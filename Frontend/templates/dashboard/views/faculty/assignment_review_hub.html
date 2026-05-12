@@ -1,0 +1,215 @@
+{% load static %}
+
+<div class="evaluation-viewport animate-fade-in">
+    <!-- 🚀 LEVEL 1: HERO INTELLIGENCE STRIP -->
+    <div class="intel-hero-strip">
+        <div class="intel-title-box">
+            <h1 class="text-2xl font-black tracking-tight">EVALUATION INTELLIGENCE<span class="text-primary">OS</span></h1>
+            <div class="system-status-tag">
+                <div class="indicator pulse"></div>
+                LIVE OPERATIONAL SYNC ACTIVE
+            </div>
+        </div>
+        
+        <div class="intel-metrics-grid">
+            <div class="intel-kpi-card">
+                <div class="kpi-label">Weekly Throughput</div>
+                <div class="kpi-value">{{ productivity.weekly_throughput }}</div>
+                <div class="kpi-trend success">↑ 12% vs last week</div>
+            </div>
+            <div class="intel-kpi-card">
+                <div class="kpi-label">Review Velocity</div>
+                <div class="kpi-value">{{ productivity.avg_review_speed }}</div>
+                <div class="kpi-trend">Optimal Pace</div>
+            </div>
+            <div class="intel-kpi-card highlight-risk">
+                <div class="kpi-label">Fraud Flags</div>
+                <div class="kpi-value text-error">{{ metrics.fraud_flags }}</div>
+                <div class="kpi-trend">Needs Attention</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🕹️ LEVEL 2: COMMAND RIBBON -->
+    <div class="command-ribbon">
+        <div class="ribbon-pill active">All Submissions</div>
+        <div class="ribbon-pill">Review Queue ({{ metrics.pending }})</div>
+        <div class="ribbon-pill">High Risk ({{ metrics.high_risk }})</div>
+        <div class="ribbon-pill">AI Processed</div>
+        
+        <div style="margin-left: auto;">
+            <form hx-post="{% url 'faculty_evaluation_bulk_approve' %}" hx-target="#dashboard-content">
+                {% csrf_token %}
+                <button type="submit" class="btn-pil primary">
+                    <i class="fas fa-bolt mr-2"></i> Bulk Approve Low Risk
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 🏗️ LEVEL 3 & 4: PRIMARY OPERATIONAL ZONE -->
+    <div class="layout-grid-8-4">
+        <!-- Main Board -->
+        <div class="kanban-board">
+            <!-- Incoming Signal -->
+            <div class="kanban-column">
+                <div class="column-header">
+                    <span class="column-label">Incoming Signal</span>
+                    <span class="column-count">{{ pipeline.incoming.count }}</span>
+                </div>
+                {% for sub in pipeline.incoming %}
+                <div class="eval-card {% if sub.needs_attention %}urgency-glow{% endif %}"
+                     hx-get="{% url 'faculty_submission_review_mode' sub.id %}"
+                     hx-target="#dashboard-content">
+                    <div class="card-top">
+                        <span class="card-student">{{ sub.student.user.get_full_name }}</span>
+                        <div class="risk-dot {{ sub.risk_level|lower }}"></div>
+                    </div>
+                    <div class="card-meta">
+                        <span>{{ sub.assignment.subject.code }}</span>
+                        <span>•</span>
+                        <span>{{ sub.created_at|timesince }} ago</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="ai-predicted">AI Prediction: {{ sub.ai_confidence|floatformat:1|default:"8.0" }}</span>
+                        <i class="fas fa-chevron-right text-muted text-xs"></i>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="operational-empty-state">
+                    <i class="fas fa-satellite-dish mb-2 text-muted"></i>
+                    <span>NO INCOMING SIGNALS detected. Evaluation pipeline stable.</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- AI Processed -->
+            <div class="kanban-column">
+                <div class="column-header">
+                    <span class="column-label">AI Processed</span>
+                    <span class="column-count">{{ pipeline.ai_processed.count }}</span>
+                </div>
+                {% for sub in pipeline.ai_processed %}
+                <div class="eval-card"
+                     hx-get="{% url 'faculty_submission_review_mode' sub.id %}"
+                     hx-target="#dashboard-content">
+                    <div class="card-top">
+                        <span class="card-student">{{ sub.student.user.get_full_name }}</span>
+                        <div class="risk-dot {{ sub.risk_level|lower }}"></div>
+                    </div>
+                    <div class="card-meta">
+                        <span>{{ sub.assignment.subject.code }}</span>
+                        <span>•</span>
+                        <span>Confidence: {{ sub.ai_confidence|floatformat:2 }}</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="ai-predicted">Suggested: 7.5</span>
+                        <i class="fas fa-chevron-right text-muted text-xs"></i>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="operational-empty-state">
+                    <i class="fas fa-brain mb-2 text-muted"></i>
+                    <span>AI ANALYTICS IDLE. No processed submissions in queue.</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Risk Escalated -->
+            <div class="kanban-column">
+                <div class="column-header">
+                    <span class="column-label">Risk Escalated</span>
+                    <span class="column-count">{{ pipeline.escalated.count }}</span>
+                </div>
+                {% for sub in pipeline.escalated %}
+                <div class="eval-card urgency-glow"
+                     hx-get="{% url 'faculty_submission_review_mode' sub.id %}"
+                     hx-target="#dashboard-content">
+                    <div class="card-top">
+                        <span class="card-student">{{ sub.student.user.get_full_name }}</span>
+                        <div class="risk-dot high"></div>
+                    </div>
+                    <div class="card-meta">
+                        <span class="text-error font-bold">{% if sub.ai_state == 'FLAGGED' %}AI FLAG{% else %}ESCALATED{% endif %}</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="ai-predicted">Similarity: {{ sub.get_similarity }}</span>
+                        <i class="fas fa-triangle-exclamation text-error text-xs"></i>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="operational-empty-state">
+                    <i class="fas fa-shield-check mb-2 text-success"></i>
+                    <span>INTEGRITY SECURED. No risk flags escalating.</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Evaluation Complete -->
+            <div class="kanban-column">
+                <div class="column-header">
+                    <span class="column-label">Complete</span>
+                    <span class="column-count">{{ pipeline.completed.count }}</span>
+                </div>
+                {% for sub in pipeline.completed %}
+                <div class="eval-card opacity-60">
+                    <div class="card-top">
+                        <span class="card-student">{{ sub.student.user.get_full_name }}</span>
+                        <i class="fas fa-check-circle text-success text-xs"></i>
+                    </div>
+                    <div class="card-footer">
+                        <span class="font-bold text-white">{{ sub.marks }}/10</span>
+                        <span class="text-xs text-muted">Archived</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="operational-empty-state">
+                    <i class="fas fa-archive mb-2 text-muted"></i>
+                    <span>NO RECENT COMPLETIONS detected.</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right Intelligence Rail -->
+        <div class="intelligence-rail">
+            <!-- Fraud Radar -->
+            <div class="intel-card mb-6">
+                <div class="intel-header">
+                    <i class="fas fa-radiation text-error mr-2"></i>
+                    <span>FRAUD RADAR</span>
+                </div>
+                <div class="radar-stats">
+                    <div class="radar-item">
+                        <span>Critical Flags</span>
+                        <span class="text-error font-bold">{{ fraud_radar.critical_flags }}</span>
+                    </div>
+                    <div class="radar-item">
+                        <span>High Risk Avg</span>
+                        <span class="text-warning font-bold">{{ fraud_radar.high_risk_avg }}</span>
+                    </div>
+                </div>
+                <div class="radar-visual">
+                    <!-- Dynamic visualization placeholder -->
+                    <div class="radar-pulse"></div>
+                </div>
+            </div>
+
+            <!-- Review Heatmap -->
+            <div class="intel-card">
+                <div class="intel-header">
+                    <i class="fas fa-fire-alt text-warning mr-2"></i>
+                    <span>EVALUATION HEATMAP</span>
+                </div>
+                <div class="heatmap-grid">
+                    {% for day in heatmap %}
+                    <div class="heatmap-col">
+                        <div class="heatmap-bar" style="height: {{ day.count|add:20 }}px;"></div>
+                        <span class="text-[9px] text-muted">{{ day.day }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

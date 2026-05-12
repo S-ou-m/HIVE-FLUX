@@ -1,0 +1,164 @@
+<div class="execution-engine-shell animate-fade-in">
+    <!-- Header: Dynamic Hero Section -->
+    <div class="execution-hero">
+        <div class="hero-main">
+            <div class="hero-identity">
+                <div class="hero-icon-box">
+                    <i class="fa-solid fa-microchip"></i>
+                </div>
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        Academic Execution Engine
+                        <span class="hero-version-tag">v2.1 Enterprise</span>
+                    </h1>
+                    <p class="hero-subtitle">Centralized Access Control & Real-Time Attendance Orchestration</p>
+                </div>
+            </div>
+            <div class="hero-stats-group">
+                <div class="execution-stat-pill">
+                    <span class="stat-pill-label">Live Sessions</span>
+                    <span class="stat-pill-value live">
+                        <span class="live-ping"></span>
+                        {{ live_sessions_count }}
+                    </span>
+                </div>
+                <div class="execution-stat-pill border-left">
+                    <span class="stat-pill-label">Total Workload</span>
+                    <span class="stat-pill-value">{{ total_sessions_count }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="execution-tabs-bar">
+        <button class="execution-tab active" hx-get="{% url 'execution_sessions_partial' %}" hx-target="#engine-workspace">
+            <i class="fa-solid fa-calendar-day"></i>
+            Today's Sessions
+        </button>
+        <button class="execution-tab" hx-get="{% url 'execution_insights_partial' %}" hx-target="#engine-workspace">
+            <i class="fa-solid fa-chart-area"></i>
+            Execution Insights
+        </button>
+        <button class="execution-tab" hx-get="{% url 'execution_identity_partial' %}" hx-target="#engine-workspace">
+            <i class="fa-solid fa-users-viewfinder"></i>
+            Identity Matrix
+        </button>
+        <button class="execution-tab" hx-get="{% url 'execution_audit_partial' %}" hx-target="#engine-workspace">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            Audit Logs
+        </button>
+    </div>
+
+    <!-- Main Workspace -->
+    <div id="engine-workspace" class="execution-workspace" hx-get="{% url 'execution_sessions_partial' %}" hx-trigger="load">
+        <div class="execution-loading">
+            <div class="spinner-premium"></div>
+            <p>Initialising Operational Environment...</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .execution-engine-shell { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* HERO SECTION */
+    .execution-hero { 
+        background: var(--bg-surface); 
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .execution-hero::before {
+        content: '';
+        position: absolute;
+        top: 0; right: 0;
+        width: 300px; height: 100%;
+        background: radial-gradient(circle at 70% 50%, rgba(249, 115, 22, 0.05), transparent 70%);
+        pointer-events: none;
+    }
+
+    .hero-main { display: flex; justify-content: space-between; align-items: center; }
+    .hero-identity { display: flex; align-items: center; gap: 1.5rem; }
+    .hero-icon-box { 
+        width: 64px; height: 64px; 
+        background: var(--primary-glow); 
+        border: 1px solid var(--primary-color);
+        border-radius: 18px;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--primary-color);
+        font-size: 24px;
+        box-shadow: 0 0 20px rgba(249, 115, 22, 0.1);
+    }
+    .hero-title { font-size: 28px; font-weight: 900; color: #fff; letter-spacing: -0.02em; display: flex; align-items: center; gap: 12px; }
+    .hero-version-tag { 
+        font-size: 10px; font-weight: 900; color: var(--primary-color); 
+        background: var(--primary-glow); padding: 4px 10px; border-radius: 100px;
+        border: 1px solid rgba(249, 115, 22, 0.2); text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .hero-subtitle { font-size: 14px; color: var(--text-secondary); margin-top: 8px; font-weight: 500; }
+
+    .hero-stats-group { display: flex; background: rgba(0,0,0,0.2); border-radius: 20px; padding: 4px; border: 1px solid var(--border-color); }
+    .execution-stat-pill { padding: 16px 28px; text-align: left; }
+    .border-left { border-left: 1px solid var(--border-color); }
+    .stat-pill-label { display: block; font-size: 10px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .stat-pill-value { font-size: 24px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 10px; }
+    .stat-pill-value.live { color: #10B981; }
+    
+    .live-ping { width: 10px; height: 10px; background: #10B981; border-radius: 50%; position: relative; }
+    .live-ping::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: inherit; animation: ping 1.5s infinite; }
+    @keyframes ping { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(3); opacity: 0; } }
+
+    /* TABS BAR */
+    .execution-tabs-bar { 
+        display: flex; 
+        background: var(--bg-secondary); 
+        border-radius: var(--radius-lg); 
+        padding: 4px; 
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+    .execution-tab {
+        flex: 1;
+        padding: 14px 0;
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        font-weight: 700;
+        font-size: 13px;
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+    .execution-tab:hover { color: #fff; background: rgba(255,255,255,0.03); }
+    .execution-tab.active { background: var(--bg-surface); color: var(--primary-color); border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .execution-tab i { font-size: 16px; }
+
+    /* WORKSPACE */
+    .execution-workspace { min-height: 400px; }
+    .execution-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; color: var(--text-secondary); }
+    .spinner-premium { 
+        width: 32px; height: 32px; 
+        border: 3px solid var(--border-color); 
+        border-top-color: var(--primary-color); 
+        border-radius: 50%; 
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+<script>
+    document.querySelectorAll('.execution-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.execution-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+</script>

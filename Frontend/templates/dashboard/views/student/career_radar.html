@@ -1,0 +1,89 @@
+<div class="career-radar-workspace animate-fade-in space-y-10">
+    
+    <!-- 🏗️ CAREER READINESS HEADER -->
+    <div class="text-center p-10 rounded-[40px] bg-indigo-500/5 border border-indigo-500/10 relative overflow-hidden group">
+        <div class="hero-glow opacity-10"></div>
+        <div class="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-4">Placement Confidence Synthesis</div>
+        <div class="flex items-center justify-center gap-8 relative z-10">
+            <div class="text-8xl font-black text-white group-hover:scale-105 transition-transform duration-700">{{ radar.readiness_score }}%</div>
+            <div class="text-left">
+                <div class="text-xs font-black text-white/40 uppercase">Readiness Index</div>
+                <div class="flex items-center gap-2 text-[10px] font-bold text-indigo-400">
+                    <i class="fas fa-arrow-trend-up"></i> VELOCITY: {{ radar.velocity }}
+                </div>
+            </div>
+        </div>
+        <i class="fas fa-rocket-launch absolute -bottom-8 -right-8 text-9xl text-indigo-500/[0.03] group-hover:text-indigo-500/[0.08] transition-all duration-700"></i>
+    </div>
+
+    <!-- 🏗️ MARKET SIGNALS -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="stu-kpi-card flex items-center justify-between group cursor-pointer hover:border-indigo-500/30 transition-all"
+             hx-get="{% url 'student_resume_builder_partial' %}"
+             hx-target="#workspace-core"
+             hx-push-url="/dashboard/student/career/">
+            <div>
+                <div class="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Market Sentiment</div>
+                <div class="text-xl font-black text-white">INTEREST: <span class="text-indigo-400">{{ radar.recruiter_interest }}</span></div>
+                <div class="mt-2 text-[8px] font-black text-indigo-500/0 group-hover:text-indigo-500 uppercase tracking-widest transition-all">Optimize Identity <i class="fas fa-arrow-right ml-1"></i></div>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all">
+                <i class="fas fa-radar text-indigo-400"></i>
+            </div>
+        </div>
+
+        <div class="stu-kpi-card flex items-center justify-between group cursor-pointer hover:border-emerald-500/30 transition-all"
+             hx-get="{% url 'student_competency_heatmap_partial' %}"
+             hx-target="#workspace-core"
+             hx-push-url="/dashboard/student/career/">
+            <div>
+                <div class="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Institutional Prediction</div>
+                <div class="text-xl font-black text-white">READY FOR: <span class="text-emerald-400">TIER-1 CORE</span></div>
+                <div class="mt-2 text-[8px] font-black text-emerald-500/0 group-hover:text-emerald-500 uppercase tracking-widest transition-all">Audit Competencies <i class="fas fa-arrow-right ml-1"></i></div>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all">
+                <i class="fas fa-briefcase text-emerald-400"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏗️ TOP COMPETENCIES -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="text-[10px] font-black text-white/40 uppercase tracking-widest ml-4">Top Marketable Competencies</div>
+            {% for mastery in radar.top_competencies %}
+            <div class="stu-kpi-card flex items-center justify-between hover:bg-white/[0.03] group transition-all">
+                <div class="flex items-center gap-6">
+                    <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-white/40 group-hover:text-white transition-colors">
+                        {{ forloop.counter }}
+                    </div>
+                    <div>
+                        <div class="text-sm font-black text-white group-hover:text-indigo-400 transition-colors">{{ mastery.skill.name }}</div>
+                        <div class="text-[9px] font-bold text-white/20 uppercase tracking-widest">{{ mastery.skill.category }}</div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-lg font-black text-indigo-400">{{ mastery.mastery_level }}%</div>
+                    <div class="text-[8px] font-black text-white/20 uppercase">Mastery Verified</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="space-y-6">
+            <div class="text-[10px] font-black text-white/40 uppercase tracking-widest">Career Intelligence Signals</div>
+            <div class="stu-kpi-card border-indigo-500/20 bg-indigo-500/[0.02] space-y-4">
+                <div class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Mastery Suggestions</div>
+                <div class="p-3 rounded-xl bg-white/5 border border-white/5 text-xs font-bold text-white/80">
+                    Complete 'Advanced SQL' Module to qualify for Tier-1 interviews.
+                </div>
+                <button hx-get="{% url 'student_resume_builder_partial' %}"
+                        hx-target="#workspace-core"
+                        class="w-full py-3 rounded-xl bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20 hover:scale-[1.02] transition-all">
+                    Launch Resume Builder
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>

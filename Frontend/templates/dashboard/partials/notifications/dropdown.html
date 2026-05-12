@@ -1,0 +1,99 @@
+<div class="notif-dropdown-header">
+    <div class="header-main">
+        <h3>Notifications</h3>
+        {% if total_new|default:0 %}
+            <span class="new-count">{{ total_new }} new</span>
+        {% endif %}
+    </div>
+    <a href="{% url 'notification_center' %}" 
+       class="view-all"
+       hx-get="{% url 'notification_center' %}"
+       hx-target="#dashboard-content"
+       hx-push-url="true"
+       onclick="toggleNotifDropdown()">View All</a>
+</div>
+
+<div class="notif-dropdown-content">
+    {% if not critical and not warning and not info %}
+        <div class="notif-empty">
+            <i class="fa-solid fa-bell-slash"></i>
+            <p>No new notifications</p>
+        </div>
+    {% else %}
+        <!-- Critical Section -->
+        {% if critical %}
+            <div class="notif-section">
+                <label><i class="fa-solid fa-circle-exclamation"></i> Critical</label>
+                {% for n in critical %}
+                    <div class="notif-item priority-critical" hx-get="{{ n.action_url }}" hx-target="#dashboard-content" onclick="toggleNotifDropdown()">
+                        <div class="notif-strip"></div>
+                        <div class="notif-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                        <div class="notif-text">
+                            <span class="title">{{ n.title }}</span>
+                            <span class="msg">{{ n.message|truncatechars:60 }}</span>
+                            <span class="time">{{ n.created_at|timesince }} ago</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Important Section -->
+        {% if warning %}
+            <div class="notif-section">
+                <label><i class="fa-solid fa-triangle-exclamation"></i> Important</label>
+                {% for n in warning %}
+                    <div class="notif-item priority-warning" hx-get="{{ n.action_url }}" hx-target="#dashboard-content" onclick="toggleNotifDropdown()">
+                        <div class="notif-strip"></div>
+                        <div class="notif-icon"><i class="fa-solid fa-book-open"></i></div>
+                        <div class="notif-text">
+                            <span class="title">{{ n.title }}</span>
+                            <span class="msg">{{ n.message|truncatechars:60 }}</span>
+                            <span class="time">{{ n.created_at|timesince }} ago</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Info Section -->
+        {% if info %}
+            <div class="notif-section">
+                <label><i class="fa-solid fa-circle-info"></i> Activity</label>
+                {% for n in info %}
+                    <div class="notif-item priority-info" hx-get="{{ n.action_url }}" hx-target="#dashboard-content" onclick="toggleNotifDropdown()">
+                        <div class="notif-strip"></div>
+                        <div class="notif-icon"><i class="fa-solid fa-user-graduate"></i></div>
+                        <div class="notif-text">
+                            <span class="title">{{ n.title }}</span>
+                            <span class="msg">{{ n.message|truncatechars:60 }}</span>
+                            <span class="time">{{ n.created_at|timesince }} ago</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+<div class="notif-dropdown-footer">
+    <button class="clear-all">Clear All Notifications</button>
+</div>
+
+{{ total_new|default:0|json_script:"notif-count-data" }}
+<script>
+    // Update the badge count globally using safely embedded JSON data
+    (function() {
+        const badge = document.getElementById('notif-badge');
+        const countData = document.getElementById('notif-count-data');
+        if (badge && countData) {
+            const count = JSON.parse(countData.textContent);
+            if (count > 0) {
+                badge.innerText = count > 9 ? '9+' : count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    })();
+</script>

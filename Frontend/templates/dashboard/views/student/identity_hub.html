@@ -1,0 +1,85 @@
+<div class="identity-anchor animate-fade-in space-y-8">
+    
+    <!-- 🏗️ THE INSTITUTIONAL PASS (Vertical Anchor) -->
+    <div class="identity-glass-card p-8 text-center border border-white/5 rounded-[32px] bg-white/[0.02]">
+        <div class="flex justify-center mb-8">
+            <div class="avatar-ring pulse-active">
+                <div class="avatar-inner">
+                    {{ student.user.username|first|upper }}
+                </div>
+            </div>
+        </div>
+        
+        <h2 class="text-xl font-black text-white mb-1">{{ student.user.get_full_name|default:student.user.username }}</h2>
+        <div class="text-[10px] font-black text-emerald-500 uppercase tracking-[3px] mb-8">{{ student.enrollment_no }}</div>
+        
+        <!-- THE DYNAMIC IDENTITY ANCHOR -->
+        <div class="relative inline-block mb-8">
+            <div class="w-44 h-44 bg-white p-5 rounded-[32px] shadow-[0_0_60px_rgba(16,185,129,0.15)] border border-emerald-500/20 relative group cursor-zoom-in overflow-hidden"
+                 onclick="event.stopPropagation(); magnifyQR(this)"
+                 hx-get="{% url 'student_rotate_pass_partial' %}"
+                 hx-trigger="load"
+                 hx-target="#identity-qr-target">
+                
+                <!-- Card Shimmer (Institutional Parity) -->
+                <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-emerald-500/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none"></div>
+                
+                <div class="absolute inset-0 bg-emerald-500/[0.02] opacity-0 group-hover:opacity-100 transition-opacity rounded-[32px]"></div>
+                
+                <div id="identity-qr-target" class="w-full h-full relative z-10">
+                    <!-- Dynamic QR Surface Injected Here -->
+                    <div class="w-full h-full flex items-center justify-center bg-gray-50 rounded-2xl animate-pulse">
+                        <i class="fas fa-qrcode text-emerald-500/10 text-4xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex flex-col gap-2">
+            <button class="ops-commit-btn py-3 text-[10px]"
+                    hx-get="{% url 'student_rotate_pass_partial' %}"
+                    hx-target="#identity-qr-target">
+                <i class="fas fa-sync-alt mr-2"></i> ROTATE PASS
+            </button>
+            <button class="command-edit-trigger w-full py-3 text-[10px] bg-white/5 border border-white/10"
+                    hx-get="{% url 'student_identity_hub_partial' %}"
+                    hx-target="#workspace-core">
+                <i class="fas fa-user-gear mr-2"></i> COMMAND MODE
+            </button>
+        </div>
+    </div>
+
+    <!-- 🏗️ GOVERNANCE: TRUSTED TERMINALS -->
+    <div class="ops-section">
+        <div class="section-label">Active Presence Hub</div>
+        <div class="space-y-3">
+            <div class="device-item active p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-mobile-alt text-emerald-400 text-sm"></i>
+                    <div>
+                        <div class="text-[11px] font-bold text-white">iPhone 15 Pro</div>
+                        <div class="text-[8px] text-white/30 font-black uppercase">TRUSTED TERMINAL</div>
+                    </div>
+                </div>
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- 🏗️ OOB: REDIRECT TELEMETRY TO FEED COLUMN -->
+<div id="operational-timeline-feed" hx-swap-oob="true" class="space-y-3">
+    {% for event in recent_events %}
+    <div class="stu-feed-item">
+        <div class="w-1.5 h-1.5 mt-1.5 rounded-full {% if event.severity == 'SUCCESS' %}bg-emerald-500{% elif event.severity == 'WARNING' %}bg-orange-500{% else %}bg-blue-500{% endif %}"></div>
+        <div class="flex-1">
+            <div class="text-[11px] font-bold text-white/90">{{ event.event_type }}</div>
+            <div class="text-[10px] text-white/40 leading-relaxed">{{ event.description|truncatechars:60 }}</div>
+            <div class="text-[8px] font-black text-white/20 uppercase mt-1">{{ event.timestamp|timesince }} ago</div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="text-center py-10 text-[9px] font-black text-white/20 uppercase tracking-widest">No Activity Detected</div>
+    {% endfor %}
+</div>

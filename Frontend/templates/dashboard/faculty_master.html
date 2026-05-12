@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Faculty Command Center - College ERP{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/dashboard_system.css' %}">
+<link rel="stylesheet" href="{% static 'css/faculty_design_system.css' %}">
+<script src="{% static 'js/dashboard_orchestrator.js' %}" defer></script>
+<script>
+    (function() {
+        if (localStorage.getItem('sidebar_state') === 'compact') {
+            document.documentElement.classList.add('sidebar-compact-init');
+        }
+    })();
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout" id="dashboard-layout">
+    
+    <!-- Faculty Sidebar -->
+    {% include 'dashboard/partials/faculty_sidebar.html' %}
+
+    <div class="dashboard-main">
+        
+        <!-- Faculty Topbar -->
+        {% include 'dashboard/partials/faculty_topbar.html' %}
+
+        <!-- Master Command Grid Container -->
+        <main id="dashboard-content" 
+              class="dashboard-content animate-fade-in"
+              hx-get="{% if initial_load_url %}{{ initial_load_url }}{% else %}{% url 'faculty_overview_partial' %}{% endif %}" 
+              hx-trigger="load">
+            {% block dashboard_content %}
+            <div class="loading-state" style="color: var(--text-secondary); text-align: center; padding: 2rem;">
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <div class="w-8 h-8 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+                    <div class="text-sm font-black text-muted uppercase tracking-widest animate-pulse">Initializing Execution Engine...</div>
+                </div>
+            </div>
+            {% endblock %}
+        </main>
+        
+    </div>
+</div>
+
+<!-- 🏗️ GLOBAL UI ROOTS (Single-Shell Architecture) -->
+<div id="global-modal-root" class="overlay-container" style="background: transparent; backdrop-filter: none;">
+    <div id="modal-container" class="w-full h-full"></div>
+</div>
+<div id="global-drawer-root"></div>
+<div id="toast-root"></div>
+
+<!-- Side Drawer System (Context-Preserving) -->
+<div id="drawer-overlay" class="side-drawer-overlay" onclick="closeSideDrawer()"></div>
+<div id="side-drawer" class="side-drawer">
+    <div id="drawer-container">
+        <!-- Content loaded via HTMX targeting #global-drawer-root -->
+        <div id="global-drawer-content"></div>
+        <div class="loading-state p-8 drawer-loader hidden">
+            <div class="animate-pulse text-muted font-black text-[10px] tracking-widest">LOADING INTELLIGENCE...</div>
+        </div>
+    </div>
+</div>
+
+<!-- 🎯 FOCUS MODE HUD (Immersive Command Bar) -->
+<div class="focus-hud">
+    <div class="flex items-center gap-3">
+        <div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+        <span class="text-[10px] font-black text-white uppercase tracking-[0.2em]">Institutional Focus Active</span>
+    </div>
+    <div class="h-4 w-[1px] bg-white/10"></div>
+    <button class="focus-hud-btn" onclick="DashboardOrchestrator.toggleFocusMode()">
+        <i class="fas fa-times-circle mr-2"></i> Exit Focus
+    </button>
+</div>
+
+<!-- Holographic Focus Frame -->
+<div class="focus-corner tl"></div>
+<div class="focus-corner tr"></div>
+<div class="focus-corner bl"></div>
+<div class="focus-corner br"></div>
+
+<!-- Command Palette (Ctrl+K) -->
+<div id="command-palette" class="overlay-container pt-32 px-4">
+    <div class="overlay-content w-full max-w-2xl overflow-hidden" id="command-palette-inner">
+        <div class="p-4 border-b border-white/10 flex items-center gap-3 bg-white/5">
+            <i class="fas fa-search text-muted text-xl"></i>
+            <input type="text" id="cmd-search" class="w-full bg-transparent border-none text-white text-lg font-bold focus:outline-none placeholder-white/30" placeholder="Search students, sessions, commands...">
+            <div class="px-2 py-1 rounded bg-white/10 text-[10px] font-black text-muted uppercase tracking-widest border border-white/10">ESC</div>
+        </div>
+        <div class="p-2 max-h-[350px] overflow-y-auto">
+            <div class="px-3 py-2 text-[10px] font-black text-muted uppercase tracking-widest">Suggestions</div>
+            <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-500/10 hover:text-white text-white/80 transition-colors group cursor-pointer border border-transparent hover:border-blue-500/20">
+                <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center border border-green-500/20 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-play text-green-500"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">Start Next Session</div>
+                    <div class="text-[11px] text-muted font-semibold">Initialize the Execution Engine</div>
+                </div>
+                <div class="text-[10px] font-black text-muted uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Execute ⏎</div>
+            </a>
+            <a href="#" hx-get="{% url 'faculty_attendance_logs_partial' %}" hx-target="#dashboard-content" onclick="closeCommandPalette()" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-500/10 hover:text-white text-white/80 transition-colors group cursor-pointer border border-transparent hover:border-blue-500/20">
+                <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-list-ul text-blue-500"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">View Audit Logs</div>
+                    <div class="text-[11px] text-muted font-semibold">Open the Audit Intelligence Console</div>
+                </div>
+            </a>
+            <a href="#" hx-get="{% url 'faculty_performance_partial' %}" hx-target="#dashboard-content" onclick="closeCommandPalette()" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-500/10 hover:text-white text-white/80 transition-colors group cursor-pointer border border-transparent hover:border-blue-500/20">
+                <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center border border-purple-500/20 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-chart-line text-purple-500"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">Performance Analytics</div>
+                    <div class="text-[11px] text-muted font-semibold">View Insights & Syllabus Progress</div>
+                </div>
+            </a>
+            <a href="#" hx-get="{% url 'faculty_overview_partial' %}" hx-target="#dashboard-content" onclick="closeCommandPalette()" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-500/10 hover:text-white text-white/80 transition-colors group cursor-pointer border border-transparent hover:border-blue-500/20">
+                <div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center border border-orange-500/20 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-home text-orange-500"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">Command Center</div>
+                    <div class="text-[11px] text-muted font-semibold">Return to Main Execution Dashboard</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openCommandPalette() {
+        const cp = document.getElementById('command-palette');
+        const inner = document.getElementById('command-palette-inner');
+        cp.classList.remove('hidden');
+        cp.classList.add('flex');
+        void cp.offsetWidth; // force reflow
+        cp.classList.remove('opacity-0');
+        inner.classList.remove('scale-95');
+        document.getElementById('cmd-search').focus();
+    }
+    
+    function closeCommandPalette() {
+        const cp = document.getElementById('command-palette');
+        const inner = document.getElementById('command-palette-inner');
+        cp.classList.add('opacity-0');
+        inner.classList.add('scale-95');
+        setTimeout(() => {
+            cp.classList.add('hidden');
+            cp.classList.remove('flex');
+        }, 200);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            const cp = document.getElementById('command-palette');
+            if (cp.classList.contains('hidden')) { openCommandPalette(); } else { closeCommandPalette(); }
+        }
+        if (e.key === 'Escape') {
+            closeCommandPalette();
+            closeSideDrawer();
+        }
+    });
+
+    function openSideDrawer() {
+        document.getElementById('drawer-overlay').classList.add('active');
+        document.getElementById('side-drawer').classList.add('active');
+    }
+
+    function closeSideDrawer() {
+        document.getElementById('drawer-overlay').classList.remove('active');
+        document.getElementById('side-drawer').classList.remove('active');
+    }
+
+    function openModal() {
+        const root = document.getElementById('global-modal-root');
+        const container = document.getElementById('modal-container');
+        if (root) root.classList.add('active');
+        if (container) container.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        const root = document.getElementById('global-modal-root');
+        const container = document.getElementById('modal-container');
+        if (root) root.classList.remove('active');
+        if (container) container.classList.remove('active');
+        document.body.style.overflow = '';
+        setTimeout(() => {
+            if (container) container.innerHTML = '';
+        }, 300);
+    }
+
+    // 🎯 Modal Intelligence Engine
+    document.addEventListener('htmx:afterSwap', (evt) => {
+        if (evt.detail.target.id === 'modal-container') {
+            const hasContent = evt.detail.target.innerHTML.trim().length > 0;
+            if (hasContent) {
+                console.log("🧩 Modal Content Detected: Activating Overlay");
+                openModal();
+            } else {
+                console.log("Empty Modal Target: Terminating Overlay");
+                closeModal();
+            }
+        }
+    });
+</script>
+{% endblock %}

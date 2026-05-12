@@ -1,0 +1,8 @@
+<div hx-swap-oob="innerHTML:#finance-content">
+    {% include "dashboard/views/finance/student_payments_table.html" %}
+</div>
+<script>
+    closeModal();
+    // Optional: Show a toast/alert with the count
+    alert("Successfully generated {{ count }} invoices!");
+</script>

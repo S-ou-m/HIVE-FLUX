@@ -1,0 +1,324 @@
+<!-- Elite SaaS: 12-Column Responsive Charts Grid -->
+<div class="charts-grid-layout">
+    <!-- Trend Analysis (Wide: 8 Cols) -->
+    <div class="chart-container-card wide-card animate-fade-in" id="trend-card">
+        <div class="chart-header">
+            <div>
+                <h4 class="chart-title">Enrollment Velocity</h4>
+                <p class="chart-subtitle">Real-time performance vs previous period</p>
+            </div>
+            <div class="chart-actions">
+                <select class="chart-select" hx-get="{% url 'admin_students_charts_partial' %}" hx-target="#student-charts-container" name="time_filter">
+                    <option value="6m">Last 6 Months</option>
+                    <option value="12m">Last 12 Months</option>
+                </select>
+            </div>
+        </div>
+        <div class="chart-body">
+            <canvas id="studentEnrollmentChart"></canvas>
+            <div id="trend-empty" class="chart-empty-overlay" style="display:none;">
+                <div class="empty-content">
+                    <span>📊</span>
+                    <p>Insufficient data for trend analysis</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Distribution (Narrow: 4 Cols) -->
+    <div class="chart-container-card narrow-card animate-fade-in" id="dept-card">
+        <div class="chart-header">
+            <h4 class="chart-title">Department Yield</h4>
+        </div>
+        <div class="chart-body">
+            <canvas id="studentDeptChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Academic Distribution (Segmented Donut with Center Insight) -->
+    <div class="chart-container-card half-card animate-fade-in" id="sem-card">
+        <div class="chart-header">
+            <h4 class="chart-title">Academic Distribution</h4>
+        </div>
+        <div class="chart-body donut-wrapper">
+            <canvas id="studentSemChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Financial Recovery (Radial Progress with Center KPI) -->
+    <div class="chart-container-card half-card animate-fade-in" id="finance-card">
+        <div class="chart-header">
+            <h4 class="chart-title">Financial Recovery</h4>
+        </div>
+        <div class="chart-body radial-wrapper">
+            <canvas id="studentFinanceChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<style>
+    .charts-grid-layout { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; }
+    .wide-card { grid-column: span 8; }
+    .narrow-card { grid-column: span 4; }
+    .half-card { grid-column: span 6; }
+
+    @media (max-width: 1200px) { .wide-card, .narrow-card, .half-card { grid-column: span 12; } }
+
+    .chart-container-card {
+        background: #111827; /* Deep SaaS Dark */
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 1.5rem;
+        min-height: 380px;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .chart-container-card:hover { border-color: rgba(59, 130, 246, 0.3); }
+
+    .chart-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; }
+    .chart-title { font-size: 1rem; font-weight: 700; color: #f3f4f6; margin: 0; letter-spacing: -0.01em; }
+    .chart-subtitle { font-size: 0.8rem; color: #9ca3af; margin: 4px 0 0; }
+    .chart-body { flex: 1; position: relative; min-height: 280px; }
+    
+    .chart-select {
+        background: #1f2937;
+        border: 1px solid #374151;
+        color: #f3f4f6;
+        font-size: 0.75rem;
+        padding: 6px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        outline: none;
+    }
+
+    .chart-empty-overlay {
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(17, 24, 39, 0.9);
+        border-radius: 12px;
+        z-index: 10;
+    }
+    .empty-content { text-align: center; color: #6b7280; }
+    .empty-content span { font-size: 2rem; display: block; margin-bottom: 0.5rem; opacity: 0.5; }
+
+    /* Layout tweaks for donuts */
+    .donut-wrapper, .radial-wrapper { display: flex; align-items: center; justify-content: center; }
+</style>
+
+<script>
+    (async function() {
+        function safeDestroy(chart) { if (chart) chart.destroy(); }
+        
+        // Helper to create gradients
+        function createGradient(ctx, colorStart, colorEnd) {
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, colorStart);
+            gradient.addColorStop(1, colorEnd);
+            return gradient;
+        }
+
+        try {
+            const [trendRes, deptRes, semRes, finRes] = await Promise.all([
+                fetch("{% url 'admin_students_chart_enrollment' %}?v=1"),
+                fetch("{% url 'admin_students_chart_department' %}?v=1"),
+                fetch("{% url 'admin_students_chart_semester' %}?v=1"),
+                fetch("{% url 'admin_students_chart_finance' %}?v=1")
+            ]);
+
+            const trendData = await trendRes.json();
+            const deptData = await deptRes.json();
+            const semData = await semRes.json();
+            const finData = await finRes.json();
+
+            // --- 1. ENROLLMENT VELOCITY (Line with Shadows) ---
+            safeDestroy(window._chart_studentTrend);
+            if (trendData.data) {
+                const ctxTrend = document.getElementById("studentEnrollmentChart").getContext('2d');
+                window._chart_studentTrend = new Chart(ctxTrend, {
+                    type: "line",
+                    data: {
+                        labels: trendData.labels,
+                        datasets: [
+                            { 
+                                label: 'Current Period',
+                                data: trendData.data, 
+                                borderColor: '#3b82f6',
+                                backgroundColor: createGradient(ctxTrend, 'rgba(59, 130, 246, 0.2)', 'rgba(59, 130, 246, 0)'),
+                                fill: true, tension: 0.4, borderWidth: 3, pointRadius: 4, pointHoverRadius: 8, pointBackgroundColor: '#3b82f6'
+                            },
+                            {
+                                label: 'Previous Period',
+                                data: trendData.comparison_data || [],
+                                borderColor: 'rgba(156, 163, 175, 0.3)', borderDash: [6, 4],
+                                fill: false, tension: 0.4, borderWidth: 2, pointRadius: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { 
+                            legend: { display: true, position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 6, font: { size: 11, weight: '500' }, color: '#9ca3af' } },
+                            tooltip: { backgroundColor: '#1f2937', titleColor: '#f3f4f6', bodyColor: '#9ca3af', borderColor: '#374151', borderWidth: 1, padding: 12, cornerRadius: 8 }
+                        },
+                        scales: { 
+                            y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false }, ticks: { color: '#6b7280', font: { size: 10 } } },
+                            x: { grid: { display: false }, ticks: { color: '#6b7280', font: { size: 10 } } }
+                        }
+                    }
+                });
+            }
+
+            // --- 2. DEPARTMENT YIELD (Modern Horizontal Bar) ---
+            safeDestroy(window._chart_studentDept);
+            if (deptData.data) {
+                const ctxDept = document.getElementById("studentDeptChart").getContext('2d');
+                window._chart_studentDept = new Chart(ctxDept, {
+                    type: "bar",
+                    data: {
+                        labels: deptData.labels,
+                        datasets: [{ 
+                            data: deptData.data, 
+                            backgroundColor: createGradient(ctxDept, '#8b5cf6', '#6366f1'),
+                            borderRadius: 6, barThickness: 12
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { 
+                            x: { grid: { color: 'rgba(255, 255, 255, 0.03)' }, ticks: { color: '#6b7280' } },
+                            y: { grid: { display: false }, ticks: { color: '#9ca3af', font: { weight: '500' } } }
+                        },
+                        onClick: (e, elements) => {
+                            if (elements.length > 0) {
+                                const index = elements[0].index;
+                                const deptId = deptData.ids[index];
+                                htmx.ajax('GET', `{% url 'admin_students_partial' %}?department=${deptId}&v=1`, {target: '#students-content', pushUrl: true});
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- 3. ACADEMIC DISTRIBUTION (Segmented Donut) ---
+            safeDestroy(window._chart_studentSem);
+            if (semData.data) {
+                const ctxSem = document.getElementById("studentSemChart").getContext('2d');
+                const totalStudents = semData.data.reduce((a, b) => a + b, 0);
+                
+                window._chart_studentSem = new Chart(ctxSem, {
+                    type: "doughnut",
+                    data: {
+                        labels: semData.labels,
+                        datasets: [{ 
+                            data: semData.data, 
+                            backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#6366f1'],
+                            borderWidth: 4, borderColor: '#111827', // The "Segmented" trick
+                            hoverOffset: 12, cutout: '78%'
+                        }]
+                    },
+                    options: { 
+                        responsive: true, maintainAspectRatio: false,
+                        animation: { animateRotate: true, duration: 2000, easing: 'easeOutQuart' },
+                        plugins: { 
+                            legend: { position: 'right', labels: { color: '#9ca3af', font: { size: 11 }, padding: 20, usePointStyle: true } },
+                            tooltip: {
+                                callbacks: {
+                                    label: (item) => {
+                                        const val = item.raw;
+                                        const pct = ((val / totalStudents) * 100).toFixed(0);
+                                        return ` ${item.label}: ${val} students (${pct}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    plugins: [{
+                        id: 'centerInsight',
+                        beforeDraw: (chart) => {
+                            const { ctx, width, height } = chart;
+                            ctx.save();
+                            const centerX = (chart.chartArea.left + chart.chartArea.right) / 2;
+                            const centerY = (chart.chartArea.top + chart.chartArea.bottom) / 2;
+
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            
+                            // Count
+                            ctx.font = 'bold 2.2rem sans-serif';
+                            ctx.fillStyle = '#f3f4f6';
+                            ctx.fillText(totalStudents, centerX, centerY - 10);
+                            
+                            // Label
+                            ctx.font = '600 0.7rem sans-serif';
+                            ctx.fillStyle = '#6b7280';
+                            ctx.fillText('ACTIVE STUDENTS', centerX, centerY + 20);
+                            ctx.restore();
+                        }
+                    }]
+                });
+            }
+
+            // --- 4. FINANCIAL RECOVERY (Radial Progress Arc) ---
+            safeDestroy(window._chart_studentFin);
+            if (finData.data) {
+                const ctxFin = document.getElementById("studentFinanceChart").getContext('2d');
+                const total = finData.data.reduce((a, b) => a + b, 0);
+                const cleared = finData.data[0];
+                const recoveryPct = total > 0 ? ((cleared / total) * 100).toFixed(0) : 0;
+
+                window._chart_studentFin = new Chart(ctxFin, {
+                    type: "doughnut",
+                    data: {
+                        labels: finData.labels,
+                        datasets: [{ 
+                            data: finData.data, 
+                            backgroundColor: [
+                                createGradient(ctxFin, '#10b981', '#059669'), // Cleared
+                                '#ef4444', // Dues
+                                '#3b82f6'  // Advance
+                            ],
+                            borderWidth: 0, cutout: '82%', circumference: 240, rotation: 240
+                        }]
+                    },
+                    options: { 
+                        responsive: true, maintainAspectRatio: false,
+                        animation: { animateScale: true, duration: 2500 },
+                        plugins: { 
+                            legend: { position: 'right', labels: { color: '#9ca3af', font: { size: 11 }, padding: 15, usePointStyle: true } }
+                        }
+                    },
+                    plugins: [{
+                        id: 'radialCenter',
+                        beforeDraw: (chart) => {
+                            const { ctx } = chart;
+                            ctx.save();
+                            const centerX = (chart.chartArea.left + chart.chartArea.right) / 2;
+                            const centerY = (chart.chartArea.top + chart.chartArea.bottom) / 2;
+
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            
+                            // Percentage
+                            ctx.font = 'bold 2.5rem sans-serif';
+                            ctx.fillStyle = '#10b981';
+                            ctx.fillText(`${recoveryPct}%`, centerX, centerY - 10);
+                            
+                            // Metric
+                            ctx.font = '600 0.75rem sans-serif';
+                            ctx.fillStyle = '#6b7280';
+                            ctx.fillText('FEE RECOVERY', centerX, centerY + 22);
+                            ctx.restore();
+                        }
+                    }]
+                });
+            }
+
+        } catch (error) { 
+            console.error("Elite Chart Error:", error);
+            document.querySelectorAll('.chart-empty-overlay').forEach(el => el.style.display = 'flex');
+        }
+    })();
+</script>

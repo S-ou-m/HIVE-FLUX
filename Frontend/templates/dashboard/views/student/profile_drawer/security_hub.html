@@ -1,0 +1,70 @@
+{% load humanize %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xs font-black uppercase tracking-widest text-white/40">Security Command</h3>
+        <div class="flex items-center gap-2">
+            <span class="text-[10px] font-black text-white/40 uppercase">Confidence:</span>
+            <span class="text-[10px] font-black text-[#FF6B00] uppercase">{{ state.security.confidence_score }}%</span>
+        </div>
+    </div>
+
+    <!-- 📊 Security Confidence Meter -->
+    <div class="p-5 bg-white/5 border border-white/10 rounded-3xl relative overflow-hidden">
+        <div class="relative z-10">
+            <div class="flex justify-between items-end mb-4">
+                <div>
+                    <div class="text-xl font-black text-white">Security Integrity: {{ state.security.integrity_state }}</div>
+                    <div class="text-[10px] text-white/40 mt-1">Based on trust signals & device history</div>
+                </div>
+                <div class="w-12 h-12 rounded-full border-4 border-[#FF6B00]/20 flex items-center justify-center">
+                    <div class="w-8 h-8 rounded-full border-4 border-[#FF6B00] border-t-transparent animate-spin"></div>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                <div class="h-full bg-[#FF6B00] shadow-[0_0_15px_#FF6B00]" style="width: {{ state.security.confidence_score }}%"></div>
+            </div>
+        </div>
+        
+        <!-- Background Glow -->
+        <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-[#FF6B00]/10 blur-3xl rounded-full"></div>
+    </div>
+
+    <!-- 🏗️ Session Management -->
+    <div class="space-y-3">
+        <div class="flex items-center justify-between px-2">
+            <span class="text-[10px] font-bold text-white/40 uppercase">Active Sessions ({{ state.security.active_sessions }})</span>
+            <button class="text-[10px] font-black text-[#FF6B00] uppercase hover:underline">Revoke All</button>
+        </div>
+
+        <div class="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400">
+                    <i class="fa-solid fa-desktop text-sm"></i>
+                </div>
+                <div>
+                    <div class="text-sm font-bold text-white">Current Workstation</div>
+                    <div class="text-[10px] text-white/40">Windows • {{ state.security.last_login|naturaltime }}</div>
+                </div>
+            </div>
+            <span class="px-2 py-1 bg-green-500/20 text-[9px] text-green-400 font-black rounded-lg">ACTIVE</span>
+        </div>
+    </div>
+
+    <!-- 🚨 Emergency Protocol -->
+    {% if freeze_executed %}
+    <div class="p-4 bg-red-500/20 border border-red-500/40 rounded-2xl text-center">
+        <div class="text-xs font-black text-red-500 uppercase tracking-widest mb-1">Identity Locked</div>
+        <div class="text-[10px] text-red-400/60 uppercase">Institutional recovery required</div>
+    </div>
+    {% else %}
+    <button hx-post="{% url 'student_identity_freeze' %}"
+            hx-target="#security-root"
+            hx-confirm="Institutional Security Protocol: This will terminate ALL active sessions and lock your command center. Proceed with Emergency Freeze?"
+            class="w-full py-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center gap-3 text-xs font-black text-red-500 hover:bg-red-500/20 transition-all uppercase tracking-widest">
+        <i class="fa-solid fa-shield-slash"></i>
+        Emergency Identity Freeze
+    </button>
+    {% endif %}
+</div>

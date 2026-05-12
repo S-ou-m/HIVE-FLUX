@@ -1,0 +1,49 @@
+{% if event == 'scan_success' %}
+<div id="toast-container" hx-swap-oob="afterbegin">
+    <div class="toast">
+        <div class="icon text-green-500"><i class="fas fa-check-circle"></i></div>
+        <p>{{ message }}</p>
+    </div>
+</div>
+
+<div id="faculty-profile-activity-container" hx-swap-oob="afterbegin">
+    <!-- This will insert a new log entry at the top of the activity list if it exists -->
+    <div class="flex items-center gap-3 p-3 bg-green-500/5 border border-green-500/10 rounded-xl mb-2 animate-fade-in">
+        <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-500 text-xs">
+            <i class="fas fa-fingerprint"></i>
+        </div>
+        <div class="flex-1">
+            <div class="text-[11px] font-bold text-white">{{ student_name }}</div>
+            <div class="text-[9px] text-muted">{{ timestamp }} • Verified Scan</div>
+        </div>
+    </div>
+</div>
+
+<div id="scanner-ticker" hx-swap-oob="afterbegin">
+    <div class="p-2 rounded bg-green-500/10 border border-green-500/20 flex justify-between items-center animate-fade-in">
+        <div class="flex items-center gap-2">
+            <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+            <div>
+                <div class="text-[10px] font-black text-white">Student Verified</div>
+                <div class="text-[9px] text-muted">{{ student_name }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if event == 'session_status_change' %}
+<!-- Update the Identity Hub Status Indicator -->
+<button id="identity-hub-trigger" hx-swap-oob="true" class="relative w-10 h-10 rounded-full border-2 border-blue-500/50 focus:outline-none hover:shadow-[0_0_12px_rgba(59,130,246,0.4)] transition-all cursor-pointer overflow-hidden peer" onclick="toggleIdentityHub(event)">
+    {% if status == 'LIVE' %}
+        <div class="absolute inset-0 bg-red-500/20 animate-pulse"></div>
+        <div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#0a0f1e] z-10 shadow-[0_0_8px_#ef4444]"></div>
+    {% elif status == 'READY' %}
+        <div class="absolute inset-0 bg-blue-500/20 animate-pulse"></div>
+        <div class="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-[#0a0f1e] z-10 shadow-[0_0_8px_#3b82f6]"></div>
+    {% else %}
+        <div class="absolute -top-1 -right-1 w-3 h-3 bg-gray-500 rounded-full border-2 border-[#0a0f1e] z-10"></div>
+    {% endif %}
+    <span class="absolute inset-0 flex items-center justify-center text-xs font-black text-white z-0">{{ initials }}</span>
+</button>
+{% endif %}

@@ -1,0 +1,384 @@
+<div class="module-header">
+    <div class="module-title">
+        <h2>Notification Center</h2>
+        <p>Manage your alerts, insights, and system activities.</p>
+    </div>
+    <div class="module-actions">
+        <button class="btn btn-ghost sm" 
+                hx-post="{% url 'mark_all_notifications_read' %}" 
+                hx-target="#dashboard-content"
+                hx-confirm="Are you sure you want to mark all notifications as read?">
+            <i class="fa-solid fa-check-double"></i> Mark All as Read
+        </button>
+        <button class="btn btn-primary sm"
+                hx-get="{% url 'notification_settings' %}"
+                hx-target="#global-drawer-content"
+                onclick="openSideDrawer()">
+            <i class="fa-solid fa-gear"></i> Notification Settings
+        </button>
+    </div>
+</div>
+
+<div class="notification-center-layout">
+    <aside class="notif-filters">
+        <button class="filter-btn {% if active_filter == 'all' %}active{% endif %}"
+                hx-get="{% url 'notification_center' %}"
+                hx-target="#dashboard-content">
+            <i class="fa-solid fa-list"></i> All Notifications
+        </button>
+        <button class="filter-btn {% if active_filter == 'unread' %}active{% endif %}"
+                hx-get="{% url 'notification_center' %}?unread=true"
+                hx-target="#dashboard-content">
+            <i class="fa-solid fa-envelope-open"></i> Unread
+        </button>
+        <button class="filter-btn {% if active_filter == 'critical' %}active{% endif %}"
+                hx-get="{% url 'notification_center' %}?priority=critical"
+                hx-target="#dashboard-content">
+            <i class="fa-solid fa-circle-exclamation"></i> Critical
+        </button>
+        
+        <div class="filter-divider">Modules</div>
+        
+        <button class="filter-btn {% if active_filter == 'finance' %}active{% endif %}"
+                hx-get="{% url 'notification_center' %}?type=finance"
+                hx-target="#dashboard-content">
+            <i class="fa-solid fa-indian-rupee-sign"></i> Finance
+        </button>
+        <button class="filter-btn {% if active_filter == 'academic' %}active{% endif %}"
+                hx-get="{% url 'notification_center' %}?type=academic"
+                hx-target="#dashboard-content">
+            <i class="fa-solid fa-book-open"></i> Academics
+        </button>
+        <button class="filter-btn {% if active_filter == 'system' %}active{% endif %}"
+                hx-get="{% url 'notification_center' %}?type=system"
+                hx-target="#dashboard-content">
+            <i class="fa-solid fa-server"></i> System
+        </button>
+    </aside>
+
+    <div class="notif-history">
+        {% if not notifications %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fa-solid fa-bell-slash"></i>
+                </div>
+                <h3>All caught up!</h3>
+                <p>No notifications found for this filter.</p>
+                <button class="btn btn-ghost sm" hx-get="{% url 'notification_center' %}" hx-target="#dashboard-content">Clear filters</button>
+            </div>
+        {% else %}
+            <div class="notif-list">
+                {% regroup notifications by created_at|date:"F d, Y" as date_groups %}
+                {% for group in date_groups %}
+                    <div class="date-group">
+                        <span class="date-label">{{ group.grouper }}</span>
+                        <div class="date-items">
+                            {% for n in group.list %}
+                                <div class="notif-card {% if not n.is_read %}unread{% endif %} priority-{{ n.priority|lower }} type-{{ n.type|lower }}">
+                                    <div class="notif-priority-strip"></div>
+                                    <div class="notif-card-icon">
+                                        {% if n.type == 'FINANCE' %}<i class="fa-solid fa-indian-rupee-sign"></i>
+                                        {% elif n.type == 'STUDENT' %}<i class="fa-solid fa-user-graduate"></i>
+                                        {% elif n.type == 'ACADEMIC' %}<i class="fa-solid fa-book-open"></i>
+                                        {% else %}<i class="fa-solid fa-server"></i>{% endif %}
+                                    </div>
+                                    <div class="notif-card-body">
+                                        <div class="notif-card-header">
+                                            <div class="title-row">
+                                                <h4>{{ n.title }}</h4>
+                                                {% if not n.is_read %}<span class="unread-dot"></span>{% endif %}
+                                            </div>
+                                            <span class="time">{{ n.created_at|timesince }} ago</span>
+                                        </div>
+                                        <p class="notif-message">{{ n.message }}</p>
+                                        <div class="notif-footer">
+                                            {% if n.action_url %}
+                                                <a href="{{ n.action_url }}" class="action-link">
+                                                    Take Action <i class="fa-solid fa-arrow-right"></i>
+                                                </a>
+                                            {% endif %}
+                                            <div class="notif-meta">
+                                                <span class="type-tag">{{ n.type|title }}</span>
+                                                <span class="priority-tag">{{ n.priority|title }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="notif-card-actions">
+                                        {% if not n.is_read %}
+                                            <button title="Mark as read" 
+                                                    hx-post="{% url 'mark_notification_read' n.id %}" 
+                                                    hx-target="#dashboard-content">
+                                                <i class="fa-solid fa-check"></i>
+                                            </button>
+                                        {% endif %}
+                                        <button title="Delete" 
+                                                class="delete-btn"
+                                                hx-post="{% url 'delete_notification' n.id %}" 
+                                                hx-target="#dashboard-content"
+                                                hx-confirm="Delete this notification?">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.notification-center-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    padding-bottom: 3rem;
+}
+
+.notif-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    background: var(--bg-surface);
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    height: fit-content;
+    position: sticky;
+    top: 1rem;
+}
+
+.filter-divider {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    margin: 1rem 0 0.5rem 0.75rem;
+    font-weight: 700;
+    opacity: 0.6;
+}
+
+.filter-btn {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.filter-btn i {
+    width: 20px;
+    text-align: center;
+}
+
+.filter-btn:hover {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    transform: translateX(2px);
+}
+
+.filter-btn.active {
+    background: var(--primary-glow);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.date-group {
+    margin-bottom: 2.5rem;
+}
+
+.date-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    padding-left: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.date-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.notif-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    display: flex;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.notif-card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+}
+
+.notif-priority-strip {
+    width: 4px;
+    height: 100%;
+    background: var(--text-secondary);
+    opacity: 0.2;
+    flex-shrink: 0;
+}
+
+.priority-critical .notif-priority-strip { background: #ef4444; opacity: 1; }
+.priority-warning .notif-priority-strip { background: #f59e0b; opacity: 1; }
+.priority-info .notif-priority-strip { background: #3b82f6; opacity: 1; }
+
+.notif-card-icon {
+    padding: 1.5rem 0 0 1.5rem;
+    font-size: 1.4rem;
+}
+
+.type-finance .notif-card-icon { color: #ef4444; }
+.type-student .notif-card-icon { color: #22c55e; }
+.type-academic .notif-card-icon { color: #f59e0b; }
+.type-system .notif-card-icon { color: #3b82f6; }
+
+.notif-card-body {
+    padding: 1.25rem;
+    flex-grow: 1;
+}
+
+.notif-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.notif-card-header h4 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.unread-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--primary-color);
+}
+
+.notif-card-header .time {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.notif-message {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    max-width: 90%;
+}
+
+.notif-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notif-meta {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.type-tag, .priority-tag {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+}
+
+.unread .notif-message { color: var(--text-primary); font-weight: 450; }
+
+.notif-card-actions {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+    border-left: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.notif-card:hover .notif-card-actions {
+    opacity: 1;
+}
+
+.notif-card-actions button {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.notif-card-actions button:hover {
+    color: var(--text-primary);
+    border-color: var(--border-hover);
+    background: var(--bg-surface);
+}
+
+.notif-card-actions button.delete-btn:hover {
+    color: #ef4444;
+    border-color: #ef4444;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+    background: var(--bg-surface);
+    border-radius: var(--radius-xl);
+    border: 2px dashed var(--border-color);
+}
+
+.empty-icon {
+    font-size: 3rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    opacity: 0.3;
+}
+
+.empty-state h3 {
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+</style>

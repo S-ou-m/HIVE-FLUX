@@ -1,0 +1,42 @@
+<div class="tds-summary-container p-6 animate-fade-in">
+    <div class="header-stats grid grid-cols-2 gap-4 mb-8">
+        <div class="stat-card bg-indigo-50 border border-indigo-100 p-5 rounded-2xl">
+            <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Total TDS Liability</span>
+            <h2 class="text-3xl font-black text-indigo-700 mt-1">₹{{ total_tds|floatformat:2 }}</h2>
+        </div>
+        <div class="stat-card bg-emerald-50 border border-emerald-100 p-5 rounded-2xl">
+            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Employees Taxed</span>
+            <h2 class="text-3xl font-black text-emerald-700 mt-1">{{ faculties_taxed }} / {{ total_employees }}</h2>
+        </div>
+    </div>
+
+    <div class="compliance-details bg-slate-50 rounded-2xl p-6 border border-slate-200">
+        <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-shield-check text-emerald-500"></i> Compliance Breakdown
+        </h4>
+        
+        <div class="space-y-4">
+            <div class="flex justify-between items-center py-3 border-b border-slate-200">
+                <span class="text-sm text-slate-500">Reporting Period</span>
+                <span class="text-sm font-semibold text-slate-900">{{ month }}/{{ year }}</span>
+            </div>
+            <div class="flex justify-between items-center py-3 border-b border-slate-200">
+                <span class="text-sm text-slate-500">Tax Regime Applied</span>
+                <span class="text-sm font-semibold text-slate-900">Configurable Slab Engine</span>
+            </div>
+            <div class="flex justify-between items-center py-3">
+                <span class="text-sm text-slate-500">Filing Status</span>
+                <span class="px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold uppercase">Pending Filing</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-8">
+        <button class="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-black transition-all shadow-lg flex items-center justify-center gap-2">
+            <i class="fa-solid fa-file-pdf"></i> Download TDS Challan (Draft)
+        </button>
+        <p class="text-[10px] text-slate-400 text-center mt-3 italic">
+            This summary is generated based on progressive tax accumulation logic for the current payroll batch.
+        </p>
+    </div>
+</div>

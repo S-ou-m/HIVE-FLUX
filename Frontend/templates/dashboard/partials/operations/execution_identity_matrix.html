@@ -1,0 +1,49 @@
+<div class="identity-matrix-container animate-fade-in">
+    <div class="matrix-header">
+        <h2 class="section-title">Identity Matrix</h2>
+        <p class="section-subtitle">Real-Time Binding Verification Status</p>
+    </div>
+
+    <div class="matrix-grid">
+        <div class="matrix-card">
+            <div class="card-icon"><i class="fa-solid fa-fingerprint"></i></div>
+            <div class="card-info">
+                <h3>Active Bindings</h3>
+                <p>{{ active_bindings }} <span class="trend positive">Live</span></p>
+            </div>
+        </div>
+        <div class="matrix-card">
+            <div class="card-icon"><i class="fa-solid fa-user-shield"></i></div>
+            <div class="card-info">
+                <h3>High-Trust Users</h3>
+                <p>{{ high_trust_percentage }} <span class="trend">Stable</span></p>
+            </div>
+        </div>
+        <div class="matrix-card">
+            <div class="card-icon"><i class="fa-solid fa-user-secret"></i></div>
+            <div class="card-info">
+                <h3>Potential Proxies</h3>
+                <p>{{ potential_proxies }} <span class="trend {% if potential_proxies > 0 %}negative{% else %}neutral{% endif %}">
+                    {% if potential_proxies > 0 %}Alert{% else %}0%{% endif %}
+                </span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .matrix-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-top: 2rem; }
+    .matrix-card { 
+        background: var(--bg-surface); border: 1px solid var(--border-color); padding: 2rem; 
+        border-radius: 24px; display: flex; align-items: center; gap: 1.5rem;
+    }
+    .card-icon { 
+        width: 56px; height: 56px; background: var(--bg-elevated); border-radius: 16px; 
+        display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--primary-color);
+    }
+    .card-info h3 { font-size: 14px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 4px; }
+    .card-info p { font-size: 24px; font-weight: 900; color: #fff; }
+    .trend { font-size: 12px; font-weight: 800; margin-left: 8px; }
+    .trend.positive { color: #10B981; }
+    .trend.neutral { color: var(--text-secondary); }
+</style>

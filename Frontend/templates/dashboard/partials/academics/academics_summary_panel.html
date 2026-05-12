@@ -1,0 +1,59 @@
+<div class="summary-card-overview glass h-full">
+    <div class="card-header-mini">
+        <span class="label">Academic Snapshot</span>
+    </div>
+    
+    <div class="snapshot-body">
+        <div class="gauge-container">
+            <svg viewBox="0 0 36 36" class="circular-chart orange">
+                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path class="circle" stroke-dasharray="85, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <text x="18" y="20.35" class="percentage">85%</text>
+            </svg>
+            <div class="gauge-label">Active Capacity</div>
+        </div>
+
+        <div class="snapshot-metrics">
+            <div class="metric-item">
+                <span class="m-label">Top Dept</span>
+                <span class="m-val">{{ stats.top_dept_name }}</span>
+            </div>
+            <div class="metric-item">
+                <span class="m-label">Weakest</span>
+                <span class="m-val">{{ stats.weakest_dept_name }}</span>
+            </div>
+        </div>
+    </div>
+
+    {% if stats.inactive_depts > 0 %}
+    <div class="panel-alert">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>{{ stats.inactive_depts }} departments pending setup</span>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .summary-card-overview { background: rgba(30, 41, 59, 0.4); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); padding: 20px; display: flex; flex-direction: column; height: 320px; }
+    .card-header-mini .label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+    
+    .snapshot-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; }
+    
+    /* Circular Chart */
+    .gauge-container { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .circular-chart { display: block; margin: 0 auto; max-width: 120px; max-height: 120px; }
+    .circle-bg { fill: none; stroke: rgba(255,255,255,0.03); stroke-width: 3.8; }
+    .circle { fill: none; stroke-width: 2.8; stroke-linecap: round; animation: progress 1s ease-out forwards; }
+    .circular-chart.orange .circle { stroke: #f97316; }
+    .percentage { fill: #fff; font-family: sans-serif; font-size: 8px; font-weight: 800; text-anchor: middle; }
+    .gauge-label { font-size: 11px; color: #475569; font-weight: 700; }
+
+    .snapshot-metrics { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; border-top: 1px solid rgba(255,255,255,0.03); pt: 16px; }
+    .metric-item { display: flex; flex-direction: column; gap: 2px; }
+    .m-label { font-size: 9px; color: #475569; font-weight: 800; text-transform: uppercase; }
+    .m-val { font-size: 11px; color: #94a3b8; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .panel-alert { margin-top: auto; background: rgba(239, 68, 68, 0.05); color: #ef4444; padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; }
+
+    @keyframes progress { 0% { stroke-dasharray: 0 100; } }
+</style>

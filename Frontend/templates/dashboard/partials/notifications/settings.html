@@ -1,0 +1,207 @@
+<div class="side-panel-header">
+    <h3>Notification Settings</h3>
+    <p>Control how and when you receive alerts.</p>
+</div>
+
+<form class="settings-form" 
+      hx-post="{% url 'notification_settings' %}" 
+      hx-target="#side-panel-content">
+    {% csrf_token %}
+    
+    {% if success %}
+        <div class="settings-success animate-fade-in">
+            <i class="fa-solid fa-circle-check"></i> Preferences saved successfully!
+        </div>
+    {% endif %}
+
+    <div class="settings-section">
+        <label class="section-label">Channel Preferences</label>
+        <div class="toggle-group">
+            <div class="toggle-item">
+                <div class="toggle-info">
+                    <span class="title">In-App Notifications</span>
+                    <span class="desc">Show alerts in the dashboard bell icon</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" name="in_app_notifications" {% if prefs.in_app_notifications %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="toggle-item">
+                <div class="toggle-info">
+                    <span class="title">Email Digests</span>
+                    <span class="desc">Receive daily summaries of important activities</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" name="email_notifications" {% if prefs.email_notifications %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <label class="section-label">Module Alerts</label>
+        <div class="toggle-grid">
+            <div class="toggle-card">
+                <i class="fa-solid fa-indian-rupee-sign icon finance"></i>
+                <span>Finance</span>
+                <label class="switch sm">
+                    <input type="checkbox" name="finance_alerts" {% if prefs.finance_alerts %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="toggle-card">
+                <i class="fa-solid fa-book-open icon academic"></i>
+                <span>Academics</span>
+                <label class="switch sm">
+                    <input type="checkbox" name="academic_alerts" {% if prefs.academic_alerts %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="toggle-card">
+                <i class="fa-solid fa-user-graduate icon student"></i>
+                <span>Students</span>
+                <label class="switch sm">
+                    <input type="checkbox" name="student_alerts" {% if prefs.student_alerts %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="toggle-card">
+                <i class="fa-solid fa-server icon system"></i>
+                <span>System</span>
+                <label class="switch sm">
+                    <input type="checkbox" name="system_alerts" {% if prefs.system_alerts %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeSidePanel()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+</form>
+
+<style>
+.settings-form {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.settings-success {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 500;
+}
+
+.section-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    display: block;
+    font-weight: 700;
+}
+
+.toggle-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.toggle-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toggle-info .title {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.toggle-info .desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Switch Styling */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--bg-elevated);
+    transition: .3s;
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 2px;
+    bottom: 2px;
+    background-color: var(--text-secondary);
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { background-color: var(--primary-color); border-color: var(--primary-color); }
+input:checked + .slider:before { transform: translateX(24px); background-color: white; }
+
+.switch.sm { width: 36px; height: 20px; }
+.switch.sm .slider:before { height: 14px; width: 14px; }
+input:checked + .switch.sm .slider:before { transform: translateX(16px); }
+
+.toggle-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.toggle-card {
+    background: var(--bg-elevated);
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid var(--border-color);
+}
+
+.toggle-card .icon { font-size: 1.25rem; }
+.toggle-card span { font-size: 0.9rem; font-weight: 500; }
+
+.settings-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+</style>

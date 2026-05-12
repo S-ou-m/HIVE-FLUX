@@ -1,0 +1,133 @@
+<div class="module-wrapper animate-fade-in students-module-container">
+    <!-- Header & Actions -->
+    <div class="module-header" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-start;">
+        <div class="module-title">
+            <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">Student Intelligence Engine</h2>
+            <p style="margin: 0.25rem 0 0; color: var(--text-secondary); font-size: 0.9rem;">Monitor enrollment trends, financial health, and academic distribution.</p>
+        </div>
+        <div class="module-actions" id="student-actions">
+            <button class="btn btn-primary" hx-get="{% url 'admin_student_create' %}" hx-target="#modal-container">
+                <span class="icon" style="margin-right: 0.5rem;">+</span> Add Student
+            </button>
+        </div>
+    </div>
+
+    <!-- ELITE INTELLIGENCE LAYER: High-Density Canonical Grid -->
+    <div class="intelligence-grid-wrapper animate-fade-in" style="margin-bottom: 2rem;">
+        
+        <!-- ROW 1: Hero KPI + Decision Cards -->
+        <div id="student-stats-container" 
+             hx-get="{% url 'admin_students_stats_partial' %}?{{ request.GET.urlencode }}" 
+             hx-trigger="load, every 30s"
+             hx-swap="innerHTML">
+            <div class="skeleton-row">
+                <div class="skeleton-card hero-skeleton"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+        </div>
+
+        <!-- ROW 2 & 3: Independent Intelligence Charts -->
+        <div id="student-charts-container" 
+             hx-get="{% url 'admin_students_charts_partial' %}?{{ request.GET.urlencode }}" 
+             hx-trigger="load"
+             hx-swap="innerHTML">
+            <div class="skeleton-grid">
+                <div class="skeleton-card chart-skeleton-wide"></div>
+                <div class="skeleton-card chart-skeleton-narrow"></div>
+                <div class="skeleton-card chart-skeleton-half"></div>
+                <div class="skeleton-card chart-skeleton-half"></div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Elite Skeleton UI */
+        .skeleton-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 16px; margin-bottom: 1rem; }
+        .skeleton-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+        .skeleton-card { background: rgba(255, 255, 255, 0.05); border-radius: 12px; height: 140px; position: relative; overflow: hidden; }
+        .skeleton-card::after {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+            animation: skeleton-shimmer 1.5s infinite;
+        }
+        @keyframes skeleton-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        .hero-skeleton { height: 160px; }
+        .chart-skeleton-wide { grid-column: span 8; height: 320px; }
+        .chart-skeleton-narrow { grid-column: span 4; height: 320px; }
+        .chart-skeleton-half { grid-column: span 6; height: 320px; }
+
+        @media (max-width: 1200px) {
+            .skeleton-row, .skeleton-grid { grid-template-columns: 1fr; }
+            .chart-skeleton-wide, .chart-skeleton-narrow, .chart-skeleton-half { grid-column: span 1; }
+        }
+    </style>
+
+<!-- FILTER BAR -->
+<div class="filter-bar-wrapper animate-fade-in" style="background: var(--bg-surface); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 2rem; position: sticky; top: 0; z-index: 10; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+    <form hx-get="{% url 'admin_students_partial' %}" 
+          hx-target="#students-content" 
+          hx-trigger="change, keyup delay:500ms from:#search-input"
+          hx-push-url="true"
+          class="filter-form" 
+          style="display: grid; grid-template-columns: 1.5fr 1fr 1fr 0.8fr auto; gap: 1rem; align-items: end;">
+        
+        <div class="filter-group">
+            <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; font-weight: 600;">Search Students</label>
+            <div style="position: relative;">
+                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);">🔍</span>
+                <input type="text" name="search" id="search-input" placeholder="Name, Email or Enrollment..." 
+                       value="{{ current_filters.search }}"
+                       style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; background: var(--bg-surface-hover); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary);">
+            </div>
+        </div>
+
+        <div class="filter-group">
+            <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; font-weight: 600;">Department</label>
+            <select name="dept" style="width: 100%; padding: 0.75rem; background: var(--bg-surface-hover); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary);">
+                <option value="all">All Departments</option>
+                {% for d in departments %}
+                <option value="{{ d.id }}" {% if current_filters.dept == d.id|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; font-weight: 600;">Semester</label>
+            <select name="sem" style="width: 100%; padding: 0.75rem; background: var(--bg-surface-hover); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary);">
+                <option value="all">All Semesters</option>
+                {% for s in semesters %}
+                <option value="{{ s.id }}" {% if current_filters.sem == s.id|stringformat:"s" %}selected{% endif %}>Sem {{ s.number }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; font-weight: 600;">Admission Year</label>
+            <input type="number" name="year" placeholder="YYYY" 
+                   value="{{ current_filters.year }}"
+                   style="width: 100%; padding: 0.75rem; background: var(--bg-surface-hover); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary);">
+        </div>
+
+        <div class="filter-group">
+            <button type="button" 
+                    hx-get="{% url 'admin_students_partial' %}" 
+                    hx-target="#dashboard-content"
+                    hx-push-url="true"
+                    class="btn btn-secondary" 
+                    style="height: 46px; background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary);">
+                Reset
+            </button>
+        </div>
+        
+        <!-- Hidden sort inputs to maintain state -->
+        <input type="hidden" name="sort" value="{{ current_filters.sort }}">
+        <input type="hidden" name="order" value="{{ current_filters.order }}">
+    </form>
+</div>
+
+<div id="students-content">
+    {% include 'dashboard/views/students_table.html' %}
+</div>

@@ -1,0 +1,80 @@
+<article class="notice-card priority-{{ notice.priority|lower }} {% if is_read %}read{% endif %} animate-slide-up" 
+         id="notice-{{ notice.id }}"
+         onclick="viewNoticeIntelligence('{{ notice.id }}')">
+    
+    <div class="flex justify-between items-start mb-6">
+        <div class="flex items-center gap-3">
+            <div class="notice-badge badge-{{ notice.notice_type|lower|default:'info' }}">
+                {{ notice.get_notice_type_display }}
+            </div>
+            {% if notice.priority == 'CRITICAL' %}
+            <div class="flex items-center gap-2 px-2 py-1 rounded bg-red-500/10 border border-red-500/20 text-[9px] font-black text-red-500 uppercase tracking-widest animate-pulse">
+                <i class="fa-solid fa-triangle-exclamation"></i> Critical
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="meta-item">
+            <i class="fa-solid fa-clock-rotate-left opacity-40"></i>
+            {{ notice.published_at|timesince }} ago
+        </div>
+    </div>
+
+    <h2 class="notice-title">{{ notice.title }}</h2>
+    
+    <div class="notice-content text-white/50 text-sm leading-relaxed mb-8 line-clamp-3">
+        {{ notice.content|truncatewords:60 }}
+    </div>
+
+    <div class="notice-actions">
+        <div class="flex items-center gap-6 flex-1">
+            <!-- Author Intelligence -->
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 shadow-lg">
+                    <span class="text-[10px] font-black text-white/60">{{ notice.created_by.get_full_name|slice:":1"|default:notice.created_by.username|slice:":1" }}</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-white/80 tracking-tight">{{ notice.created_by.get_full_name|default:notice.created_by.username }}</span>
+                    <span class="text-[8px] font-black text-white/20 uppercase tracking-widest">Institutional Officer</span>
+                </div>
+            </div>
+
+            {% if notice.target_roles or notice.target_departments.exists %}
+            <div class="h-6 w-px bg-white/5"></div>
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-bullseye text-[10px] text-white/20"></i>
+                <span class="text-[9px] font-black text-white/30 uppercase tracking-[0.1em]">
+                    {% for role in notice.target_roles %}{{ role }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    {% if notice.target_departments.exists %}
+                        • {% for dept in notice.target_departments.all %}{{ dept.code }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    {% endif %}
+                </span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="flex items-center gap-3">
+            {% if not is_read %}
+            <button class="btn-com-action"
+                    hx-post="{% url 'mark_notice_read' notice.id %}"
+                    hx-target="#notice-{{ notice.id }}"
+                    hx-swap="outerHTML"
+                    onclick="event.stopPropagation()"
+                    title="Mark as Read">
+                <i class="fa-solid fa-check"></i>
+                <span>Acknowledge</span>
+            </button>
+            {% endif %}
+
+            {% if user_role == 'Administrator' %}
+            <button class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 text-white/20 hover:text-white transition-all hover:border-blue-500/40"
+                    hx-get="{% url 'notice_read_receipts' notice.id %}"
+                    hx-target="#global-drawer-content"
+                    onclick="event.stopPropagation(); openSideDrawer();"
+                    title="Read Receipts">
+                <i class="fa-solid fa-chart-line text-xs"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</article>

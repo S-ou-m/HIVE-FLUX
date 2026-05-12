@@ -1,0 +1,58 @@
+{% load static %}
+<div class="animate-fade-in">
+    <!-- Analysis Summary Strip -->
+    <div class="grid grid-cols-3 gap-6 mb-10">
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+            <div class="text-[9px] font-black text-muted uppercase tracking-widest mb-1">Efficiency Index</div>
+            <div class="text-xl font-black text-white">94.2%</div>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+            <div class="text-[9px] font-black text-muted uppercase tracking-widest mb-1">Conflict Risk</div>
+            <div class="text-xl font-black text-green-500">Minimal</div>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+            <div class="text-[9px] font-black text-muted uppercase tracking-widest mb-1">Optimization State</div>
+            <div class="text-xl font-black text-blue-500">Peak</div>
+        </div>
+    </div>
+
+    <!-- Data Table Matrix -->
+    <div class="overflow-hidden border border-white/10 rounded-2xl bg-white/2">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="bg-white/5 border-b border-white/10">
+                    <th class="px-6 py-4 text-[10px] font-black text-muted uppercase tracking-widest">Entity / Parameter</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-muted uppercase tracking-widest">Orchestration State</th>
+                    <th class="px-6 py-4 text-[10px] font-black text-muted uppercase tracking-widest text-right">Telemetry</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                {% for item in items %}
+                <tr class="hover:bg-white/[0.03] transition-colors group">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-8 h-8 rounded-lg bg-{{ color }}-500/10 flex items-center justify-center text-{{ color }}-500 text-xs">
+                                <i class="fas {{ icon }}"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-white group-hover:text-{{ color }}-400 transition-colors">{{ item.name }}</div>
+                                <div class="text-[9px] text-muted font-bold uppercase tracking-tighter">{{ item.category }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                            <span class="text-[10px] font-bold text-muted uppercase tracking-widest">Active & Validated</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="text-xs font-black text-white">{{ item.value }}</div>
+                        <div class="text-[9px] text-green-400 font-bold italic">{{ item.trend }}</div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

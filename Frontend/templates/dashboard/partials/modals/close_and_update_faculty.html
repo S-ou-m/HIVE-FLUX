@@ -1,0 +1,16 @@
+<!-- SUCCESS MODAL CLOSER & DATA REFRESHER -->
+<div id="modal-container" hx-swap-oob="true"></div>
+
+<!-- Success Notification -->
+<div id="notification-container" hx-swap-oob="afterbegin">
+    <div class="toast animate-slide-in" style="background: #10b981; color: white; padding: 1rem 1.5rem; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <span>✅</span>
+        <div style="font-size: 0.9rem; font-weight: 500;">Faculty profile updated successfully!</div>
+    </div>
+</div>
+
+<!-- RE-RENDER THE INSIGHTS (OOB) -->
+{% include 'dashboard/views/faculty_insights.html' %}
+
+<!-- RE-RENDER THE TABLE (This will be the main response injected into #faculty-content) -->
+{% include 'dashboard/views/faculty_table.html' %}

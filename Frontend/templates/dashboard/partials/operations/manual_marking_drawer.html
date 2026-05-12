@@ -1,0 +1,81 @@
+<div class="manual-marking-container p-6 animate-fade-in">
+    <div class="marking-header mb-8">
+        <h3 class="text-white font-bold text-lg">{{ session.subject_snapshot_name }}</h3>
+        <p class="text-xs text-slate-500 uppercase tracking-widest mt-1">Manual Attendance Entry</p>
+    </div>
+
+    <!-- 🔍 Search Bar -->
+    <div class="search-box mb-6 relative">
+        <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+        <input type="text" 
+               id="manual-student-search"
+               placeholder="Search by name or ID..." 
+               class="w-full bg-slate-900 border border-white/5 rounded-xl py-3 pl-12 pr-4 text-sm text-white focus:border-blue-500 outline-none transition-all">
+    </div>
+
+    <!-- 👥 Student List -->
+    <div class="student-list-box space-y-3" id="manual-marking-list">
+        {% for enrollment in students %}
+        <div class="student-mark-card p-4 bg-slate-800/40 border border-white/5 rounded-2xl flex justify-between items-center group hover:border-white/10 transition-all">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold">
+                    {{ enrollment.student.user.get_full_name|slice:":1" }}
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-white">{{ enrollment.student.user.get_full_name }}</p>
+                    <p class="text-[10px] text-slate-500">{{ enrollment.student.student_id|default:"STD-001" }}</p>
+                </div>
+            </div>
+            
+            <button class="mark-btn-sm"
+                    hx-post="{% url 'api_manual_mark_execute' session.id enrollment.student.id %}"
+                    hx-target="this"
+                    hx-swap="outerHTML">
+                <i class="fa-solid fa-plus mr-1"></i> Mark
+            </button>
+        </div>
+        {% empty %}
+        <div class="text-center py-12 opacity-50">
+            <i class="fa-solid fa-users-slash text-3xl mb-3"></i>
+            <p class="text-xs font-bold uppercase tracking-widest">All students marked</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .mark-btn-sm {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .mark-btn-sm:hover {
+        background: #3b82f6;
+        color: #fff;
+    }
+    .student-mark-card.hidden { display: none; }
+</style>
+
+<script>
+    document.getElementById('manual-student-search').addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.student-mark-card');
+        
+        cards.forEach(card => {
+            const name = card.querySelector('.text-sm').innerText.toLowerCase();
+            const id = card.querySelector('.text-\\[10px\\]').innerText.toLowerCase();
+            
+            if (name.includes(query) || id.includes(query)) {
+                card.classList.remove('hidden');
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+    });
+</script>

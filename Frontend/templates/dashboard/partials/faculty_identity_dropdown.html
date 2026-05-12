@@ -1,0 +1,153 @@
+<!-- d:\ERP_cms\Frontend\templates\dashboard\partials\faculty_identity_dropdown.html -->
+<div>
+    <!-- Enterprise Identity Capsule (Trigger) -->
+    <div id="identity-hub-trigger" 
+         class="identity-capsule pulse-active" 
+         onclick="event.stopPropagation(); document.getElementById('identity-hub-container').classList.toggle('active')">
+        
+        <div class="avatar-mini">
+            <div class="avatar-mini-inner">
+                {{ hub.identity.avatar_initials }}
+            </div>
+            <!-- Presence Dot -->
+            <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[#0a0f1e] shadow-[0_0_5px_#22c55e]"></div>
+        </div>
+
+        <div class="capsule-details">
+            <div class="capsule-name">{{ hub.identity.name|truncatechars:12 }}</div>
+            <div class="capsule-status">
+                <div class="w-1 h-1 rounded-full bg-green-500 animate-pulse"></div>
+                Live Sync
+            </div>
+        </div>
+
+        <i class="fas fa-chevron-down text-[10px] text-muted ml-1 opacity-40"></i>
+    </div>
+
+    <!-- Dropdown Panel (Unicorn Faculty Identity OS) -->
+    <div id="identity-hub-dropdown" class="glass-dropdown" style="width: 420px; border-radius: 28px;">
+        
+        <!-- LIVE STATUS BAR -->
+        <div class="status-strip-top">
+            <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+            <span>System Operational • Live Sync Active</span>
+            <span style="margin-left: auto; opacity: 0.5;">Last update: 1s ago</span>
+        </div>
+        
+        <!-- TIER 1: ELITE IDENTITY -->
+        <div class="hub-section" style="padding-bottom: 0;">
+            <div class="flex items-center gap-5">
+                <div class="avatar-elite">
+                    <div class="avatar-inner" style="background: var(--bg-dark); width: 100%; height: 100%; font-size: 18px;">
+                        {{ hub.identity.avatar_initials }}
+                    </div>
+                    <div class="avatar-badge" style="width: 14px; height: 14px; border-width: 3px;"></div>
+                </div>
+                <div class="flex-1">
+                    <div style="font-size: 22px; font-weight: 800; color: white; letter-spacing: -0.5px; margin-bottom: 4px;">
+                        {{ hub.identity.name }}
+                    </div>
+                    <div class="flex gap-2">
+                        <span class="status-chip active">FACULTY</span>
+                        <span class="status-chip">{{ hub.identity.department }}</span>
+                        <span class="status-chip">ACTIVE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TIER 2: MODULAR METRICS (Micro-Cards) -->
+        <div class="hub-section" style="padding-top: var(--space-sm);">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div style="font-size: 10px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Today</div>
+                    <div style="font-size: 16px; font-weight: 900; color: white;">2 Sessions</div>
+                </div>
+                <div class="metric-card">
+                    <div style="font-size: 10px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Avg Att.</div>
+                    <div style="font-size: 16px; font-weight: 900; color: var(--green-success);">{{ hub.kpis.attendance_avg }}</div>
+                </div>
+                <div class="metric-card">
+                    <div style="font-size: 10px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Alerts</div>
+                    <div style="font-size: 16px; font-weight: 900; color: var(--red-danger);">{{ hub.kpis.fraud_alerts }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TIER 3: BALANCED ACTION DOCK -->
+        <div class="hub-section" style="padding-top: 0; padding-bottom: var(--space-sm);">
+            <div class="action-dock">
+                <button class="btn-pil primary" style="width: 100%;"
+                        hx-get="{% url 'faculty_attendance_scanner_launcher' %}"
+                        hx-target="#global-drawer-content"
+                        onclick="openSideDrawer(); toggleIdentityHub(null, true)">
+                    <i class="fas fa-qrcode"></i> Open Scanner
+                </button>
+                <a href="{% url 'faculty_profile_dashboard_partial' %}" 
+                   hx-get="{% url 'faculty_profile_dashboard_partial' %}" 
+                   hx-target="#dashboard-content" 
+                   onclick="toggleIdentityHub(null, true)"
+                   class="btn-pil secondary" style="width: 100%; text-decoration: none;">
+                    <i class="fas fa-chart-pie"></i> My Profile
+                </a>
+            </div>
+        </div>
+
+        <!-- TIER 4: COMPRESSED INSIGHT ENGINE -->
+        <div class="hub-section" style="padding-top: 0; padding-bottom: 28px;">
+            <div style="font-size: 10px; color: var(--text-muted); font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-brain text-blue-500"></i> Smart Insights
+            </div>
+            {% for insight in hub.insights|slice:":1" %}
+            <div class="insight-card {% if insight.type == 'warning' %}warning{% elif insight.type == 'danger' %}danger{% endif %}" style="padding: 16px; border-radius: 18px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 700; color: white; margin-bottom: 2px;">{{ insight.title }}</div>
+                        <div style="font-size: 11px; color: var(--text-muted); max-width: 240px; line-height: 1.4;">{{ insight.description }}</div>
+                    </div>
+                    <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/5">
+                         <i class="fas {{ insight.icon }} text-[12px] opacity-40"></i>
+                    </div>
+                </div>
+                <div style="font-size: 10px; font-weight: 900; color: var(--blue-primary); text-transform: uppercase; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 6px;" class="hover:translate-x-1 transition-transform">
+                    {{ insight.action_label }} <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- TIER 5: SYSTEM UTILITY BAR -->
+        <div class="utility-bar">
+            <div class="flex gap-4">
+                <div hx-get="{% url 'faculty_digital_id_partial' %}"
+                     hx-target="#global-drawer-content"
+                     onclick="openSideDrawer(); toggleIdentityHub(null, true)"
+                     style="font-size: 11px; color: var(--blue-primary); font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; background: rgba(59, 130, 246, 0.1); padding: 6px 12px; border-radius: 10px; border: 1px solid rgba(59, 130, 246, 0.2);" 
+                     class="hover:scale-105 transition-transform">
+                    <i class="fas fa-id-card text-[10px]"></i> Digital Pass
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;" class="hover:text-white transition-colors">
+                    <i class="fas fa-bell text-[10px]"></i> Alerts
+                </div>
+            </div>
+            <a href="{% url 'logout' %}" style="font-size: 12px; font-weight: 700; color: var(--red-danger); text-decoration: none; display: flex; align-items: center; gap: 6px;" class="hover:scale-105 transition-transform">
+                <i class="fas fa-power-off"></i> Logout
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Self-contained outside click listener that survives HTMX swaps
+    if (!window.dropdownListenerInitialized) {
+        document.addEventListener('click', function(event) {
+            const hubs = document.querySelectorAll('.dropdown-wrapper.active');
+            hubs.forEach(hub => {
+                if (!hub.contains(event.target)) {
+                    hub.classList.remove('active');
+                }
+            });
+        });
+        window.dropdownListenerInitialized = true;
+    }
+</script>

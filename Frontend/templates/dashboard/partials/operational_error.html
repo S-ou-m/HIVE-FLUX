@@ -1,0 +1,56 @@
+<div class="operational-failure-viewport animate-fade-in">
+    <div class="failure-card">
+        <div class="failure-icon-box">
+            <i class="fas fa-radiation text-error animate-pulse"></i>
+        </div>
+        <h2 class="text-xl font-black text-white mb-2 uppercase tracking-widest">Intelligence Module Failure</h2>
+        <p class="text-sm text-muted mb-8 leading-relaxed">
+            The requested evaluation stream could not be synchronized with the neural link. 
+            The system state has been preserved.
+        </p>
+        
+        <div class="flex gap-4">
+            <button class="btn-pil primary" onclick="window.location.reload()">
+                <i class="fas fa-sync-alt mr-2"></i> Hard Reset System
+            </button>
+            <button class="btn-pil secondary" hx-get="{% url 'faculty_overview_partial' %}" hx-target="#dashboard-content">
+                <i class="fas fa-home mr-2"></i> Command Center
+            </button>
+        </div>
+        
+        <div class="failure-meta-info mt-8 p-4 bg-white/5 rounded-xl border border-white/5">
+            <div class="text-[10px] font-black text-muted uppercase tracking-widest mb-1">Error Signature</div>
+            <div class="text-[11px] font-mono text-error/80">{{ error_sig|default:"ERR_INTEL_SYNC_TIMEOUT_0x44" }}</div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .operational-failure-viewport {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+    }
+    .failure-card {
+        background: var(--elevation-2);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        padding: 48px;
+        border-radius: 24px;
+        max-width: 500px;
+        text-align: center;
+        box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 40px rgba(239, 68, 68, 0.1);
+    }
+    .failure-icon-box {
+        width: 80px;
+        height: 80px;
+        background: rgba(239, 68, 68, 0.1);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        margin: 0 auto 24px;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+</style>

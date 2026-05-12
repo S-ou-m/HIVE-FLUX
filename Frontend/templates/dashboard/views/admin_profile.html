@@ -1,0 +1,558 @@
+<div class="profile-dashboard animate-fade-in">
+    <!-- Header: Identity + Health -->
+    <div class="profile-hero">
+        <div class="hero-main">
+            <div class="hero-avatar">
+                <span>{{ user.username|slice:":1"|upper }}</span>
+                <div class="status-indicator"></div>
+            </div>
+            <div class="hero-details">
+                <h1>{{ user.get_full_name|default:user.username }}</h1>
+                <p>{{ user.email }}</p>
+                <div class="hero-badges">
+                    <span class="badge primary">System Admin</span>
+                    <span class="badge success">Active Account</span>
+                    <span class="badge warning">Enterprise Tier</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-stats">
+            <div class="mini-stat">
+                <label>Profile Strength</label>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="--w: {{ completion }}%; width: var(--w);"></div>
+                </div>
+                <span>{{ completion }}% Complete</span>
+            </div>
+            <div class="mini-stat">
+                <label>Account Health</label>
+                <div class="health-score">
+                    <span class="score">{{ health_score }}%</span>
+                    <span class="trend">Excellent</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: Intelligence & Activity -->
+    <div class="profile-grid">
+        <!-- Activity Log -->
+        <div class="profile-card activity-card">
+            <div class="card-header">
+                <h3>Activity Intelligence</h3>
+                <span class="subtitle">Last 30 days summary</span>
+            </div>
+            <div class="card-content">
+                <div class="stat-row">
+                    <div class="stat-box">
+                        <span class="val">{{ activity_count }}</span>
+                        <span class="lab">Total Actions</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="val">Today</span>
+                        <span class="lab">12 Actions</span>
+                    </div>
+                </div>
+                <ul class="audit-list">
+                    <li>
+                        <div class="audit-icon student"><i class="fa-solid fa-user-plus"></i></div>
+                        <div class="audit-info">
+                            <span class="action">Enrolled new student</span>
+                            <span class="time">2 hours ago</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="audit-icon finance"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                        <div class="audit-info">
+                            <span class="action">Approved budget request</span>
+                            <span class="time">Yesterday, 4:30 PM</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="audit-icon academic"><i class="fa-solid fa-book"></i></div>
+                        <div class="audit-info">
+                            <span class="action">Modified course curriculum</span>
+                            <span class="time">3 days ago</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Access Control -->
+        <div class="profile-card access-card">
+            <div class="card-header">
+                <h3>Access Control Matrix</h3>
+                <span class="subtitle">Global Module Permissions</span>
+            </div>
+            <div class="card-content">
+                <div class="permissions-grid">
+                    {% for perm in permissions %}
+                    <div class="permission-item">
+                        <span class="perm-name">{{ perm.name }}</span>
+                        <div class="perm-status">
+                            {% if perm.access %}
+                            <span class="status-pill granted">Granted</span>
+                            {% else %}
+                            <span class="status-pill denied">Restricted</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="access-footer">
+                    <p><i class="fa-solid fa-circle-info"></i> Contact Super Admin to request additional module access.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security & Session -->
+        <div class="profile-card security-card">
+            <div class="card-header">
+                <h3>Security Center</h3>
+                <span class="subtitle">Account safety & sessions</span>
+            </div>
+            <div class="card-content">
+                <div class="security-list">
+                    <div class="security-item">
+                        <div class="sec-icon"><i class="fa-solid fa-lock"></i></div>
+                        <div class="sec-details">
+                            <label>Password Status</label>
+                            <span>Last updated 45 days ago</span>
+                        </div>
+                        <button class="sec-btn">Update</button>
+                    </div>
+                    <div class="security-item">
+                        <div class="sec-icon"><i class="fa-solid fa-shield-check"></i></div>
+                        <div class="sec-details">
+                            <label>Two-Factor Auth</label>
+                            <span class="warning">Not Enabled</span>
+                        </div>
+                        <button class="sec-btn primary">Enable</button>
+                    </div>
+                </div>
+                <div class="active-sessions">
+                    <label>Active Sessions</label>
+                    <div class="session-row">
+                        <div class="browser-icon"><i class="fa-brands fa-chrome"></i></div>
+                        <div class="session-info">
+                            <span class="device">Windows PC — Chrome</span>
+                            <span class="loc">IP: 192.168.1.1 (Current)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Profile Dashboard Styles */
+    .profile-dashboard {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .profile-hero {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-hero::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 300px;
+        height: 100%;
+        background: radial-gradient(circle at 100% 0%, var(--primary-glow), transparent 70%);
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .hero-main {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .hero-avatar {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 700;
+        color: white;
+        position: relative;
+        box-shadow: 0 15px 30px var(--primary-glow);
+    }
+
+    .status-indicator {
+        position: absolute;
+        bottom: -5px;
+        right: -5px;
+        width: 24px;
+        height: 24px;
+        background: #22c55e;
+        border: 4px solid var(--bg-surface);
+        border-radius: 50%;
+    }
+
+    .hero-details h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        background: linear-gradient(to right, #fff, #a1a1aa);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-details p {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+
+    .hero-badges {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .badge.primary { background: var(--primary-glow); color: var(--primary-color); border: 1px solid rgba(249, 115, 22, 0.2); }
+    .badge.success { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
+    .badge.warning { background: rgba(234, 179, 8, 0.1); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.2); }
+
+    .hero-stats {
+        display: flex;
+        gap: 3rem;
+    }
+
+    .mini-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-width: 180px;
+    }
+
+    .mini-stat label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-secondary);
+        font-weight: 700;
+    }
+
+    .progress-bar-container {
+        height: 8px;
+        background: var(--bg-elevated);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: var(--primary-color);
+        box-shadow: 0 0 10px var(--primary-color);
+        transition: width 1s ease-out;
+    }
+
+    .mini-stat span {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .health-score {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+    }
+
+    .health-score .score {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #22c55e;
+    }
+
+    .health-score .trend {
+        font-size: 0.8rem;
+        color: #22c55e;
+        font-weight: 600;
+    }
+
+    /* Grid Section */
+    .profile-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+    }
+
+    .profile-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-header h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .card-header .subtitle {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .card-content {
+        padding: 1.5rem;
+        flex-grow: 1;
+    }
+
+    /* Activity Card */
+    .stat-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-box {
+        background: var(--bg-elevated);
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        text-align: center;
+        border: 1px solid var(--border-color);
+    }
+
+    .stat-box .val {
+        display: block;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .stat-box .lab {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    .audit-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .audit-list li {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .audit-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+
+    .audit-icon.student { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .audit-icon.finance { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+    .audit-icon.academic { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+
+    .audit-info .action {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .audit-info .time {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    /* Access Card */
+    .permissions-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .permission-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: var(--bg-elevated);
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+    }
+
+    .perm-name {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .status-pill {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    .status-pill.granted { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+    .status-pill.denied { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+    .access-footer {
+        padding: 1rem;
+        background: rgba(249, 115, 22, 0.05);
+        border-radius: 8px;
+        border: 1px dashed rgba(249, 115, 22, 0.3);
+    }
+
+    .access-footer p {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        line-height: 1.4;
+    }
+
+    /* Security Card */
+    .security-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .security-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .sec-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--bg-elevated);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    .sec-details {
+        flex-grow: 1;
+    }
+
+    .sec-details label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .sec-details span {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .sec-details .warning { color: #eab308; }
+
+    .sec-btn {
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background: transparent;
+        color: var(--text-primary);
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .sec-btn:hover { background: var(--bg-elevated); }
+    .sec-btn.primary { background: var(--primary-color); border-color: var(--primary-color); color: white; }
+
+    .active-sessions label {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .session-row {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        padding: 1rem;
+        background: rgba(34, 197, 94, 0.05);
+        border-radius: 10px;
+        border: 1px solid rgba(34, 197, 94, 0.1);
+    }
+
+    .browser-icon {
+        font-size: 1.5rem;
+        color: #22c55e;
+    }
+
+    .session-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .session-info .device {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .session-info .loc {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 1024px) {
+        .profile-grid { grid-template-columns: 1fr; }
+        .profile-hero { flex-direction: column; gap: 2rem; align-items: flex-start; }
+    }
+</style>

@@ -1,0 +1,27 @@
+<div class="col-span-full p-8 bg-blue-500/10 border border-blue-500/20 rounded-[32px] animate-in zoom-in-95 duration-500">
+    <div class="flex items-center gap-6">
+        <div class="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 text-2xl animate-bounce">
+            <i class="fa-solid fa-calendar-check"></i>
+        </div>
+        <div>
+            <h3 class="text-xl font-black text-white">Consultation Scheduled</h3>
+            <div class="flex items-center gap-2 mt-1">
+                <span class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em]">Assigned Specialist:</span>
+                <span class="text-[10px] font-bold text-white/60">{{ specialist }}</span>
+            </div>
+        </div>
+    </div>
+    <p class="mt-6 text-sm text-white/50 leading-relaxed italic">
+        Your 1-on-1 session has been confirmed. A secure meeting invitation and preparation heuristics have been dispatched to your institutional dashboard.
+    </p>
+    <div class="mt-8 flex gap-4">
+        <button hx-get="{% url 'student_service_portal_partial' service_slug=service_slug %}"
+                hx-target="#workspace-core"
+                class="px-6 py-3 bg-white/5 border border-white/10 text-[10px] font-black text-white/60 hover:text-white rounded-xl uppercase tracking-widest transition-all">
+            Return to Portal
+        </button>
+        <button class="px-6 py-3 bg-blue-500 text-white text-[10px] font-black rounded-xl uppercase tracking-widest shadow-lg shadow-blue-500/20">
+            Add to Degree Roadmap
+        </button>
+    </div>
+</div>

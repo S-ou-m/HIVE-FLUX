@@ -1,0 +1,189 @@
+<!-- ========================================== -->
+<!-- TOP NAVIGATION BAR -->
+<!-- ========================================== -->
+<header class="topbar">
+    
+    <!-- ========================================== -->
+    <!-- GLOBAL SEARCH BAR -->
+    <!-- ========================================== -->
+    <button class="mobile-nav-trigger" onclick="toggleMobileSidebar()" style="display: none;">
+        <i class="fa-solid fa-bars-staggered"></i>
+    </button>
+    <div class="topbar-search">
+        <span class="icon">🔍</span>
+        <input type="text" placeholder="Search globally (Ctrl+K)...">
+    </div>
+    
+    <div class="topbar-actions">
+        
+        <!-- ========================================== -->
+        <!-- CREATE NOTICE QUICK ACTION (Admin Only) -->
+        <!-- ========================================== -->
+        {% if user_role == 'Administrator' or user.is_staff %}
+        <button class="icon-btn" 
+                hx-get="{% url 'create_notice' %}" 
+                hx-target="#modal-container"
+                title="Publish Broadcast"
+                style="background:rgba(59, 130, 246, 0.1); border:1px solid rgba(59, 130, 246, 0.2); color:#60a5fa; width: 32px; height: 32px; border-radius: 8px; margin-right: 15px; cursor:pointer;">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+        {% endif %}
+
+        <!-- ========================================== -->
+        <!-- NOTICE CENTER QUICK ACCESS -->
+        <!-- ========================================== -->
+        <a href="#" class="icon-btn" 
+           hx-get="{% url 'notice_center' %}" 
+           hx-target="#dashboard-content"
+           style="background:transparent; border:none; color:var(--text-primary); font-size:1.2rem; cursor:pointer; text-decoration:none; margin-right: 15px;">
+            <i class="fa-solid fa-bullhorn"></i>
+        </a>
+
+        <!-- ========================================== -->
+        <!-- NOTIFICATIONS BUTTON -->
+        <!-- ========================================== -->
+        <div class="notifications-wrapper" id="notifications-wrapper">
+            <button class="icon-btn" id="notif-trigger" 
+                    hx-get="{% url 'notifications_dropdown' %}" 
+                    hx-target="#notif-dropdown" 
+                    hx-trigger="click"
+                    onclick="toggleNotifDropdown()"
+                    style="background:transparent; border:none; color:var(--text-primary); font-size:1.2rem; cursor:pointer; position:relative;">
+                <i class="fa-solid fa-bell"></i>
+                <span class="notif-badge" id="notif-badge" 
+                      hx-get="{% url 'notifications_dropdown' %}" 
+                      hx-trigger="every 30s" 
+                      hx-swap="none"
+                      style="display:none;"></span>
+            </button>
+            <div class="notif-dropdown" id="notif-dropdown">
+                <!-- Content loaded via HTMX -->
+                <div class="notif-loading">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Loading...
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========================================== -->
+        <!-- USER PROFILE WIDGET + DROP_DOWN -->
+        <!-- ========================================== -->
+        <div class="user-profile-wrapper">
+            <div class="user-profile" id="profile-trigger" onclick="toggleProfileDropdown()">
+                <div class="avatar">A</div>
+                <div class="user-info">
+                    <span class="name">System Admin</span>
+                    <span class="role">Administrator</span>
+                </div>
+                <span class="chevron">▼</span>
+            </div>
+
+            <!-- SaaS Level Dropdown -->
+            <div class="profile-dropdown" id="profile-dropdown">
+                <!-- Identity Block -->
+                <div class="dropdown-header">
+                    <div class="header-avatar">SN</div>
+                    <div class="header-info">
+                        <span class="full-name">{{ user.get_full_name|default:"Soumya Dutta Nayak" }}</span>
+                        <span class="user-email">{{ user.email|default:"nayaksoumyadutta@gmail.com" }}</span>
+                        <div class="tenant-badge">
+                            <span class="dot"></span>
+                            {{ college.name|default:"Main Campus HQ" }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="dropdown-section">
+                    <label>Quick Actions</label>
+                    <a href="#" class="dropdown-item" hx-get="{% url 'admin_profile_partial' %}" hx-target="#dashboard-content" onclick="toggleProfileDropdown()">
+                        <i class="fa-solid fa-user-tie"></i> View Profile
+                    </a>
+                    <a href="#" class="dropdown-item" hx-get="{% url 'admin_profile_edit_partial' %}" hx-target="#global-drawer-content" onclick="toggleProfileDropdown(); openSideDrawer()">
+                        <i class="fa-solid fa-user-gear"></i> Edit Profile
+                    </a>
+                    <a href="#" class="dropdown-item" hx-get="{% url 'admin_password_change_partial' %}" hx-target="#global-drawer-content" onclick="toggleProfileDropdown(); openSideDrawer()">
+                        <i class="fa-solid fa-key"></i> Change Password
+                    </a>
+                </div>
+
+                <!-- Tenant Context -->
+                <div class="dropdown-section">
+                    <label>Tenant</label>
+                    <div class="dropdown-info">
+                        <div class="info-row">
+                            <span>Current</span>
+                            <span class="val">{{ college.name|default:"Main Campus HQ" }}</span>
+                        </div>
+                        <a href="#" class="dropdown-item" hx-get="{% url 'admin_tenant_switch_partial' %}" hx-target="#global-drawer-content" onclick="toggleProfileDropdown(); openSideDrawer()">
+                            <i class="fa-solid fa-building-circle-arrow-right"></i> Switch Tenant <i class="fa-solid fa-chevron-right arrow"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Security -->
+                <div class="dropdown-section">
+                    <label>Security</label>
+                    <div class="dropdown-info">
+                        <div class="info-row">
+                            <span>Last Login</span>
+                            <span class="val">Today, 12:10 PM</span>
+                        </div>
+                        <a href="#" class="dropdown-item" hx-get="{% url 'admin_sessions_partial' %}" hx-target="#global-drawer-content" onclick="toggleProfileDropdown(); openSideDrawer()">
+                            <i class="fa-solid fa-shield-halved"></i> Active Sessions <i class="fa-solid fa-chevron-right arrow"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Logout -->
+                <div class="dropdown-footer">
+                    <a href="{% url 'logout' %}" class="logout-link">
+                        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function toggleProfileDropdown() {
+                const dropdown = document.getElementById('profile-dropdown');
+                const trigger = document.getElementById('profile-trigger');
+                
+                // Close notif dropdown if open
+                document.getElementById('notif-dropdown').classList.remove('active');
+                document.getElementById('notif-trigger').classList.remove('active');
+
+                dropdown.classList.toggle('active');
+                trigger.classList.toggle('active');
+            }
+
+            function toggleNotifDropdown() {
+                const dropdown = document.getElementById('notif-dropdown');
+                const trigger = document.getElementById('notif-trigger');
+
+                // Close profile dropdown if open
+                document.getElementById('profile-dropdown').classList.remove('active');
+                document.getElementById('profile-trigger').classList.remove('active');
+
+                dropdown.classList.toggle('active');
+                trigger.classList.toggle('active');
+            }
+
+
+            // Close when clicking outside
+            document.addEventListener('click', function(event) {
+                const profileWrapper = document.querySelector('.user-profile-wrapper');
+                const notifWrapper = document.getElementById('notifications-wrapper');
+                
+                if (profileWrapper && !profileWrapper.contains(event.target)) {
+                    document.getElementById('profile-dropdown').classList.remove('active');
+                    document.getElementById('profile-trigger').classList.remove('active');
+                }
+                
+                if (notifWrapper && !notifWrapper.contains(event.target)) {
+                    document.getElementById('notif-dropdown').classList.remove('active');
+                    document.getElementById('notif-trigger').classList.remove('active');
+                }
+            });
+        </script>
+    </div>
+</header>

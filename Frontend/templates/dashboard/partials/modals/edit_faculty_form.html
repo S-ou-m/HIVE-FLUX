@@ -1,0 +1,106 @@
+<!-- ========================================== -->
+<!-- EDIT FACULTY MODAL -->
+<!-- ========================================== -->
+<div class="modal-backdrop" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation();" style="max-width: 600px; padding: 0;">
+        
+        <div class="modal-header" style="padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid var(--border-color);">
+            <h3>Edit Faculty Profile</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        
+        <form hx-post="{% url 'admin_faculty_edit' faculty.id %}" hx-target="#modal-container" hx-indicator="#submit-spinner">
+            {% csrf_token %}
+            <div class="modal-body" style="padding: 1.5rem; max-height: 70vh; overflow-y: auto;">
+                
+                <h4 class="section-title">Personal Details</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Email Address</label>
+                        {{ form.email }}
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Phone No</label>
+                        {{ form.phone_no }}
+                    </div>
+                </div>
+
+                <h4 class="section-title">Professional Details</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                    <div class="form-group">
+                        <label>Department</label>
+                        {{ form.department }}
+                    </div>
+                    <div class="form-group">
+                        <label>Designation</label>
+                        {{ form.designation }}
+                    </div>
+                </div>
+
+                <h4 class="section-title">Address Information</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Street Address</label>
+                        {{ form.address_line1 }}
+                    </div>
+                    <div class="form-group">
+                        <label>City</label>
+                        {{ form.city }}
+                    </div>
+                    <div class="form-group">
+                        <label>State</label>
+                        {{ form.state }}
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>PIN Code</label>
+                        {{ form.pincode }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 1rem; padding: 1.5rem; border-top: 1px solid var(--border-color); background: var(--bg-surface-hover);">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="box-shadow: 0 8px 20px rgba(249,115,22,0.3); display: flex; align-items: center;">
+                    <span id="submit-text">Save Changes</span>
+                    <span id="submit-spinner" class="htmx-indicator" style="margin-left: 0.5rem;">⏳</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function closeModal() {
+        document.getElementById('modal-container').innerHTML = '';
+    }
+</script>
+
+<style>
+    .section-title {
+        font-size: 11px;
+        letter-spacing: 1px;
+        color: var(--color-orange);
+        text-transform: uppercase;
+        margin-bottom: 1.25rem;
+        font-weight: 700;
+        border-bottom: 1px solid rgba(249, 115, 22, 0.1);
+        padding-bottom: 0.5rem;
+    }
+    
+    .htmx-indicator {
+        display: none;
+    }
+    .htmx-request .htmx-indicator {
+        display: inline-block;
+        animation: spin 2s linear infinite;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+</style>

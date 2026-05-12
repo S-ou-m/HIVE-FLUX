@@ -1,0 +1,410 @@
+<div class="attendance-intelligence-shell animate-fade-in">
+    <!-- 🚀 TOP SECTION: KPI STRIP (Decision Layer) -->
+    <div class="kpi-grid">
+        <!-- Avg Attendance -->
+        <div class="kpi-card glass-card">
+            <div class="kpi-header">
+                <div class="kpi-icon bg-success-glow"><i class="fa-solid fa-users-check"></i></div>
+                <div class="kpi-trend positive">+2.4%</div>
+            </div>
+            <div class="kpi-value">{{ kpis.avg_attendance }}</div>
+            <div class="kpi-label">Avg Attendance</div>
+            <div class="kpi-footer">System benchmark: 75%</div>
+        </div>
+
+        <!-- At-Risk Students -->
+        <div class="kpi-card glass-card">
+            <div class="kpi-header">
+                <div class="kpi-icon bg-danger-glow"><i class="fa-solid fa-user-ninja"></i></div>
+                <div class="kpi-badge">CRITICAL</div>
+            </div>
+            <div class="kpi-value">{{ kpis.at_risk }}</div>
+            <div class="kpi-label">At-Risk Students</div>
+            <div class="kpi-footer">< 75% threshold</div>
+        </div>
+
+        <!-- Pending Sessions -->
+        <div class="kpi-card glass-card">
+            <div class="kpi-header">
+                <div class="kpi-icon bg-warning-glow"><i class="fa-solid fa-clock-rotate-left"></i></div>
+            </div>
+            <div class="kpi-value">{{ kpis.pending }}</div>
+            <div class="kpi-label">Pending Sessions</div>
+            <div class="kpi-footer">Awaiting completion</div>
+        </div>
+
+        <!-- Faculty Compliance -->
+        <div class="kpi-card glass-card">
+            <div class="kpi-header">
+                <div class="kpi-icon bg-primary-glow"><i class="fa-solid fa-shield-check"></i></div>
+                <div class="kpi-trend positive">STABLE</div>
+            </div>
+            <div class="kpi-value">{{ kpis.compliance }}</div>
+            <div class="kpi-label">Compliance Rate</div>
+            <div class="kpi-footer">Institutional target: 95%</div>
+        </div>
+    </div>
+
+    <!-- 📊 MAIN INTELLIGENCE GRID -->
+    <div class="attendance-main-grid">
+        <!-- Left Column: Session Orchestrator -->
+        <div class="session-orchestrator glass-card">
+            <div class="section-header">
+                <div class="header-content">
+                    <h3>Operational Flow</h3>
+                    <p>Live session control & multi-mode capture</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-icon"><i class="fa-solid fa-filter"></i></button>
+                    <button class="btn-icon"><i class="fa-solid fa-rotate"></i></button>
+                </div>
+            </div>
+
+            <div class="session-list-container custom-scrollbar">
+                {% for session in today_sessions %}
+                <div class="session-strip {% if session.status == 'LIVE' %}status-live{% endif %}">
+                    <div class="session-time">
+                        <span class="time">{{ session.started_at|time:"H:i" }}</span>
+                        <span class="date">TODAY</span>
+                    </div>
+                    <div class="session-info">
+                        <div class="subject-name">{{ session.slot_instance.timetable_slot.assignment.subject.name }}</div>
+                        <div class="session-meta">
+                            <span><i class="fa-solid fa-user-tie"></i> {{ session.faculty_snapshot_name }}</span>
+                            <span><i class="fa-solid fa-location-dot"></i> {{ session.slot_instance.timetable_slot.room.name }}</span>
+                        </div>
+                    </div>
+                    <div class="session-stats">
+                        <div class="stat-box">
+                            <span class="stat-val">{{ session.present_count }}/{{ session.expected_count }}</span>
+                            <span class="stat-lab">Present</span>
+                        </div>
+                    </div>
+                    <div class="session-actions">
+                        {% if session.status == 'LIVE' %}
+                        <button class="btn-control btn-stop" hx-post="{% url 'api_session_control' session.id 'end' %}" hx-target="#dashboard-content">
+                            <i class="fa-solid fa-stop"></i>
+                        </button>
+                        {% elif session.status == 'COMPLETED' %}
+                        <div class="status-badge badge-success">COMPLETED</div>
+                        {% else %}
+                        <button class="btn-control btn-start" hx-post="{% url 'api_session_control' session.id 'start' %}" hx-target="#dashboard-content">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <i class="fa-solid fa-calendar-xmark"></i>
+                    <p>No sessions scheduled for today</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right Column: Behavioral Analytics -->
+        <div class="behavioral-analytics glass-card">
+            <div class="section-header">
+                <h3>Behavioral Telemetry</h3>
+                <p>Attendance trends & patterns</p>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="attendanceTrendChart"></canvas>
+            </div>
+
+            <div class="intelligence-feed">
+                <div class="feed-item">
+                    <div class="feed-icon bg-warning-glow"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="feed-content">
+                        <strong>Late Arrival Spike</strong>
+                        <span>5% increase in late arrivals for 8AM sessions.</span>
+                    </div>
+                </div>
+                <div class="feed-item">
+                    <div class="feed-icon bg-success-glow"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="feed-content">
+                        <strong>High Retention</strong>
+                        <span>92% retention rate in Lab sessions this week.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Attendance Intelligence CSS */
+.attendance-intelligence-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 20px;
+}
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+.kpi-card {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.kpi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.kpi-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.kpi-value {
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+}
+
+.kpi-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.kpi-footer {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.3);
+    margin-top: 4px;
+}
+
+.attendance-main-grid {
+    display: grid;
+    grid-template-columns: 8fr 4fr;
+    gap: 32px;
+    height: calc(100vh - 400px);
+}
+
+.section-header {
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.section-header h3 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.section-header p {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.session-strip {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+}
+
+.session-strip:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.session-strip.status-live {
+    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.05);
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.1);
+}
+
+.session-time {
+    display: flex;
+    flex-direction: column;
+    min-width: 80px;
+}
+
+.session-time .time {
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+}
+
+.session-time .date {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--com-accent);
+    letter-spacing: 0.1em;
+}
+
+.session-info {
+    flex: 1;
+}
+
+.subject-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.session-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.session-stats .stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 8px 16px;
+    border-radius: 12px;
+}
+
+.stat-val {
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+}
+
+.stat-lab {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.btn-control {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-start {
+    background: var(--com-accent);
+    color: #fff;
+}
+
+.btn-stop {
+    background: #EF4444;
+    color: #fff;
+    animation: pulse-danger 2s infinite;
+}
+
+@keyframes pulse-danger {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.intelligence-feed {
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.feed-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+}
+
+.feed-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.feed-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.feed-content strong {
+    font-size: 13px;
+    color: #fff;
+}
+
+.feed-content span {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Background Glows */
+.bg-success-glow { background: rgba(16, 185, 129, 0.1); color: #10B981; }
+.bg-danger-glow { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
+.bg-warning-glow { background: rgba(245, 158, 11, 0.1); color: #F59E0B; }
+.bg-primary-glow { background: rgba(59, 130, 246, 0.1); color: #3B82F6; }
+
+</style>
+
+<script>
+    // Initialize Attendance Trend Chart
+    const ctx = document.getElementById('attendanceTrendChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            datasets: [{
+                label: 'Attendance Rate',
+                data: [82, 78, 85, 80, 88, 84],
+                borderColor: '#FF6B00',
+                backgroundColor: 'rgba(255, 107, 0, 0.1)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 3,
+                pointBackgroundColor: '#FF6B00',
+                pointBorderColor: '#fff',
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: 'rgba(255, 255, 255, 0.3)' } },
+                x: { grid: { display: false }, ticks: { color: 'rgba(255, 255, 255, 0.3)' } }
+            }
+        }
+    });
+</script>

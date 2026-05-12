@@ -1,0 +1,269 @@
+<div class="scanner-interface animate-fade-in" id="scanner-root">
+    <!-- Session Header -->
+    <div class="scanner-session-banner">
+        <div class="banner-left">
+            <div class="live-pulse-container">
+                <div class="live-pulse-orb"></div>
+            </div>
+            <div class="banner-text">
+                <h2 class="banner-title">{{ session.subject_snapshot_name }} <span class="highlight">Execution Panel</span></h2>
+                <p class="banner-meta">Faculty: {{ session.faculty_snapshot_name }} | Room: {{ session.timetable.room.name|default:"Main Hall" }}</p>
+            </div>
+        </div>
+        <div class="banner-right">
+            <div class="banner-stat">
+                <span class="stat-label">Present Count</span>
+                <span class="stat-value" id="scanner-present-count">{{ session.present_count }}</span>
+            </div>
+            <button class="exit-btn" hx-get="{% url 'execution_sessions_partial' %}" hx-target="#engine-workspace">
+                <i class="fa-solid fa-chevron-left"></i> Exit Panel
+            </button>
+        </div>
+    </div>
+
+    <div class="scanner-layout-grid">
+        <!-- 🎥 Scanner Section (Left) -->
+        <div class="scanner-viewport-section">
+            <div class="viewport-card">
+                <div id="reader" class="scanner-frame"></div>
+                
+                <!-- Overlay Feedback -->
+                <div id="scanner-feedback" class="feedback-overlay">
+                    <div class="feedback-circle">
+                        <i id="feedback-icon" class="fa-solid"></i>
+                    </div>
+                </div>
+
+                <div class="scanner-status-tag">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>Fast Scan Mode Active</span>
+                    <div class="status-dot"></div>
+                </div>
+            </div>
+
+            <div class="scanner-controls-footer">
+                <div class="instruction-tip">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Position the dynamic QR within the frame</span>
+                </div>
+                <button class="saas-btn-sm" onclick="toggleScanner()">
+                    <i class="fa-solid fa-power-off"></i> Toggle Camera
+                </button>
+            </div>
+        </div>
+
+        <!-- 📊 Live Stats & Feed (Right) -->
+        <div class="scanner-telemetry-section">
+            <div class="telemetry-card">
+                <div class="card-header">
+                    <h3 class="card-title">Live Scan Feed</h3>
+                    <span class="card-subtitle">Real-time Stream</span>
+                </div>
+                <div class="scan-feed-list" id="scan-feed">
+                    {% for log in last_scans %}
+                    <div class="scan-feed-item {% if log.result == 'SUCCESS' %}is-success{% else %}is-error{% endif %}">
+                        <div class="item-identity">
+                            <div class="result-icon">
+                                <i class="fa-solid {% if log.result == 'SUCCESS' %}fa-check{% else %}fa-xmark{% endif %}"></i>
+                            </div>
+                            <div class="item-text">
+                                <p class="user-name">{{ log.user.get_full_name|default:log.user.username }}</p>
+                                <p class="timestamp">{{ log.scanned_at|time:"H:i:s" }} | {{ log.get_result_display }}</p>
+                            </div>
+                        </div>
+                        {% if log.latency_ms %}
+                        <span class="latency-tag">{{ log.latency_ms }}ms</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="telemetry-stats-row">
+                <div class="stat-box">
+                    <span class="stat-box-label">Expected Enrollment</span>
+                    <span class="stat-box-value">{{ session.expected_count|default:"60" }}</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-box-label">Scan Velocity</span>
+                    <span class="stat-box-value accent">2.4<span class="unit">scans/s</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script>
+    var html5QrCode;
+    var isProcessing = false;
+
+    function onScanSuccess(decodedText, decodedResult) {
+        if (isProcessing) return;
+        isProcessing = true;
+
+        const formData = new FormData();
+        formData.append('qr_data', decodedText);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch("{% url 'api_process_scan' session.id %}", {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showFeedback('SUCCESS');
+                updateScanFeed(data.message, 'SUCCESS');
+                document.getElementById('scanner-present-count').innerText = data.present_count;
+            } else {
+                showFeedback('ERROR', data.result_code);
+                updateScanFeed(data.message, 'ERROR');
+            }
+            setTimeout(() => { isProcessing = false; }, 800);
+        })
+        .catch(err => {
+            console.error(err);
+            isProcessing = false;
+        });
+    }
+
+    function showFeedback(type) {
+        const feedback = document.getElementById('scanner-feedback');
+        const icon = document.getElementById('feedback-icon');
+        
+        feedback.className = `feedback-overlay is-active ${type === 'SUCCESS' ? 'success' : 'error'}`;
+        icon.className = `fa-solid ${type === 'SUCCESS' ? 'fa-check-circle' : 'fa-circle-xmark'}`;
+        
+        setTimeout(() => { feedback.className = 'feedback-overlay'; }, 500);
+    }
+
+    function updateScanFeed(message, type) {
+        const feed = document.getElementById('scan-feed');
+        const entry = document.createElement('div');
+        entry.className = `scan-feed-item animate-slide-in ${type === 'SUCCESS' ? 'is-success' : 'is-error'}`;
+        entry.innerHTML = `
+            <div class="item-identity">
+                <div class="result-icon">
+                    <i class="fa-solid ${type === 'SUCCESS' ? 'fa-check' : 'fa-xmark'}"></i>
+                </div>
+                <div class="item-text">
+                    <p class="user-name">Incoming Scan</p>
+                    <p class="timestamp">${message}</p>
+                </div>
+            </div>
+        `;
+        feed.prepend(entry);
+        if (feed.children.length > 5) feed.lastElementChild.remove();
+    }
+
+    function toggleScanner() {
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                html5QrCode = null;
+                document.getElementById('reader').innerHTML = "";
+            });
+        } else {
+            html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 15, qrbox: { width: 280, height: 280 } };
+            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess);
+        }
+    }
+
+    setTimeout(toggleScanner, 500);
+    document.addEventListener('htmx:beforeSwap', function(evt) {
+        if (html5QrCode) html5QrCode.stop();
+    });
+</script>
+
+<style>
+    .scanner-session-banner {
+        background: var(--bg-surface); border: 1px solid var(--border-color);
+        padding: 1.5rem 2rem; border-radius: 20px; display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 2rem; border-left: 4px solid var(--primary-color);
+    }
+    .banner-left { display: flex; align-items: center; gap: 1.5rem; }
+    .live-pulse-orb { width: 12px; height: 12px; background: #EF4444; border-radius: 50%; position: relative; }
+    .live-pulse-orb::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: inherit; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(3); opacity: 0; } }
+
+    .banner-title { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    .banner-title .highlight { color: var(--primary-color); }
+    .banner-meta { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+
+    .banner-right { display: flex; align-items: center; gap: 3rem; }
+    .banner-stat { text-align: right; }
+    .stat-label { display: block; font-size: 10px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .stat-value { font-size: 28px; font-weight: 900; color: #fff; line-height: 1; }
+
+    .exit-btn { 
+        background: var(--bg-elevated); border: 1px solid var(--border-color); color: var(--text-primary);
+        padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s;
+    }
+    .exit-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
+
+    /* GRID LAYOUT */
+    .scanner-layout-grid { display: grid; grid-template-columns: 1fr 400px; gap: 2rem; }
+
+    .viewport-card { 
+        position: relative; background: #000; border-radius: 30px; border: 1px solid var(--border-color);
+        aspect-ratio: 16/9; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .scanner-frame { width: 100%; height: 100%; }
+    .scanner-frame video { object-fit: cover !important; }
+
+    .feedback-overlay { 
+        position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+        opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 10;
+    }
+    .feedback-overlay.is-active { opacity: 1; }
+    .feedback-overlay.success { background: rgba(16, 185, 129, 0.2); }
+    .feedback-overlay.error { background: rgba(239, 68, 68, 0.2); }
+    .feedback-circle { width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #fff; }
+
+    .scanner-status-tag {
+        position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+        background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
+        padding: 10px 24px; border-radius: 100px; display: flex; align-items: center; gap: 12px;
+        color: #fff; font-size: 12px; font-weight: 700;
+    }
+    .status-dot { width: 8px; height: 8px; background: #10B981; border-radius: 50%; animation: blink 1s infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .scanner-controls-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding: 0 1rem; }
+    .instruction-tip { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-secondary); }
+    .instruction-tip i { color: var(--primary-color); }
+
+    /* TELEMETRY */
+    .telemetry-card { 
+        background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 24px; 
+        padding: 1.5rem; height: 420px; display: flex; flex-direction: column;
+    }
+    .card-header { margin-bottom: 1.5rem; }
+    .card-title { font-size: 14px; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 0.1em; }
+    .card-subtitle { font-size: 10px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; }
+
+    .scan-feed-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; padding-right: 4px; }
+    .scan-feed-item { 
+        display: flex; justify-content: space-between; align-items: center;
+        background: var(--bg-elevated); border: 1px solid var(--border-color); padding: 12px; border-radius: 14px;
+        animation: slide-in 0.3s ease-out forwards;
+    }
+    @keyframes slide-in { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    .item-identity { display: flex; align-items: center; gap: 12px; }
+    .result-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .is-success .result-icon { background: rgba(16, 185, 129, 0.1); color: #10B981; }
+    .is-error .result-icon { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
+
+    .user-name { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+    .timestamp { font-size: 10px; color: var(--text-secondary); font-weight: 600; }
+    .latency-tag { font-family: monospace; font-size: 10px; color: var(--text-secondary); opacity: 0.5; }
+
+    .telemetry-stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
+    .stat-box { background: var(--bg-surface); border: 1px solid var(--border-color); padding: 16px; border-radius: 18px; }
+    .stat-box-label { display: block; font-size: 10px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px; }
+    .stat-box-value { font-size: 20px; font-weight: 900; color: #fff; }
+    .stat-box-value.accent { color: var(--primary-color); }
+    .stat-box-value .unit { font-size: 10px; font-weight: 700; color: var(--text-secondary); margin-left: 4px; }
+</style>

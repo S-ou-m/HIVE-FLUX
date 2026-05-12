@@ -1,0 +1,72 @@
+<div class="modal-backdrop" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation();" style="max-width: 500px;">
+        <div class="modal-header">
+            <h3>{% if edit %}Edit Workload Assignment{% else %}Assign Faculty Workload{% endif %}</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        
+        <form hx-post="{% if edit %}{% url 'admin_workload_edit' workload_entry.id %}{% else %}{% url 'admin_workload_create' %}{% endif %}" 
+              hx-target="#modal-container">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Academic Batch / Timetable</label>
+                    {{ form.timetable }}
+                </div>
+                <div class="form-group">
+                    <label>Faculty Member</label>
+                    {{ form.faculty }}
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    {{ form.subject }}
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Semester (Optional)</label>
+                        {{ form.semester }}
+                    </div>
+                    <div class="form-group">
+                        <label>Slot Type</label>
+                        {{ form.slot_type }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Room / Location</label>
+                    {{ form.room }}
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Day of Week</label>
+                        {{ form.day_of_week }}
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Start Time</label>
+                        {{ form.start_time }}
+                    </div>
+                    <div class="form-group">
+                        <label>End Time</label>
+                        {{ form.end_time }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    {% if edit %}Update Assignment{% else %}Save Assignment{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    if (typeof closeModal !== 'function') {
+        function closeModal() {
+            document.getElementById('modal-container').innerHTML = '';
+        }
+    }
+</script>

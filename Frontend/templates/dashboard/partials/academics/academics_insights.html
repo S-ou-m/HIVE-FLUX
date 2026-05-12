@@ -1,0 +1,28 @@
+{% if insights %}
+<div class="intel-strip animate-slide-down">
+    <div class="intel-body">
+        {% for insight in insights %}
+        <div class="intel-pill type-{{ insight.type }}">
+            <i class="fas fa-{{ insight.icon }}"></i>
+            <span>{{ insight.text }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="intel-meta">
+        <span class="pulse-dot"></span> Intelligence Live
+    </div>
+</div>
+{% endif %}
+
+<style>
+    .intel-strip { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; }
+    .intel-body { display: flex; gap: 32px; }
+    .intel-pill { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; }
+    .intel-pill.type-growth { color: #10b981; }
+    .intel-pill.type-critical { color: #ef4444; }
+    .intel-pill.type-warning { color: #f59e0b; }
+    
+    .intel-meta { font-size: 10px; color: #475569; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 6px; font-weight: 700; }
+    .pulse-dot { width: 4px; height: 4px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+</style>

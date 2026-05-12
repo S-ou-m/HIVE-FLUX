@@ -1,0 +1,93 @@
+{% load static %}
+<!-- 🏛️ Student Identity & Success Command Surface -->
+<!-- This is the Stage-0 shell that orchestrates the immersive drawer. -->
+
+<div id="drawer-orchestrator" class="h-full flex flex-col overflow-hidden">
+    
+    <!-- Operational Calm Header -->
+    <div class="px-8 py-6 border-b border-white/5 flex items-center justify-between bg-black/50 backdrop-blur-md sticky top-0 z-20">
+        <div class="flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+            <h1 class="text-[10px] font-black tracking-[0.3em] text-white/60 uppercase">Student Profile</h1>
+        </div>
+        <button onclick="IdentityOS.StateMachine.transition('CLOSING', 'user_close')" class="text-white/20 hover:text-white transition-colors">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Main Command Surface (Scrollable) -->
+    <div id="command-surface-viewport" class="flex-1 overflow-y-auto custom-scrollbar">
+        {% include 'dashboard/views/student/profile_drawer/overview.html' %}
+    </div>
+
+    <!-- Institutional Footer: Operational State -->
+    <div class="p-6 border-t border-white/5 bg-black/80 flex items-center justify-between">
+        <div class="space-y-1">
+            <p class="text-[8px] font-black text-white/30 uppercase tracking-widest">Operational Sync</p>
+            <p class="text-[10px] font-bold text-white/60 italic" id="sync-status">All systems operational</p>
+        </div>
+        <div class="text-right">
+            <p class="text-[8px] font-black text-white/30 uppercase tracking-widest">Latency</p>
+            <p class="text-[10px] font-bold text-emerald-400 font-mono">18ms</p>
+        </div>
+    </div>
+
+    <style>
+        :root {
+            --brand-anchor: {{ state.preferences.theme_accent|default:'#FF6B00' }};
+        }
+
+        /* 📏 Density Scales */
+        #command-surface-viewport.density-COMPACT { --density-gap: 1.5rem; --density-padding: 1.5rem; --density-scale: 0.85; }
+        #command-surface-viewport.density-COZY { --density-gap: 2.5rem; --density-padding: 2rem; --density-scale: 1; }
+        #command-surface-viewport.density-RELAXED { --density-gap: 4rem; --density-padding: 3rem; --density-scale: 1.15; }
+
+        .density-COMPACT .space-y-10 > * + * { margin-top: var(--density-gap) !important; }
+        .density-COMPACT .p-8 { padding: var(--density-padding) !important; }
+        
+        .density-RELAXED .space-y-10 > * + * { margin-top: var(--density-gap) !important; }
+        .density-RELAXED .p-8 { padding: var(--density-padding) !important; }
+
+        /* 🎨 Brand Anchor Utility (Overrides) */
+        .text-brand { color: var(--brand-anchor) !important; }
+        .bg-brand { background-color: var(--brand-anchor) !important; }
+        .border-brand { border-color: var(--brand-anchor) !important; }
+        .bg-brand-soft { background-color: color-mix(in srgb, var(--brand-anchor), transparent 90%) !important; }
+        .border-brand-soft { border-color: color-mix(in srgb, var(--brand-anchor), transparent 80%) !important; }
+        .shadow-brand { box-shadow: 0 10px 30px color-mix(in srgb, var(--brand-anchor), transparent 70%) !important; }
+    </style>
+</div>
+
+<script>
+    /**
+     * 🏎️ Immediate UI State Synchronization
+     * Signals the State Machine that the surface is READY after HTMX injection.
+     */
+    (function() {
+        if (window.IdentityOS && window.IdentityOS.StateMachine) {
+            window.IdentityOS.StateMachine.transition('READY', 'htmx_load_success');
+        }
+
+        // 🎨 Brand Anchor Sync
+        document.body.addEventListener('change', function(evt) {
+            if (evt.target.name === 'theme_accent') {
+                document.documentElement.style.setProperty('--brand-anchor', evt.target.value);
+            }
+        });
+
+        // 📏 Global Density Sync
+        document.body.addEventListener('preferences-updated', function(evt) {
+            const viewport = document.getElementById('command-surface-viewport');
+            const density = document.querySelector('input[name="ui_density"]:checked')?.value || 'COZY';
+            
+            // Remove existing classes
+            viewport.classList.remove('density-COMPACT', 'density-COZY', 'density-RELAXED');
+            // Add new class
+            viewport.classList.add(`density-${density}`);
+        });
+
+        // Initial application
+        const initialDensity = "{{ state.preferences.ui_density|default:'COZY' }}";
+        document.getElementById('command-surface-viewport')?.classList.add(`density-${initialDensity}`);
+    })();
+</script>

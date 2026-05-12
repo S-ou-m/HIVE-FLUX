@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+        .header {
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .college-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+        }
+        .doc-title {
+            text-align: right;
+            float: right;
+        }
+        .meta-table {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        .meta-table td {
+            width: 50%;
+            vertical-align: top;
+        }
+        .label {
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+        }
+        .value {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .data-table th {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+        }
+        .data-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            font-size: 12px;
+        }
+        .summary-box {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .net-pay-label {
+            font-size: 12px;
+            color: #666;
+        }
+        .net-pay-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #000;
+            margin: 5px 0;
+        }
+        .footer {
+            margin-top: 50px;
+        }
+        .signature {
+            float: left;
+            width: 200px;
+            border-top: 1px solid #333;
+            text-align: center;
+            padding-top: 5px;
+            font-size: 10px;
+        }
+        .seal {
+            float: right;
+            text-align: right;
+            font-size: 10px;
+            color: #22c55e;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span class="college-name">{{ pr.college.name|upper }}</span>
+        <div class="doc-title">
+            <div style="font-size: 20px; font-weight: bold;">PAYSLIP</div>
+            <div style="font-size: 10px; color: #666;">CONFIDENTIAL</div>
+        </div>
+        <div style="clear: both;"></div>
+    </div>
+
+    <table class="meta-table">
+        <tr>
+            <td>
+                <div class="label">Employee Name</div>
+                <div class="value">{{ pr.faculty.user.get_full_name }}</div>
+                <div class="label" style="margin-top: 10px;">Designation</div>
+                <div class="value">{{ pr.faculty.designation }}</div>
+            </td>
+            <td>
+                <div class="label">Month/Year</div>
+                <div class="value">{{ pr.month }}/{{ pr.year }}</div>
+                <div class="label" style="margin-top: 10px;">Employee ID</div>
+                <div class="value">FAC-{{ pr.faculty.id|stringformat:".8s" }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>EARNINGS</th>
+                <th>AMOUNT</th>
+                <th>DEDUCTIONS</th>
+                <th>AMOUNT</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Basic Salary</td>
+                <td>INR {{ breakdown.base|floatformat:2 }}</td>
+                <td>Provident Fund</td>
+                <td>INR {{ breakdown.deductions.PF|default:"0.00" }}</td>
+            </tr>
+            <tr>
+                <td>HRA</td>
+                <td>INR {{ breakdown.hra|floatformat:2 }}</td>
+                <td>Income Tax</td>
+                <td>INR {{ breakdown.deductions.Tax|default:"0.00" }}</td>
+            </tr>
+            {% for name, amt in breakdown.allowances.items %}
+            <tr>
+                <td>{{ name }}</td>
+                <td>INR {{ amt|floatformat:2 }}</td>
+                <td></td>
+                <td></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr style="font-weight: bold;">
+                <td>Total Earnings</td>
+                <td>INR {{ pr.gross_salary|floatformat:2 }}</td>
+                <td>Total Deductions</td>
+                <td>INR {{ pr.deductions|floatformat:2 }}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="summary-box">
+        <div class="net-pay-label">NET SALARY PAYABLE</div>
+        <div class="net-pay-amount">INR {{ pr.net_salary|floatformat:2 }}</div>
+        <div style="font-size: 12px; font-style: italic;">Rupees {{ pr.net_salary|floatformat:0 }} only</div>
+    </div>
+
+    <div class="footer">
+        <div class="signature">
+            Authorized Signatory
+        </div>
+        <div class="seal">
+            Digitally Verified by ERP System
+        </div>
+        <div style="clear: both;"></div>
+    </div>
+</body>
+</html>

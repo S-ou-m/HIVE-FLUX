@@ -1,0 +1,60 @@
+<div class="modal-backdrop" onclick="closeModal()">
+    <div class="modal-content animate-slide-up" onclick="event.stopPropagation();" style="max-width: 500px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden;">
+        
+        <div style="padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-color); background: rgba(255,255,255,0.02); display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 36px; height: 36px; background: rgba(249, 115, 22, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--primary-color);">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                </div>
+                <div>
+                    <h4 style="margin: 0; font-size: 1rem; font-weight: 800; color: white;">{{ regime.name }}</h4>
+                    <div style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600;">Slab-based progressive taxation</div>
+                </div>
+            </div>
+            <button onclick="closeModal()" style="background: transparent; border: none; color: var(--text-secondary); cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div style="padding: 2rem;">
+            <!-- 📄 REGIME HIGHLIGHTS -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 1rem; border-radius: 12px;">
+                    <div style="font-size: 0.6rem; color: var(--text-secondary); font-weight: 800; text-transform: uppercase; margin-bottom: 0.25rem;">Standard Deduction</div>
+                    <div style="font-size: 1.1rem; font-weight: 800; color: white;">₹{{ regime.standard_deduction|floatformat:0 }}</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 1rem; border-radius: 12px;">
+                    <div style="font-size: 0.6rem; color: var(--text-secondary); font-weight: 800; text-transform: uppercase; margin-bottom: 0.25rem;">Tax Rebate Up To</div>
+                    <div style="font-size: 1.1rem; font-weight: 800; color: #22c55e;">₹{{ regime.rebate_limit|floatformat:0 }}</div>
+                </div>
+            </div>
+
+            <!-- 📊 SLAB TABLE -->
+            <div style="border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                    <thead style="background: rgba(255,255,255,0.02);">
+                        <tr>
+                            <th style="padding: 1rem; text-align: left; color: var(--text-secondary); font-weight: 600;">Income Slab</th>
+                            <th style="padding: 1rem; text-align: right; color: var(--text-secondary); font-weight: 600;">Tax Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for slab in slabs %}
+                        <tr style="border-top: 1px solid var(--border-color);">
+                            <td style="padding: 1rem; color: white;">
+                                ₹{{ slab.min_income|floatformat:0 }} 
+                                {% if slab.max_income %} - ₹{{ slab.max_income|floatformat:0 }}{% else %} and above{% endif %}
+                            </td>
+                            <td style="padding: 1rem; text-align: right; color: var(--primary-color); font-weight: 700;">
+                                {{ slab.tax_rate }}%
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <p style="margin-top: 1.5rem; font-size: 0.7rem; color: var(--text-secondary); line-height: 1.5; font-style: italic;">
+                *Calculations are based on projected annual gross income after applying standard deductions and institutional allowances.
+            </p>
+        </div>
+    </div>
+</div>

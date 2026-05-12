@@ -1,0 +1,39 @@
+<!-- ========================================== -->
+<!-- DEPARTMENT CREATION MODAL -->
+<!-- ========================================== -->
+<!-- Clicking the backdrop closes the modal -->
+<div class="modal-backdrop" onclick="document.getElementById('modal-container').innerHTML = '';">
+    
+    <!-- Stop propagation so clicking inside the modal doesn't close it -->
+    <div class="modal-content" onclick="event.stopPropagation();">
+        
+        <div class="modal-header">
+            <h3>Add New Department</h3>
+            <button class="close-btn" onclick="document.getElementById('modal-container').innerHTML = '';">&times;</button>
+        </div>
+        
+        <!-- Form submits via HTMX POST. If invalid, it re-renders here. If valid, it returns the empty string and OOB swaps the table. -->
+        <form hx-post="{% url 'admin_department_create' %}" hx-target="#modal-container">
+            {% csrf_token %}
+            <div class="modal-body">
+                
+                {% for field in form %}
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div style="color: #ef4444; font-size: 0.8rem; margin-top: 0.25rem;">{{ field.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); width: auto;" onclick="document.getElementById('modal-container').innerHTML = '';">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="width: auto;">Save Department</button>
+            </div>
+        </form>
+        
+    </div>
+</div>

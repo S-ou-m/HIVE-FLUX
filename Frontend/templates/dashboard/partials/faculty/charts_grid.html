@@ -1,0 +1,307 @@
+<style>
+    .chart-card-elite {
+        background: rgba(17, 24, 39, 0.4);
+        backdrop-filter: blur(12px);
+        border-radius: 20px;
+        padding: 1.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        height: 100%;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .chart-card-elite:hover {
+        border-color: rgba(99, 102, 241, 0.2);
+        background: rgba(17, 24, 39, 0.6);
+        transform: translateY(-2px);
+    }
+
+    .chart-header-intel {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+    }
+    .chart-title-pro { font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+    .chart-subtitle-pro { font-size: 0.75rem; color: #64748b; font-weight: 600; }
+
+    /* Donut Intelligence */
+    .donut-intel-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 3rem;
+    }
+    .donut-visual-core {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        flex-shrink: 0;
+    }
+    .donut-telemetry-center {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        pointer-events: none;
+    }
+    .telemetry-value { font-size: 2.25rem; font-weight: 900; color: #fff; line-height: 1; text-shadow: 0 0 20px rgba(255,255,255,0.1); }
+    .telemetry-label { font-size: 0.65rem; color: #64748b; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-top: 4px; }
+    .telemetry-pct { font-size: 0.8rem; font-weight: 800; color: #6366f1; margin-bottom: -4px; }
+
+    .stats-drilldown-list { flex: 1; }
+    .drilldown-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+    .drilldown-row:hover {
+        background: rgba(255,255,255,0.03);
+        border-color: rgba(255,255,255,0.05);
+    }
+    .drilldown-label { display: flex; align-items: center; gap: 12px; font-size: 0.85rem; font-weight: 600; color: #94a3b8; }
+    .drilldown-dot { width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
+    .drilldown-value { font-size: 0.9rem; font-weight: 800; color: #fff; }
+
+    /* Progress Intelligence */
+    .density-bar-intel {
+        height: 280px;
+        margin-top: 1rem;
+    }
+    
+    .dominant-dept-badge {
+        background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(99, 102, 241, 0.1));
+        color: #a855f7;
+        border: 1px solid rgba(168, 85, 247, 0.2);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.65rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 0 15px rgba(168, 85, 247, 0.1);
+    }
+</style>
+
+<!-- LEFT: DESIGNATION INTELLIGENCE -->
+<div class="chart-card-elite">
+    <div class="chart-header-intel">
+        <div>
+            <h3 class="chart-title-pro">Designation Breakdown</h3>
+            <p class="chart-subtitle-pro">Operational role distribution</p>
+        </div>
+        <div class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+            <i class="fa-solid fa-user-tie"></i>
+        </div>
+    </div>
+    
+    <div class="donut-intel-wrapper">
+        <div class="donut-visual-core">
+            <canvas id="facultyDesigChart"></canvas>
+            <div id="desig-telemetry" class="donut-telemetry-center">
+                <span class="telemetry-pct" id="desig-hover-pct"></span>
+                <span class="telemetry-value" id="desig-total-val">--</span>
+                <span class="telemetry-label" id="desig-total-label">Total</span>
+            </div>
+        </div>
+        
+        <div id="desig-drilldown-list" class="stats-drilldown-list">
+            <!-- Dynamic intelligence injected here -->
+        </div>
+    </div>
+</div>
+
+<!-- RIGHT: INSTITUTIONAL DENSITY -->
+<div class="chart-card-elite">
+    <div class="chart-header-intel">
+        <div>
+            <h3 class="chart-title-pro">Institutional Density</h3>
+            <p class="chart-subtitle-pro">Faculty spread across domains</p>
+        </div>
+        <div id="top-dept-pill" class="dominant-dept-badge">
+            Dominant: <span id="dominant-dept-name">--</span>
+        </div>
+    </div>
+    
+    <div class="density-bar-intel">
+        <canvas id="facultyDeptChart"></canvas>
+    </div>
+</div>
+
+<script>
+(function() {
+    const desigCtx = document.getElementById('facultyDesigChart');
+    const deptCtx = document.getElementById('facultyDeptChart');
+
+    if (!desigCtx || !deptCtx) return;
+
+    // SaaS Grade Color Palette
+    const palette = [
+        { solid: '#6366f1', glow: 'rgba(99, 102, 241, 0.4)' }, // Indigo
+        { solid: '#a855f7', glow: 'rgba(168, 85, 247, 0.4)' }, // Purple
+        { solid: '#10b981', glow: 'rgba(16, 185, 129, 0.4)' }, // Emerald
+        { solid: '#f59e0b', glow: 'rgba(245, 158, 11, 0.4)' },  // Amber
+        { solid: '#ef4444', glow: 'rgba(239, 68, 68, 0.4)' },   // Red
+        { solid: '#3b82f6', glow: 'rgba(59, 130, 246, 0.4)' }   // Blue
+    ];
+
+    fetch('{% url "admin_faculty_chart_desig" %}')
+        .then(res => res.json())
+        .then(data => {
+            const total = data.meta.total;
+            document.getElementById('desig-total-val').innerText = total;
+            
+            const listContainer = document.getElementById('desig-drilldown-list');
+            listContainer.innerHTML = data.labels.map((label, i) => `
+                <div class="drilldown-row" onclick="filterFacultyByDesig('${label}')">
+                    <div class="drilldown-label">
+                        <span class="drilldown-dot" style="background: ${palette[i % palette.length].solid}; color: ${palette[i % palette.length].glow}"></span>
+                        ${label}
+                    </div>
+                    <div class="drilldown-value">${data.data[i]}</div>
+                </div>
+            `).join('');
+
+            new Chart(desigCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.data,
+                        backgroundColor: data.labels.map((_, i) => palette[i % palette.length].solid),
+                        hoverBackgroundColor: data.labels.map((_, i) => palette[i % palette.length].solid),
+                        borderWidth: 0,
+                        hoverOffset: 12,
+                        cutout: '82%',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    },
+                    onHover: (event, activeElements) => {
+                        const labelEl = document.getElementById('desig-total-label');
+                        const valEl = document.getElementById('desig-total-val');
+                        const pctEl = document.getElementById('desig-hover-pct');
+
+                        if (activeElements.length > 0) {
+                            const index = activeElements[0].index;
+                            const val = data.data[index];
+                            const pct = ((val / total) * 100).toFixed(1);
+                            
+                            valEl.innerText = val;
+                            labelEl.innerText = data.labels[index];
+                            pctEl.innerText = pct + '%';
+                            pctEl.style.color = palette[index % palette.length].solid;
+                        } else {
+                            valEl.innerText = total;
+                            labelEl.innerText = 'Total';
+                            pctEl.innerText = '';
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            filterFacultyByDesig(data.labels[elements[0].index]);
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        });
+
+    fetch('{% url "admin_faculty_chart_dept" %}')
+        .then(res => res.json())
+        .then(data => {
+            if(data.labels.length > 0) {
+                document.getElementById('dominant-dept-name').innerText = data.labels[0].split('(')[0];
+            }
+            
+            new Chart(deptCtx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.data,
+                        backgroundColor: (ctx) => {
+                            const gradient = deptCtx.getContext('2d').createLinearGradient(0, 0, 400, 0);
+                            gradient.addColorStop(0, '#6366f1');
+                            gradient.addColorStop(1, '#a855f7');
+                            return gradient;
+                        },
+                        hoverBackgroundColor: '#818cf8',
+                        borderRadius: 8,
+                        barThickness: 16
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            titleFont: { size: 12, weight: '800' },
+                            bodyFont: { size: 11, weight: '600' },
+                            padding: 12,
+                            cornerRadius: 10,
+                            displayColors: false
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const rawLabel = data.labels[elements[0].index];
+                            const deptName = rawLabel.split('(')[0].trim();
+                            filterFacultyByDept(deptName);
+                        }
+                    },
+                    scales: {
+                        x: { display: false },
+                        y: { 
+                            grid: { display: false },
+                            border: { display: false },
+                            ticks: { 
+                                color: '#64748b', 
+                                font: { size: 11, weight: '800' },
+                                padding: 10
+                            }
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        });
+
+    // Intelligence Orchestration Functions
+    window.filterFacultyByDesig = function(desig) {
+        const searchInput = document.getElementById('faculty-search-input'); // Assuming this ID exists in directory
+        if (searchInput) {
+            searchInput.value = desig;
+            // Trigger HTMX filter
+            searchInput.dispatchEvent(new Event('keyup'));
+        }
+    };
+
+    window.filterFacultyByDept = function(dept) {
+        const deptFilter = document.getElementById('faculty-dept-filter'); // Assuming this ID exists in directory
+        if (deptFilter) {
+            // Find option with matching text
+            Array.from(deptFilter.options).forEach(opt => {
+                if (opt.text.toLowerCase().includes(dept.toLowerCase())) {
+                    deptFilter.value = opt.value;
+                }
+            });
+            // Trigger HTMX filter
+            deptFilter.dispatchEvent(new Event('change'));
+        }
+    };
+})();
+</script>

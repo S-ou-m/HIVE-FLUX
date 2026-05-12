@@ -1,0 +1,138 @@
+<div class="modal-backdrop" onclick="closeModal()">
+    <div class="modal-content animate-slide-up" onclick="event.stopPropagation();" style="max-width: 550px; padding: 0;">
+        <!-- Header -->
+        <div class="modal-header" style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); background: var(--bg-secondary);">
+            <div class="header-content">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                    <h3 style="color: var(--text-primary);">Record Payment</h3>
+                    <span class="status-badge status-info" style="font-size: 0.65rem;">INV-{{ invoice.id|stringformat:".8s" }}</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Capture payment details for this student invoice.</p>
+            </div>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+
+        <!-- Student Summary -->
+        <div class="student-summary" style="padding: 1.25rem 1.5rem; background: var(--bg-elevated); border-bottom: 1px solid var(--border-color); display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+                <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px;">Student</div>
+                <div style="font-weight: 600;">{{ invoice.student.user.get_full_name }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">{{ invoice.student.enrollment_no }}</div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px;">Balance Due</div>
+                <div id="original-due" style="font-size: 1.25rem; font-weight: 700; color: #ef4444;" data-due="{{ invoice.balance_due }}">
+                    ₹ {{ invoice.balance_due|floatformat:2 }}
+                </div>
+            </div>
+        </div>
+
+        <form hx-post="{% url 'admin_payment_record_save' invoice.id %}" hx-target="#modal-container" id="payment-record-form">
+            {% csrf_token %}
+            <div class="modal-body" style="padding: 1.5rem;">
+                
+                <!-- Amount Entry -->
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label style="display: flex; justify-content: space-between;">
+                        Amount to Pay
+                        <span style="font-size: 0.75rem; color: var(--primary-color); cursor: pointer;" onclick="document.getElementById('id_amount_paid').value = '{{ invoice.balance_due }}'; calculateRemaining();">Pay Full</span>
+                    </label>
+                    <div style="position: relative;">
+                        <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);">₹</span>
+                        <input type="number" name="amount_paid" id="id_amount_paid" class="form-control" 
+                               value="{{ invoice.balance_due }}" step="0.01" max="{{ invoice.balance_due }}"
+                               style="padding-left: 2rem; font-size: 1.2rem; font-weight: 600;" 
+                               oninput="calculateRemaining()" required>
+                    </div>
+                </div>
+
+                <!-- Payment Mode -->
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label>Payment Method</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <select name="mode" id="id_mode" class="form-control" onchange="toggleModeFields()">
+                            <option value="UPI">UPI</option>
+                            <option value="CASH">Cash</option>
+                            <option value="BANK_TRANSFER">Bank Transfer</option>
+                            <option value="CARD">Card</option>
+                        </select>
+                        <input type="date" name="payment_date" class="form-control" value="{% now 'Y-m-d' %}">
+                    </div>
+                </div>
+
+                <!-- Dynamic Reference Fields -->
+                <div id="dynamic-fields" class="form-group" style="margin-bottom: 1.5rem;">
+                    <label id="ref-label">Transaction ID / Reference</label>
+                    <input type="text" name="reference_id" id="id_reference_id" class="form-control" placeholder="Enter Reference Number">
+                </div>
+
+                <!-- Live Calculation -->
+                <div class="live-calc" style="background: rgba(34, 197, 94, 0.05); border: 1px dashed rgba(34, 197, 94, 0.3); border-radius: var(--radius-md); padding: 1rem;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                        <span style="color: var(--text-secondary);">Remaining Balance after this payment</span>
+                        <span id="remaining-due" style="font-weight: 700; color: #22c55e;">₹ 0.00</span>
+                    </div>
+                    <div style="height: 4px; background: var(--border-color); border-radius: 2px; overflow: hidden;">
+                        <div id="payment-progress" style="height: 100%; background: #22c55e; width: 0%; transition: width 0.4s ease;"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="modal-footer" style="padding: 1.5rem; border-top: 1px solid var(--border-color); background: var(--bg-secondary); display: flex; justify-content: flex-end; gap: 1rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()" style="width: auto; background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="width: auto; min-width: 160px;">Record Payment</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function calculateRemaining() {
+        const totalDue = parseFloat(document.getElementById('original-due').dataset.due);
+        const amountPaid = parseFloat(document.getElementById('id_amount_paid').value) || 0;
+        const remaining = totalDue - amountPaid;
+        
+        const display = document.getElementById('remaining-due');
+        display.innerText = '₹ ' + Math.max(0, remaining).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+        
+        const progress = document.getElementById('payment-progress');
+        const percentage = (amountPaid / totalDue) * 100;
+        progress.style.width = Math.min(100, percentage) + '%';
+
+        // Validation
+        const btn = document.querySelector('button[type="submit"]');
+        if (amountPaid > totalDue || amountPaid <= 0) {
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+        } else {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        }
+    }
+
+    function toggleModeFields() {
+        const mode = document.getElementById('id_mode').value;
+        const label = document.getElementById('ref-label');
+        const input = document.getElementById('id_reference_id');
+        
+        if (mode === 'CASH') {
+            label.innerText = 'Received By / Remarks';
+            input.placeholder = 'e.g. Admin Office';
+        } else if (mode === 'UPI') {
+            label.innerText = 'UPI Transaction ID';
+            input.placeholder = 'e.g. 1234567890';
+        } else if (mode === 'BANK_TRANSFER') {
+            label.innerText = 'Bank Reference Number';
+            input.placeholder = 'e.g. UTR Number';
+        } else {
+            label.innerText = 'Reference ID';
+            input.placeholder = 'Enter reference details';
+        }
+    }
+
+    // Initialize
+    calculateRemaining();
+    toggleModeFields();
+</script>

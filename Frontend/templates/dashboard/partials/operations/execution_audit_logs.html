@@ -1,0 +1,51 @@
+<div class="audit-logs-container animate-fade-in">
+    <div class="audit-header">
+        <h2 class="section-title">System Audit Logs</h2>
+        <div class="filter-group">
+            <select class="premium-select">
+                <option>All Events</option>
+                <option>Access Success</option>
+                <option>Security Violations</option>
+                <option>Manual Overrides</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="audit-table-box saas-table-container">
+        <table class="saas-data-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Actor</th>
+                    <th>Event Type</th>
+                    <th>Reference</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="saas-row">
+                    <td>{% now "H:i:s" %}</td>
+                    <td>Admin</td>
+                    <td>Session Initialization</td>
+                    <td>SESS-UUID-A1</td>
+                    <td><span class="health-pill healthy">SUCCESS</span></td>
+                </tr>
+                <tr class="saas-row">
+                    <td>{% now "H:i:s" %}</td>
+                    <td>System</td>
+                    <td>QR Rotation Cycle</td>
+                    <td>GLOBAL-SYNC</td>
+                    <td><span class="health-pill healthy">ACTIVE</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .audit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .premium-select { 
+        background: var(--bg-surface); border: 1px solid var(--border-color); color: #fff;
+        padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13px;
+    }
+</style>

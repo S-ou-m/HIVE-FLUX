@@ -1,0 +1,396 @@
+<div class="summary-cards-grid" id="finance-stats-container" 
+     hx-get="{% url 'admin_finance_stats_partial' %}?time_filter={{ data.time_filter }}" 
+     hx-trigger="every 15s"
+     hx-swap="outerHTML settle:200ms">
+     
+    <!-- Revenue Card (Primary - LARGE) -->
+    <div class="stat-card primary-card clickable" 
+         hx-get="{% url 'admin_student_payments_partial' %}" 
+         hx-target="#finance-content"
+         title="Total revenue includes all successful payments.">
+        <div class="card-header">
+            <div class="icon-box" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">💰</div>
+            <div class="trend-badge {% if data.revenue.trend >= 0 %}positive{% else %}negative{% endif %}">
+                {% if data.revenue.trend >= 0 %}↑{% else %}↓{% endif %} {{ data.revenue.trend }}%
+            </div>
+        </div>
+        <div class="card-body">
+            <h3 class="metric-value text-green">₹{{ data.revenue.value|floatformat:2 }}</h3>
+            <p class="metric-label">Total Revenue</p>
+            <div style="height: 40px; margin-top: 10px; width: 100%;">
+                <canvas id="revenueSparkline"></canvas>
+            </div>
+        </div>
+        <div class="card-footer">
+            <span class="micro-stat">💰 {{ data.revenue.count }} transactions</span>
+            <span class="micro-stat live-indicator">● Live</span>
+        </div>
+    </div>
+
+    <!-- Pending Fees (MEDIUM) -->
+    <div class="stat-card clickable"
+         hx-get="{% url 'admin_student_payments_partial' %}" 
+         hx-target="#finance-content">
+        <div class="card-header">
+            <div class="icon-box" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">🧾</div>
+            {% if data.pending.overdue > 0 %}
+                <div class="trend-badge negative alert-pulse">⚠️ High Outstanding</div>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <h3 class="metric-value text-red">₹{{ data.pending.value|floatformat:2 }}</h3>
+            <p class="metric-label">Pending Fees</p>
+        </div>
+        <div class="card-footer">
+            <span class="micro-stat">⚠️ {{ data.pending.students }} pending</span>
+            <span class="micro-stat text-red">⏳ {{ data.pending.overdue }} overdue</span>
+        </div>
+    </div>
+
+    <!-- Advance Credits (SMALL) -->
+    <div class="stat-card clickable"
+         hx-get="{% url 'admin_student_payments_partial' %}" 
+         hx-target="#finance-content">
+        <div class="card-header">
+            <div class="icon-box" style="background: rgba(234, 179, 8, 0.1); color: #eab308;">✨</div>
+        </div>
+        <div class="card-body">
+            <h3 class="metric-value text-yellow">₹{{ data.credits.value|floatformat:2 }}</h3>
+            <p class="metric-label">Advance Credits</p>
+        </div>
+        <div class="card-footer">
+            <span class="micro-stat">💡 {{ data.credits.count }} active credits</span>
+        </div>
+    </div>
+
+    <!-- Payroll Expense (SMALL) -->
+    <div class="stat-card clickable"
+         hx-get="{% url 'admin_payroll_partial' %}" 
+         hx-target="#finance-content">
+        <div class="card-header">
+            <div class="icon-box" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">🏦</div>
+            <div class="trend-badge {% if data.payroll.trend >= 0 %}neutral{% else %}positive{% endif %}">
+                {% if data.payroll.trend >= 0 %}↑{% else %}↓{% endif %} {{ data.payroll.trend }}%
+            </div>
+        </div>
+        <div class="card-body">
+            <h3 class="metric-value text-blue">₹{{ data.payroll.value|floatformat:2 }}</h3>
+            <p class="metric-label">Payroll Expense</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Safe Chart initialization function
+    async function initCharts() {
+        // Wait for Chart.js to finish downloading if HTMX swapped it asynchronously
+        if (typeof Chart === 'undefined') {
+            console.log("Waiting for Chart.js to load...");
+            setTimeout(initCharts, 50);
+            return;
+        }
+
+        // 1. Fetch JSON Data
+        const [revRes, modeRes, deptRes] = await Promise.all([
+            fetch("{% url 'admin_finance_chart_revenue_trend' %}"),
+            fetch("{% url 'admin_finance_chart_payment_modes' %}"),
+            fetch("{% url 'admin_finance_chart_dept_revenue' %}")
+        ]);
+        
+        const revData = await revRes.json();
+        const modeData = await modeRes.json();
+        const deptData = await deptRes.json();
+
+        // Safe destroy function to prevent Chart.js duplicate canvas errors
+        // We MUST verify it is an actual Chart.js instance, not an HTML element!
+        const safeDestroy = (chartInstance) => {
+            if (chartInstance && typeof chartInstance.destroy === 'function') {
+                chartInstance.destroy();
+            }
+        };
+
+        // 1. Sparkline (Inside Revenue Card)
+        safeDestroy(window._chart_revenueSparkline);
+        const ctxSpark = document.getElementById("revenueSparkline");
+        if (ctxSpark) {
+            window._chart_revenueSparkline = new Chart(ctxSpark, {
+                type: "line",
+                data: {
+                    labels: revData.labels.slice(-7), // Last 7 days for sparkline
+                    datasets: [{
+                        data: revData.data.slice(-7),
+                        borderColor: '#22c55e',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                    scales: { x: { display: false }, y: { display: false } },
+                    animation: false
+                }
+            });
+        }
+
+        // 2. Main Revenue Trend Chart
+        safeDestroy(window._chart_mainRevenue);
+        const ctxMain = document.getElementById("mainRevenueChart");
+        if (ctxMain) {
+            window._chart_mainRevenue = new Chart(ctxMain, {
+                type: "line",
+                data: {
+                    labels: revData.labels,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: revData.data,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // 3. Payment Mode Donut Chart
+        safeDestroy(window._chart_paymentMode);
+        const ctxMode = document.getElementById("paymentModeChart");
+        if (ctxMode) {
+            window._chart_paymentMode = new Chart(ctxMode, {
+                type: "doughnut",
+                data: {
+                    labels: modeData.labels,
+                    datasets: [{
+                        data: modeData.data,
+                        backgroundColor: ['#22c55e', '#3b82f6', '#eab308', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: window.innerWidth < 768 ? 'bottom' : 'right' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ₹' + context.raw.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 4. Department Revenue Bar Chart
+        safeDestroy(window._chart_deptRevenue);
+        const ctxDept = document.getElementById("deptRevenueChart");
+        if (ctxDept) {
+            window._chart_deptRevenue = new Chart(ctxDept, {
+                type: "bar",
+                data: {
+                    labels: deptData.labels,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: deptData.data,
+                        backgroundColor: 'rgba(168, 85, 247, 0.8)',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ₹' + context.raw.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                        x: { 
+                            grid: { display: false },
+                            ticks: {
+                                callback: function(value) {
+                                    let label = this.getLabelForValue(value);
+                                    if (label.length > 12) {
+                                        return label.substr(0, 12) + '...';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // Initialize charts immediately on HTMX swap
+    initCharts();
+</script>
+
+<style>
+    /* SaaS Stats Grid Layout (Compact Enterprise Rules) */
+    .summary-cards-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 16px; /* Strict 16px max gap */
+        margin-bottom: 24px;
+        transition: all 0.2s ease;
+    }
+    
+    @media (max-width: 1200px) {
+        .summary-cards-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+        .summary-cards-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Card Styling */
+    .stat-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 16px; /* Strict 16px max padding */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start; /* CRITICAL: Enforce Left Anchoring */
+        text-align: left;        /* CRITICAL: Prevent Center Drift */
+        position: relative;
+        overflow: hidden;
+        min-height: 140px;
+        max-height: 160px; /* Density constraint */
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .stat-card.clickable {
+        cursor: pointer;
+    }
+
+    .stat-card.clickable:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Ensure content blocks stretch fully so flex-start anchors work properly */
+    .card-header, .card-body, .card-footer {
+        width: 100%;
+    }
+
+    /* Primary Card Highlight */
+    .primary-card {
+        background: linear-gradient(145deg, var(--bg-surface) 0%, rgba(34, 197, 94, 0.05) 100%);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+    }
+
+    .icon-box {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .metric-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin: 0;
+        line-height: 1.1;
+    }
+
+    .primary-card .metric-value {
+        font-size: 1.8rem;
+    }
+
+    .metric-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin: 0.25rem 0 0;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .card-footer {
+        margin-top: auto;
+        padding-top: 8px;
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .micro-stat {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        background: rgba(255, 255, 255, 0.05);
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        white-space: nowrap;
+    }
+
+    .live-indicator {
+        color: #22c55e;
+        background: rgba(34, 197, 94, 0.1);
+        animation: pulse 2s infinite;
+    }
+
+    /* Semantic Colors */
+    .text-green { color: #22c55e; }
+    .text-red { color: #ef4444; }
+    .text-yellow { color: #eab308; }
+    .text-blue { color: #3b82f6; }
+
+    /* Trend Badges */
+    .trend-badge {
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 0.2rem 0.4rem;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.15rem;
+    }
+    .trend-badge.positive { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .trend-badge.negative { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .trend-badge.neutral { background: rgba(255, 255, 255, 0.1); color: var(--text-secondary); }
+
+    .alert-pulse {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+</style>

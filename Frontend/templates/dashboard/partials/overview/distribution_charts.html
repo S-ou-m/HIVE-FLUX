@@ -1,0 +1,87 @@
+<div class="col-span-8 analytics-card">
+    <div class="card-header">
+        <div class="header-main">
+            <h3>Department Enrollment</h3>
+            <span class="mini-stat top-dept">
+                <i class="fas fa-crown"></i>
+                {% if departments %}{{ departments.0.department__name }} (Top){% else %}Loading{% endif %}
+            </span>
+        </div>
+        <span class="header-action">Live distribution</span>
+    </div>
+    <div class="chart-container compressed">
+        <canvas id="deptChart"></canvas>
+    </div>
+</div>
+
+<div class="col-span-4 analytics-card">
+    <div class="card-header">
+        <h3>Semester Split</h3>
+    </div>
+    <div class="chart-container donut compressed">
+        <canvas id="semChart"></canvas>
+        <div class="donut-center">
+            <span class="donut-label">Total</span>
+            <span class="donut-value">{{ total_students }}</span>
+        </div>
+    </div>
+</div>
+
+<style>
+    .top-dept { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .chart-container.compressed { height: 160px; position: relative; }
+</style>
+
+<script>
+    (function() {
+        const deptLabels = [{% for d in departments %}'{{ d.department__name }}',{% endfor %}];
+        const deptData = [{% for d in departments %}{{ d.count }},{% endfor %}];
+        
+        // Dept Bar Chart with Values on Bars
+        new Chart(document.getElementById('deptChart'), {
+            type: 'bar',
+            data: {
+                labels: deptLabels,
+                datasets: [{
+                    label: 'Students',
+                    data: deptData,
+                    backgroundColor: function(context) {
+                        const index = context.dataIndex;
+                        return index === 0 ? '#3b82f6' : 'rgba(59, 130, 246, 0.4)';
+                    },
+                    borderRadius: 6,
+                    barThickness: 24
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#475569', font: { size: 10 } } },
+                    x: { grid: { display: false }, ticks: { color: '#475569', font: { size: 10 } } }
+                }
+            }
+        });
+
+        // Semester Donut
+        new Chart(document.getElementById('semChart'), {
+            type: 'doughnut',
+            data: {
+                labels: [{% for s in semesters %}'Sem {{ s.current_semester__number }}',{% endfor %}],
+                datasets: [{
+                    data: [{% for s in semesters %}{{ s.count }},{% endfor %}],
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                    borderWidth: 0, hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                cutout: '82%'
+            }
+        });
+    })();
+</script>

@@ -1,0 +1,23 @@
+<div class="fixed bottom-6 right-6 z-[2000] animate-slide-up" id="error-toast">
+    <div class="glass-card flex items-center gap-4 border-l-4 border-red-500 py-4 px-6 shadow-2xl">
+        <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-500">
+            <i class="fa-solid fa-circle-xmark text-xl"></i>
+        </div>
+        <div>
+            <h4 class="text-sm font-bold text-primary">Error Occurred</h4>
+            <p class="text-xs text-secondary opacity-80">{{ message|default:"An unexpected error occurred." }}</p>
+        </div>
+        <button class="ml-4 text-secondary hover:text-primary transition-colors" 
+                onclick="document.getElementById('error-toast').remove()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+</div>
+
+<style>
+    @keyframes slide-up {
+        from { transform: translateY(100px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    .animate-slide-up { animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+</style>

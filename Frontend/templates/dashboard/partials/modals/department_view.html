@@ -1,0 +1,58 @@
+<!-- ========================================== -->
+<!-- DEPARTMENT DETAILED PROFILE MODAL -->
+<!-- ========================================== -->
+<div class="modal-backdrop" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation();" style="max-width: 700px; padding: 0;">
+        
+        <div class="modal-header" style="padding: 1.5rem; background: var(--bg-surface-hover); border-bottom: 1px solid var(--border-color);">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div class="dept-avatar {{ stats.health }}" style="width: 48px; height: 48px; font-size: 1.2rem;">
+                    {{ department.code|slice:":2"|upper }}
+                </div>
+                <div>
+                    <h3 style="margin: 0; color: var(--text-primary);">{{ department.name }}</h3>
+                    <span style="font-size: 0.8rem; color: var(--text-secondary);">INSTITUTIONAL CODE: {{ department.code }}</span>
+                </div>
+            </div>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        
+        <div class="modal-body" style="padding: 1.5rem;">
+            <!-- KPIS -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                <div style="background: rgba(255,255,255,0.02); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                    <div style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.5rem;">Programs</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: #fff;">{{ stats.p_count }}</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                    <div style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.5rem;">Students</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: #fff;">{{ stats.s_count }}</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                    <div style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.5rem;">Utilization</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color);">{{ stats.strength|floatformat:1 }}%</div>
+                </div>
+            </div>
+
+            <h4 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary); text-transform: uppercase;">Active Programs</h4>
+            <div class="program-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                {% for p in programs %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); border-radius: 10px;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fa-solid fa-graduation-cap" style="color: var(--primary-color);"></i>
+                        <span style="font-weight: 600; color: var(--text-primary);">{{ p.name }}</span>
+                    </div>
+                    <span style="font-size: 0.8rem; color: var(--text-secondary);">{{ p.duration_years }} Year Program</span>
+                </div>
+                {% empty %}
+                <p style="text-align: center; padding: 2rem; color: var(--text-secondary);">No programs found for this department.</p>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="modal-footer" style="padding: 1.25rem 1.5rem; background: var(--bg-surface-hover); border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 1rem;">
+            <button class="btn btn-secondary" onclick="closeModal()" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);">Close Profile</button>
+            <button class="btn btn-primary" hx-get="{% url 'admin_department_edit' department.id %}" hx-target="#modal-container">Edit Department</button>
+        </div>
+    </div>
+</div>

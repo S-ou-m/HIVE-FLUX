@@ -1,0 +1,191 @@
+<!-- 🚀 ASSIGNMENT OS: ACADEMIC EXECUTION INTELLIGENCE -->
+{% load custom_filters %}
+<div class="animate-in fade-in duration-700">
+    
+    <!-- 🏗️ EXECUTION COMMAND BAR -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="stu-kpi-card relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                <i class="fas fa-velocity text-4xl text-emerald-400"></i>
+            </div>
+            <div class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Execution Velocity</div>
+            <div class="stu-kpi-val text-emerald-400">{{ velocity }}%</div>
+            <div class="flex items-center gap-2 mt-2">
+                <div class="stu-kpi-trend text-emerald-500/40">+4.2% institutional avg</div>
+            </div>
+        </div>
+
+        <div class="stu-kpi-card relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                <i class="fas fa-clock text-4xl text-blue-400"></i>
+            </div>
+            <div class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">On-Time Rate</div>
+            <div class="stu-kpi-val text-blue-400">{{ on_time_rate }}%</div>
+            <div class="flex items-center gap-2 mt-2">
+                <div class="stu-kpi-trend text-blue-500/40">SaaS Benchmark: 88%</div>
+            </div>
+        </div>
+
+        <div class="stu-kpi-card relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                <i class="fas fa-microscope text-4xl text-purple-400"></i>
+            </div>
+            <div class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Pending Reviews</div>
+            <div class="stu-kpi-val text-purple-400">{{ pending_reviews }}</div>
+            <div class="flex items-center gap-2 mt-2">
+                <div class="stu-kpi-trend text-purple-500/40">Faculty Active</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏗️ MASTER EXECUTION GRID -->
+    <div class="workspace-grid">
+        
+        <!-- COLUMN 1: PRIORITY STACK -->
+        <div class="space-y-6">
+            <div class="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] px-4">Execution Priority</div>
+            
+            {% for item in priority_stack %}
+            <div class="p-5 bg-white/[0.03] border border-white/5 rounded-2xl group hover:border-{{ item.risk|risk_color }}-500/30 transition-all cursor-pointer">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-{{ item.risk|risk_color }}-500/10 flex items-center justify-center text-{{ item.risk|risk_color }}-500">
+                        <i class="fas fa-exclamation-triangle text-xs"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[8px] font-black text-white/30 uppercase tracking-widest">{{ item.type|replace:"_" }}</div>
+                        <div class="text-xs font-black text-white truncate">{{ item.title }}</div>
+                        <div class="text-[9px] font-bold text-white/20 mt-1">{{ item.subject }} | {{ item.deadline|date:"M d, H:i" }}</div>
+                    </div>
+                    <button hx-get="{% url 'student_assignment_workspace_partial' item.id %}" hx-target="#workspace-core" class="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black text-white/40 uppercase hover:text-white transition-all whitespace-nowrap">
+                        Upload
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="p-8 text-center bg-white/[0.02] border border-dashed border-white/5 rounded-3xl">
+                <div class="text-[9px] font-black text-white/20 uppercase tracking-widest">Stack Clear</div>
+                <div class="text-[8px] text-white/10 mt-2">No immediate execution risks.</div>
+            </div>
+            {% endfor %}
+
+            <!-- GLOBAL UPLOAD COMMAND -->
+            <button hx-get="{% url 'student_assignment_selector_partial' %}" hx-target="#workspace-core" class="w-full py-6 bg-white text-black rounded-[24px] font-black text-[11px] uppercase tracking-[0.2em] hover:bg-emerald-500 hover:text-white transition-all shadow-xl shadow-white/5 flex flex-col items-center gap-2 group">
+                <i class="fas fa-cloud-upload text-lg group-hover:scale-110 transition-transform"></i>
+                <span>Upload Assignment</span>
+            </button>
+
+            <!-- SMART RECOVERY SUGGESTION -->
+            {% if velocity < 90 %}
+            <div class="p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl mt-8">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <div class="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Recovery Intelligence</div>
+                </div>
+                <p class="text-[10px] text-white/40 leading-relaxed">
+                    Submit your next <span class="text-white">2 assignments</span> on time to recover execution confidence score.
+                </p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- COLUMN 2: ASSIGNMENT WORKSPACE -->
+        <div class="space-y-6">
+            <div class="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] px-4">Active Coursework</div>
+            
+            {% for assignment in assignments %}
+            {% with sub=submission_map|get_item:assignment.id %}
+            <div class="stu-kpi-card hover:border-emerald-500/20 group cursor-pointer transition-all">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <div class="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">{{ assignment.subject.name }}</div>
+                        <h4 class="text-base font-black text-white">{{ assignment.title }}</h4>
+                    </div>
+                    <div class="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest">
+                        {% if sub %}
+                            {{ sub.get_workflow_state_display }}
+                        {% else %}
+                            PENDING
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- EXECUTION TELEMETRY -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="p-3 bg-white/5 rounded-xl border border-white/5">
+                        <div class="text-[8px] font-black text-white/20 uppercase mb-1">Faculty</div>
+                        <div class="text-[10px] font-bold text-white">{{ assignment.faculty.user.get_full_name }}</div>
+                    </div>
+                    <div class="p-3 bg-white/5 rounded-xl border border-white/5">
+                        <div class="text-[8px] font-black text-white/20 uppercase mb-1">Submission Confidence</div>
+                        <div class="text-[10px] font-bold text-emerald-400">HIGH</div>
+                    </div>
+                </div>
+
+                <!-- PROGRESS RAIL -->
+                <div class="space-y-2">
+                    <div class="flex justify-between text-[9px] font-black uppercase tracking-widest">
+                        <span class="text-white/30">Deadline</span>
+                        <span class="text-white">{{ assignment.deadline|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div class="h-full bg-emerald-500 rounded-full transition-all duration-1000" style="width: 100%"></div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
+                    <div class="flex gap-2">
+                        <div class="px-2 py-1 rounded bg-blue-500/10 text-[8px] font-black text-blue-400 uppercase">Algorithms</div>
+                        <div class="px-2 py-1 rounded bg-purple-500/10 text-[8px] font-black text-purple-400 uppercase">System Design</div>
+                    </div>
+                    <button hx-get="{% url 'student_assignment_workspace_partial' assignment.id %}" hx-target="#workspace-core" class="px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-[9px] font-black text-emerald-400 uppercase hover:bg-emerald-500 hover:text-white transition-all">Upload Assignment</button>
+                </div>
+            </div>
+            {% endwith %}
+            {% empty %}
+            <div class="py-20 text-center">
+                <div class="text-4xl text-white/5 mb-4"><i class="fas fa-check-circle"></i></div>
+                <div class="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Execution Ledger Clear</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- COLUMN 3: FACULTY INTELLIGENCE -->
+        <div class="space-y-6">
+            <div class="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] px-4">Faculty Intelligence</div>
+            
+            <div class="space-y-4">
+                {% for event in intelligence_feed %}
+                <div class="stu-feed-item group">
+                    <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-emerald-500/30 transition-all">
+                        <i class="fas fa-comment-alt-lines text-xs text-white/20 group-hover:text-emerald-400"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[8px] font-black text-white/30 uppercase tracking-widest">{{ event.get_event_type_display }}</div>
+                        <div class="text-xs font-bold text-white/80 group-hover:text-white">{{ event.submission.assignment.title }}</div>
+                        <div class="text-[9px] text-white/20 mt-1">Review by Prof. {{ event.faculty.user.last_name }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-10 text-center text-[9px] font-black text-white/10 uppercase tracking-widest">
+                    Awaiting institutional review signals...
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- MOMENTUM ENGINE -->
+            <div class="mt-10 p-6 bg-blue-500/5 border border-blue-500/10 rounded-[32px]">
+                <div class="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-4">Academic Momentum</div>
+                <div class="flex items-center gap-4">
+                    <div class="text-2xl font-black text-white">🔥 12</div>
+                    <div class="text-[9px] font-bold text-white/40 uppercase tracking-tight">Day Submission Streak</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    /* Custom Helper for Django Template Filter */
+    .stu-kpi-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+</style>

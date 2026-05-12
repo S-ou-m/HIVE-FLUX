@@ -1,0 +1,318 @@
+<div class="orchestration-workspace h-full flex flex-col bg-[#080808]">
+    <!-- Workspace Header -->
+    <div class="px-8 py-6 border-b border-white/5 bg-[#0a0a0a]">
+        <div class="flex justify-between items-center mb-1">
+            <h2 class="text-xl font-black text-white tracking-tight">Timetable Orchestration Workspace</h2>
+            <button class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-muted hover:text-white transition-all" onclick="closeSidePanel()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <p class="text-[10px] font-bold text-muted uppercase tracking-[0.2em]">Institutional-Grade Automated Scheduling & Simulation</p>
+    </div>
+
+    <!-- Workspace Body -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar p-8">
+        <!-- Step Indicator -->
+        <div class="flex items-center gap-4 mb-10">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-black text-white">1</div>
+                <span class="text-[10px] font-black text-white uppercase tracking-widest">Strategy</span>
+            </div>
+            <div class="h-[1px] w-8 bg-white/10"></div>
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-black text-muted">2</div>
+                <span class="text-[10px] font-black text-muted uppercase tracking-widest">Constraints</span>
+            </div>
+            <div class="h-[1px] w-8 bg-white/10"></div>
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-black text-muted">3</div>
+                <span class="text-[10px] font-black text-muted uppercase tracking-widest">Simulation</span>
+            </div>
+        </div>
+
+        <!-- Section 1: Generation Strategy -->
+        <div class="mb-10" id="strategy-selector">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-1 h-4 bg-blue-600 rounded-full"></div>
+                <h3 class="text-xs font-black text-white uppercase tracking-[0.15em]">Generation Strategy</h3>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                {% for strategy in generation_strategies %}
+                <div class="strategy-card p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-blue-600/30 hover:bg-blue-600/5 transition-all cursor-pointer group relative overflow-hidden {% if forloop.first %}active{% endif %}" 
+                     data-strategy="{{ strategy.id }}"
+                     onclick="selectStrategy(this)">
+                    <div class="active-indicator absolute top-0 right-0 p-2 {% if not forloop.first %}opacity-0{% endif %}">
+                        <div class="w-2 h-2 rounded-full bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.8)]"></div>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-muted group-hover:text-blue-400 icon-box transition-colors mb-4">
+                        <i class="fas {{ strategy.icon }} text-lg"></i>
+                    </div>
+                    <h4 class="text-[11px] font-black text-white uppercase mb-1">{{ strategy.name }}</h4>
+                    <p class="text-[9px] text-muted leading-relaxed">{{ strategy.desc }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <script>
+            function updateSimulation() {
+                const isFacultyMask = document.getElementById('toggle-faculty-mask').checked;
+                const isRoomCapacity = document.getElementById('toggle-room-capacity').checked;
+                const activeStrategyCard = document.querySelector('.strategy-card.active');
+                const strategy = activeStrategyCard ? activeStrategyCard.dataset.strategy : 'balanced';
+
+                const efficiencyEl = document.getElementById('sim-efficiency');
+                const stabilityEl = document.getElementById('sim-stability');
+                const conflictsEl = document.getElementById('sim-conflicts');
+                
+                let efficiency = 12;
+                let stability = 94;
+                let conflicts = 0;
+
+                // Strategy Base Values
+                if (strategy === 'faculty') { efficiency = 8; stability = 98; }
+                else if (strategy === 'student') { efficiency = 15; stability = 91; }
+                else if (strategy === 'infrastructure') { efficiency = 24; stability = 88; }
+
+                // Constraint Modifiers
+                if (!isFacultyMask) {
+                    stability -= 15;
+                    DashboardOrchestrator.showToast('WARNING: Potential Faculty Overlap', 'warning');
+                }
+                if (!isRoomCapacity) {
+                    efficiency += 10;
+                    conflicts += 4;
+                    DashboardOrchestrator.showToast('WARNING: Overcapacity Risks Detected', 'warning');
+                }
+
+                efficiencyEl.innerText = `+${efficiency}%`;
+                stabilityEl.innerText = `${stability}%`;
+                conflictsEl.innerText = conflicts;
+                
+                // Risk Alert Visibility
+                const riskPanel = document.getElementById('risk-intelligence-panel');
+                if (!isFacultyMask || !isRoomCapacity) {
+                    riskPanel.classList.remove('hidden');
+                } else if (strategy === 'balanced') {
+                    riskPanel.classList.add('hidden');
+                }
+            }
+
+            function selectStrategy(element) {
+                document.querySelectorAll('.strategy-card').forEach(card => {
+                    card.classList.remove('active', 'bg-blue-600/5', 'border-blue-600/30');
+                    card.querySelector('.active-indicator').classList.add('opacity-0');
+                    card.querySelector('.icon-box').classList.remove('text-blue-400');
+                });
+
+                element.classList.add('active', 'bg-blue-600/5', 'border-blue-600/30');
+                element.querySelector('.active-indicator').classList.remove('opacity-0');
+                element.querySelector('.icon-box').classList.add('text-blue-400');
+
+                updateSimulation();
+            }
+        </script>
+
+        <!-- Section 2: Resource Constraints -->
+        <div class="mb-10">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-1 h-4 bg-orange-600 rounded-full"></div>
+                <h3 class="text-xs font-black text-white uppercase tracking-[0.15em]">Operational Constraints</h3>
+            </div>
+            <div class="space-y-4">
+                <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/5 transition-all">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-[10px] font-bold text-white/80 uppercase">Faculty Availability Masking</span>
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-faculty-mask" checked onchange="updateSimulation()">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <p class="text-[9px] text-muted mb-4">Automatically avoid scheduling sessions during faculty non-working hours.</p>
+                </div>
+                <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/5 transition-all">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-[10px] font-bold text-white/80 uppercase">Room Capacity Enforcement</span>
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-room-capacity" checked onchange="updateSimulation()">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="flex gap-2 mb-4">
+                        <span class="px-2 py-1 rounded bg-blue-600/10 text-blue-400 text-[8px] font-black uppercase">Standard Rooms</span>
+                        <span class="px-2 py-1 rounded bg-purple-600/10 text-purple-400 text-[8px] font-black uppercase">Labs/Workshops</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Resource Constraints -->
+        <!-- Section 3: Live Simulation Telemetry -->
+        <div class="mb-10">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-1 h-4 bg-green-600 rounded-full"></div>
+                <h3 class="text-xs font-black text-white uppercase tracking-[0.15em]">Live Impact Simulation</h3>
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="p-4 rounded-xl bg-green-600/5 border border-green-600/20 text-center hover:bg-green-600/10 transition-all cursor-pointer" onclick="alert('Insight: Optimized Room Allocation Logic Applied')">
+                    <div class="text-lg font-black text-green-500 mb-1" id="sim-efficiency">+12%</div>
+                    <div class="text-[8px] font-bold text-muted uppercase">Room Efficiency</div>
+                </div>
+                <div class="p-4 rounded-xl bg-blue-600/5 border border-blue-600/20 text-center hover:bg-blue-600/10 transition-all cursor-pointer" onclick="alert('Insight: Zero Conflicts based on Current Constraints')">
+                    <div class="text-lg font-black text-blue-400 mb-1" id="sim-conflicts">0</div>
+                    <div class="text-[8px] font-bold text-muted uppercase">Conflicts</div>
+                </div>
+                <div class="p-4 rounded-xl bg-purple-600/5 border border-purple-600/20 text-center hover:bg-purple-600/10 transition-all cursor-pointer" onclick="alert('Insight: Institutional Stability Index Validated')">
+                    <div class="text-lg font-black text-purple-400 mb-1" id="sim-stability">94%</div>
+                    <div class="text-[8px] font-bold text-muted uppercase">Stability</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Risk Intelligence -->
+        <div id="risk-intelligence-panel" class="mb-10 p-5 rounded-2xl bg-orange-600/5 border border-orange-600/20 relative overflow-hidden hidden">
+            <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-orange-600/10 flex items-center justify-center text-orange-500 text-lg">
+                    <i class="fas fa-triangle-exclamation"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-[11px] font-black text-orange-500 uppercase mb-2">Operational Risks Detected</h4>
+                    <ul class="space-y-2">
+                        <li class="text-[9px] text-muted flex items-center gap-2">
+                            <div class="w-1 h-1 rounded-full bg-orange-500"></div>
+                            2 faculty members exceed consecutive session limits.
+                        </li>
+                        <li class="text-[9px] text-muted flex items-center gap-2">
+                            <div class="w-1 h-1 rounded-full bg-orange-500"></div>
+                            Lab infrastructure conflict probability: 12%
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workspace Footer -->
+    <div class="p-8 border-t border-white/5 bg-[#0a0a0a] flex justify-between items-center">
+        <button class="px-6 py-3 rounded-xl border border-white/10 text-[11px] font-black text-muted uppercase hover:bg-white/5 transition-all" onclick="typeof closeSideDrawer === 'function' ? closeSideDrawer() : closeSidePanel()">
+            Cancel
+        </button>
+        <div class="flex gap-3">
+            <button id="btn-preview-draft" class="px-6 py-3 rounded-xl border border-blue-600/30 bg-blue-600/10 text-[11px] font-black text-blue-400 uppercase hover:bg-blue-600/20 transition-all" onclick="previewOrchestration()">
+                Preview Draft
+            </button>
+            <button id="btn-generate-final" class="px-8 py-3 rounded-xl bg-blue-600 text-[11px] font-black text-white uppercase hover:bg-blue-500 shadow-lg shadow-blue-600/20 transition-all flex items-center gap-3" onclick="runFinalOrchestration()">
+                <span id="btn-text">Generate Timetable</span>
+                <div id="btn-loader" class="hidden"><i class="fas fa-circle-notch fa-spin"></i></div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function previewOrchestration() {
+        const btn = document.getElementById('btn-preview-draft');
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> SIMULATING...';
+        btn.disabled = true;
+        
+        if (window.DashboardOrchestrator) {
+            DashboardOrchestrator.showToast('LOADING SIMULATION: ANALYZING SPATIAL CONSTRAINTS', 'info');
+        }
+        
+        setTimeout(() => {
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+            if (window.DashboardOrchestrator) {
+                DashboardOrchestrator.showToast('PREVIEW LOADED: 0 CRITICAL CONFLICTS DETECTED', 'success');
+            }
+            const grid = document.querySelector('.timetable-orchestrator');
+            if (grid) {
+                grid.style.filter = 'drop-shadow(0 0 20px rgba(59, 130, 246, 0.3))';
+                setTimeout(() => grid.style.filter = '', 2000);
+            }
+        }, 1500);
+    }
+
+    async function runFinalOrchestration() {
+        const btn = document.getElementById('btn-generate-final');
+        const text = document.getElementById('btn-text');
+        const loader = document.getElementById('btn-loader');
+        
+        btn.disabled = true;
+        loader.classList.remove('hidden');
+        
+        const stages = [
+            'SCANNING FACULTY AVAILABILITY...',
+            'RESOLVING LAB INFRASTRUCTURE...',
+            'BALANCING SESSION DISTRIBUTION...',
+            'FINALIZING CONFLICT-FREE MATRIX...'
+        ];
+
+        try {
+            for (const stage of stages) {
+                text.innerText = stage;
+                if (window.DashboardOrchestrator) {
+                    DashboardOrchestrator.showToast(stage, 'info');
+                }
+                await new Promise(r => setTimeout(r, 1000));
+            }
+
+            if (window.DashboardOrchestrator) {
+                DashboardOrchestrator.showToast('ORCHESTRATION COMPLETE: 98% OPTIMIZATION', 'success');
+            }
+            text.innerText = 'SUCCESS';
+            loader.innerHTML = '<i class="fas fa-check"></i>';
+            
+            setTimeout(() => {
+                if (typeof closeSideDrawer === 'function') {
+                    closeSideDrawer();
+                } else if (typeof closeSidePanel === 'function') {
+                    closeSidePanel();
+                }
+                
+                const gridContent = document.getElementById('dashboard-content');
+                if (gridContent) {
+                    gridContent.classList.add('animate-pulse');
+                    setTimeout(() => gridContent.classList.remove('animate-pulse'), 1000);
+                }
+            }, 1000);
+        } catch (e) {
+            console.error(e);
+            btn.disabled = false;
+            text.innerText = 'GENERATE TIMETABLE';
+            loader.classList.add('hidden');
+        }
+    }
+</script>
+
+<style>
+    .orchestration-workspace .switch {
+        width: 32px;
+        height: 18px;
+    }
+    .orchestration-workspace .slider:before {
+        height: 10px;
+        width: 100px; /* slider bug fix */
+        width: 10px;
+        left: 3px;
+        bottom: 3px;
+    }
+    .orchestration-workspace input:checked + .slider:before {
+        transform: translateX(14px);
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+</style>

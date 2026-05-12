@@ -1,0 +1,189 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/communication.css' %}">
+<!-- Quill Theme -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+<style>
+    /* Quill Custom Styling for Dark Theme */
+    .ql-toolbar.ql-snow {
+        border-color: rgba(255,255,255,0.05);
+        background: rgba(255,255,255,0.02);
+        border-radius: 12px 12px 0 0;
+    }
+    .ql-container.ql-snow {
+        border-color: rgba(255,255,255,0.05);
+        background: rgba(255,255,255,0.03);
+        border-radius: 0 0 12px 12px;
+        min-height: 200px;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        color: rgba(255,255,255,0.9);
+    }
+    .ql-editor.ql-blank::before {
+        color: rgba(255,255,255,0.2) !important;
+        font-style: normal;
+    }
+    .ql-snow .ql-stroke { stroke: rgba(255,255,255,0.4); }
+    .ql-snow .ql-fill { fill: rgba(255,255,255,0.4); }
+    .ql-snow .ql-picker { color: rgba(255,255,255,0.4); }
+</style>
+
+<div id="notice-drawer-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] opacity-0 transition-opacity duration-300" onclick="closePremiumDrawer()"></div>
+
+<div id="notice-drawer" class="fixed top-0 right-0 h-full w-[600px] bg-[#05070a] border-l border-white/10 z-[1001] translate-x-full transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1) flex flex-col shadow-2xl">
+    
+    <header class="p-8 border-b border-white/5 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20">
+                <i class="fa-solid fa-tower-broadcast text-xl"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-black text-white tracking-tight">Deploy Broadcast</h2>
+                <p class="text-[10px] font-black text-white/30 uppercase tracking-widest">Institutional Communication Hub</p>
+            </div>
+        </div>
+        <button onclick="closePremiumDrawer()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </header>
+
+    <form id="notice-form" hx-post="{% url 'create_notice' %}" 
+          hx-target="#notice-feed" 
+          hx-swap="innerHTML"
+          hx-on::after-request="closePremiumDrawer()"
+          class="flex-1 flex flex-col overflow-hidden">
+        {% csrf_token %}
+        
+        <div class="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+            <!-- Title -->
+            <div class="space-y-3">
+                <label class="text-[10px] font-black text-white/30 uppercase tracking-widest px-1">Headline Intelligence</label>
+                <input type="text" name="title" required placeholder="Enter a high-impact headline..."
+                       class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-semibold focus:border-blue-500 focus:bg-white/[0.08] transition-all outline-none">
+            </div>
+
+            <!-- Content (Quill) -->
+            <div class="space-y-3">
+                <label class="text-[10px] font-black text-white/30 uppercase tracking-widest px-1">Payload Content</label>
+                <div id="editor-wrapper" class="rounded-xl overflow-hidden">
+                    <div id="quill-editor"></div>
+                </div>
+                <input type="hidden" name="content" id="content-input">
+            </div>
+
+            <!-- Priority & Classification -->
+            <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-3">
+                    <label class="text-[10px] font-black text-white/30 uppercase tracking-widest px-1">Priority</label>
+                    <select name="priority" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs font-bold focus:border-blue-500 outline-none">
+                        <option value="INFO">Normal</option>
+                        <option value="IMPORTANT" selected>Important</option>
+                        <option value="CRITICAL">Critical</option>
+                    </select>
+                </div>
+                <div class="space-y-3">
+                    <label class="text-[10px] font-black text-white/30 uppercase tracking-widest px-1">Category</label>
+                    <select name="notice_type" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs font-bold focus:border-blue-500 outline-none">
+                        <option value="ANNOUNCEMENT">Announcement</option>
+                        <option value="ACADEMIC">Academic</option>
+                        <option value="SYSTEM">System</option>
+                        <option value="FINANCE">Finance</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Precision Targeting -->
+            <div class="space-y-6">
+                <div class="flex items-center gap-2 px-1">
+                    <i class="fa-solid fa-bullseye text-blue-500 text-[10px]"></i>
+                    <label class="text-[10px] font-black text-white/30 uppercase tracking-widest">Precision Scoping</label>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3">
+                    <label class="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 cursor-pointer transition-all hover:bg-white/[0.08] group has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/5">
+                        <input type="radio" name="target_role" value="ALL" checked class="hidden peer">
+                        <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/30 peer-checked:text-blue-500 peer-checked:bg-blue-500/10">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div class="flex-1">
+                            <span class="text-xs font-bold text-white/80">All Stakeholders</span>
+                            <p class="text-[9px] text-white/20 font-black uppercase tracking-tighter">Global Broadcast</p>
+                        </div>
+                        <div class="w-2 h-2 rounded-full border-2 border-white/10 peer-checked:bg-blue-500 peer-checked:border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0)] peer-checked:shadow-[0_0_10px_#3b82f6]"></div>
+                    </label>
+
+                    <label class="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 cursor-pointer transition-all hover:bg-white/[0.08] group has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/5">
+                        <input type="radio" name="target_role" value="STUDENT" class="hidden peer">
+                        <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/30 peer-checked:text-blue-500 peer-checked:bg-blue-500/10">
+                            <i class="fa-solid fa-user-graduate"></i>
+                        </div>
+                        <div class="flex-1">
+                            <span class="text-xs font-bold text-white/80">Students Only</span>
+                            <p class="text-[9px] text-white/20 font-black uppercase tracking-tighter">Academic Node</p>
+                        </div>
+                        <div class="w-2 h-2 rounded-full border-2 border-white/10 peer-checked:bg-blue-500 peer-checked:border-blue-500"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <footer class="p-8 border-t border-white/5 bg-white/[0.02] flex items-center justify-between">
+            <button type="button" onclick="closePremiumDrawer()" class="text-xs font-bold text-white/40 hover:text-red-400 transition-all">Discard Draft</button>
+            <div class="flex gap-4">
+                <button type="submit" class="px-8 py-3 rounded-xl bg-blue-600 text-white text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:bg-blue-500 hover:-translate-y-1 transition-all">Deploy Broadcast</button>
+            </div>
+        </footer>
+    </form>
+</div>
+
+<!-- Quill Script -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<script>
+    (function() {
+        const overlay = document.getElementById('notice-drawer-overlay');
+        const drawer = document.getElementById('notice-drawer');
+        const form = document.getElementById('notice-form');
+        const contentInput = document.getElementById('content-input');
+        
+        // Open animation
+        requestAnimationFrame(() => {
+            overlay.style.opacity = '1';
+            drawer.style.transform = 'translateX(0)';
+        });
+
+        // Initialize Quill
+        var quill = new Quill('#quill-editor', {
+            theme: 'snow',
+            placeholder: 'Compose your broadcast intelligence here...',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link', 'clean']
+                ]
+            }
+        });
+
+        // Sync Quill to Hidden Input on Submit
+        form.addEventListener('submit', function(e) {
+            contentInput.value = quill.root.innerHTML;
+            if (quill.getText().trim().length === 0) {
+                e.preventDefault();
+                alert('Content cannot be empty');
+            }
+        });
+
+        window.closePremiumDrawer = function() {
+            overlay.style.opacity = '0';
+            drawer.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                const container = document.getElementById('modal-container');
+                if (container) {
+                    container.innerHTML = '';
+                    container.classList.remove('active');
+                }
+            }, 500);
+        };
+    })();
+</script>

@@ -1,0 +1,56 @@
+<header class="dashboard-topbar">
+    <div class="topbar-left">
+        <button class="mobile-nav-trigger" onclick="toggleMobileSidebar()" style="display: none;">
+            <i class="fa-solid fa-bars-staggered"></i>
+        </button>
+        <div class="breadcrumb">
+            <span class="text-muted">Faculty</span>
+            <i class="fas fa-chevron-right mx-2 text-[10px]"></i>
+            <span class="text-primary font-bold">Command Center</span>
+        </div>
+    </div>
+
+    <div class="topbar-center">
+        <div class="system-clock" id="system-clock">
+            <i class="fas fa-clock mr-2 text-primary"></i>
+            <span class="clock-time" id="live-time">00:00:00</span>
+            <span class="clock-date ml-2 text-muted text-xs">{{ today|date:"D, d M" }}</span>
+        </div>
+    </div>
+
+    <div class="topbar-right">
+        <div class="action-group">
+            <button class="icon-btn" title="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge"></span>
+            </button>
+            <button class="icon-btn" title="Help / Documentation">
+                <i class="fas fa-question-circle"></i>
+            </button>
+            <div class="divider"></div>
+            <!-- Identity Hub Container (HTMX Lazy Load) -->
+            <div id="identity-hub-container" class="relative dropdown-wrapper"
+                 hx-get="{% url 'faculty_identity_hub_partial' %}" 
+                 hx-trigger="load, every 15s">
+                <!-- Skeleton loader while fetching -->
+                <div class="flex items-center gap-3 p-2 rounded-xl animate-pulse bg-white/5 border border-white/10 w-[180px]">
+                    <div class="w-8 h-8 rounded-full bg-white/10"></div>
+                    <div class="flex-1 space-y-2">
+                        <div class="h-2 bg-white/10 rounded w-3/4"></div>
+                        <div class="h-2 bg-white/10 rounded w-1/2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<script>
+    function updateClock() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        document.getElementById('live-time').textContent = timeStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+</script>

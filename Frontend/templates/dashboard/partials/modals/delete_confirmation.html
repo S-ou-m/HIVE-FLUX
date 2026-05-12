@@ -1,0 +1,47 @@
+<!-- ========================================== -->
+<!-- GLOBAL DELETE CONFIRMATION MODAL -->
+<!-- ========================================== -->
+<div class="modal-backdrop" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation();" style="max-width: 450px; padding: 0; overflow: hidden;">
+        
+        <!-- HEADER: Red Alert Context -->
+        <div class="modal-header" style="padding: 1.5rem; background: rgba(239, 68, 68, 0.05); border-bottom: 1px solid rgba(239, 68, 68, 0.1);">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="width: 32px; height: 32px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 1.1rem; color: #ef4444;">Confirm Deletion</h3>
+            </div>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        
+        <!-- BODY: Impact Warning -->
+        <div class="modal-body" style="padding: 2rem 1.5rem; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.8;">🗑️</div>
+            <h4 style="margin-bottom: 0.5rem; color: var(--text-primary);">Delete "{{ object.name|default:object }}"?</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
+                This action is irreversible. All related data associated with this record will be permanently purged from the system.
+            </p>
+        </div>
+        
+        <!-- FOOTER: Destructive Action -->
+        <div class="modal-footer" style="padding: 1.25rem 1.5rem; display: flex; justify-content: flex-end; gap: 0.75rem; background: var(--bg-surface-hover); border-top: 1px solid var(--border-color);">
+            <button class="btn btn-secondary" onclick="closeModal()" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);">
+                Cancel
+            </button>
+            <form hx-post="{{ delete_url }}" hx-target="{{ target|default:'#modal-container' }}" hx-indicator="#delete-spinner">
+                {% csrf_token %}
+                <button type="submit" class="btn" style="background: #ef4444; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); display: flex; align-items: center; gap: 0.5rem;">
+                    <span>Delete Permanently</span>
+                    <span id="delete-spinner" class="htmx-indicator">⏳</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .htmx-indicator { display: none; }
+    .htmx-request .htmx-indicator { display: inline-block; animation: spin 1s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+</style>

@@ -1,0 +1,699 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/faculty_design_system.css' %}">
+<link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+<style>
+    /* ♿ Accessibility: Skip Link */
+    .skip-link { position: absolute; top: -40px; left: 0; background: var(--stu-accent); color: white; padding: 8px; z-index: 999999; }
+    .skip-link:focus { top: 0; }
+
+    /* 🎨 STUDENT SUCCESS OS: COMPOSITIONAL MATURITY OVERRIDES */
+    :root {
+        --stu-accent: #FF6B00; /* Neon Orange */
+        --stu-bg: #000000;
+        --stu-glass: rgba(0, 0, 0, 0.95);
+        --stu-border: rgba(255, 107, 0, 0.1);
+    }
+    
+    body { background: var(--stu-bg); color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+    
+    @media (min-width: 1025px) {
+        body { overflow: hidden; }
+    }
+</style>
+
+<!-- 🚀 Institutional Reliability Layer: State Machines & Capability Detectors -->
+<script src="{% static 'js/PerformanceCapabilityDetector.js' %}"></script>
+<script src="{% static 'js/IdentityDrawerStateMachine.js' %}"></script>
+
+<script>
+    /**
+     * 🎯 Identity Command Surface Orchestrator
+     * Global Namespace Hoisting to prevent ReferenceErrors.
+     */
+    window.openSideDrawer = function() {
+        console.log("[IdentityOS] Open Command Received");
+        if (window.IdentityOS && window.IdentityOS.StateMachine) {
+            window.IdentityOS.StateMachine.transition('OPENING', 'user_identity_trigger');
+        } else {
+            document.body.classList.add('drawer-active');
+        }
+    };
+
+    window.closeSideDrawer = function() {
+        if (window.IdentityOS && window.IdentityOS.StateMachine) {
+            window.IdentityOS.StateMachine.transition('CLOSING', 'backdrop_click');
+        } else {
+            document.body.classList.remove('drawer-active');
+        }
+    };
+
+    /**
+     * 🛰️ Magnification Protocol: Presence OS
+     * Facilitates high-fidelity attendance scanning by 'popping out' the institutional pass.
+     */
+    window.magnifyQR = function(element) {
+        const qrTarget = element.querySelector('#identity-qr-target');
+        const modal = document.getElementById('qr-magnifier-modal');
+        const magnifiedTarget = document.getElementById('magnified-qr-content');
+        
+        if (qrTarget && modal && magnifiedTarget) {
+            magnifiedTarget.innerHTML = qrTarget.innerHTML;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    };
+
+    window.closeMagnifier = function() {
+        const modal = document.getElementById('qr-magnifier-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    };
+
+    // 🛡️ Fail-safe Global Listener
+    document.addEventListener('DOMContentLoaded', () => {
+        document.body.addEventListener('htmx:beforeRequest', (evt) => {
+            if (evt.detail.target && evt.detail.target.id === 'global-drawer-content') {
+                window.openSideDrawer();
+            }
+        });
+    });
+</script>
+
+<style>
+    .stu-shell { display: flex; height: 100vh; }
+    
+    /* 🏗️ SIDEBAR: IMMERSIVE ANCHOR */
+    .stu-sidebar {
+        width: 300px;
+        background: var(--stu-glass);
+        backdrop-filter: blur(40px);
+        border-right: 1px solid var(--stu-border);
+        display: flex;
+        flex-direction: column;
+        z-index: 100;
+    }
+    
+    .sidebar-brand { padding: 40px; }
+    .os-badge { 
+        display: inline-flex; align-items: center; gap: 12px; 
+        padding: 8px 16px; background: rgba(255, 107, 0, 0.05); 
+        border: 1px solid rgba(255, 107, 0, 0.1); border-radius: 12px;
+    }
+
+    /* 🚀 SAAS-GRADE NAVIGATION ORCHESTRATION */
+    .nav-link {
+        display: flex; align-items: center; gap: 14px; padding: 14px 20px;
+        color: rgba(255,255,255,0.4); text-decoration: none; border-radius: 0 14px 14px 0;
+        font-size: 13px; font-weight: 700; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative; overflow: hidden; margin-left: -2px;
+    }
+    .nav-link:hover { background: rgba(255, 107, 0, 0.05); color: white; }
+    
+    .nav-link.active { 
+        background: linear-gradient(90deg, rgba(255, 107, 0, 0.1) 0%, transparent 100%);
+        color: #FFFFFF; font-weight: 900;
+    }
+
+    @keyframes rail-breathe {
+        0%, 100% { opacity: 1; box-shadow: 0 0 10px var(--stu-accent); }
+        50% { opacity: 0.8; box-shadow: 0 0 20px var(--stu-accent); }
+    }
+
+    .nav-link.active::before {
+        content: '';
+        position: absolute; left: 0; top: 0; height: 100%; width: 4px;
+        background: var(--stu-accent);
+        z-index: 10;
+        animation: rail-breathe 2s infinite ease-in-out;
+    }
+
+    .nav-dot { width: 6px; height: 6px; border-radius: 50%; opacity: 0.1; transition: all 0.3s; background: var(--stu-accent); }
+    .nav-link.active .nav-dot { opacity: 1; box-shadow: 0 0 15px var(--stu-accent); }
+    
+    /* Workspace Context Indicators */
+    .workspace-group { transition: opacity 0.3s; }
+    .workspace-group:has(.nav-link.active) { opacity: 1; }
+    .workspace-group:not(:has(.nav-link.active)) { opacity: 0.7; }
+    
+    .nav-badge {
+        margin-left: auto; padding: 2px 6px; border-radius: 6px;
+        background: rgba(255, 107, 0, 0.1); border: 1px solid rgba(255, 107, 0, 0.2);
+        color: var(--stu-accent); font-size: 9px; font-weight: 900;
+    }
+
+    /* 🏗️ MAIN WORKSPACE: DENSE ORCHESTRATION */
+    .stu-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    
+    .stu-topbar { 
+        height: 80px; padding: 0 40px; display: flex; align-items: center; justify-content: space-between;
+        background: rgba(2, 6, 23, 0.6); backdrop-filter: blur(20px); border-bottom: 1px solid var(--stu-border);
+    }
+
+    .workspace-canvas { flex: 1; overflow-y: auto; padding: 40px; }
+
+    /* 🏗️ HERO MISSION SURFACE */
+    .hero-mission {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(2, 6, 23, 0) 100%);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        padding: 48px; border-radius: 32px; margin-bottom: 40px;
+        position: relative; overflow: hidden;
+    }
+    .hero-glow { position: absolute; top: -50%; right: -20%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%); filter: blur(60px); }
+
+    .hero-title { font-size: 32px; font-weight: 900; letter-spacing: -1px; margin-bottom: 8px; }
+    .hero-motivation { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.4); max-width: 500px; }
+
+    /* 🏗️ SUCCESS CONFIDENCE SCORE */
+    .confidence-meter {
+        position: absolute; top: 40px; right: 48px; text-align: right;
+    }
+    .score-val { font-size: 48px; font-weight: 900; line-height: 1; color: var(--stu-accent); }
+    .score-label { font-size: 10px; font-weight: 900; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 2px; }
+
+    /* 🏗️ MASTER GRID LAYOUT */
+    .workspace-grid { display: grid; grid-template-columns: 320px 1fr 320px; gap: 32px; align-items: start; }
+
+    /* 🏗️ PROGRESSION RAILS */
+    .progression-rail { background: rgba(255,255,255,0.02); border: 1px solid var(--stu-border); padding: 20px; border-radius: 20px; }
+    .rail-bar-bg { height: 6px; background: rgba(255,255,255,0.05); border-radius: 100px; margin: 12px 0; overflow: hidden; }
+    .rail-bar-fill { height: 100%; border-radius: 100px; transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1); }
+
+    /* 🏗️ KPI CARDS: UPGRADED */
+    .stu-kpi-card {
+        background: rgba(255,255,255,0.03); border: 1px solid var(--stu-border);
+        padding: 32px; border-radius: 28px; transition: all 0.3s ease;
+    }
+    .stu-kpi-card:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.15); transform: translateY(-4px); }
+    .stu-kpi-val { font-size: 32px; font-weight: 900; margin: 8px 0; }
+    .stu-kpi-trend { font-size: 10px; font-weight: 900; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,0.05); }
+
+    /* 🏗️ FEED SYSTEM */
+    .stu-feed-item {
+        display: flex; gap: 16px; padding: 20px; border-radius: 20px;
+        border: 1px solid transparent; transition: all 0.2s;
+    }
+    .stu-feed-item:hover { background: rgba(255,255,255,0.02); border-color: var(--stu-border); }
+
+    /* Fix for Tailwinds dynamic classes in rail */
+    .bg-emerald-500 { background-color: #10b981 !important; }
+    .bg-blue-500 { background-color: #3b82f6 !important; }
+    .bg-purple-500 { background-color: #a855f7 !important; }
+    /* 🏗️ IDENTITY COMMAND CENTER DRAWER STYLES */
+    #side-drawer { 
+        position: fixed; top: 0; right: -500px !important;
+        height: 100vh; width: 440px; 
+        background: #000000 !important; 
+        box-shadow: -30px 0 60px rgba(0,0,0,0.9);
+        border-left: 1px solid rgba(255, 255, 255, 0.05);
+        z-index: 999999 !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        visibility: hidden; opacity: 0;
+    }
+    body.drawer-active #side-drawer { 
+        right: 0 !important; 
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    #drawer-overlay {
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.8);
+        backdrop-filter: blur(12px);
+        z-index: 999998 !important;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+    body.drawer-active #drawer-overlay { 
+        opacity: 1 !important; 
+        pointer-events: auto !important; 
+    }
+
+    /* Shimmer State */
+    .drawer-shimmer {
+        background: linear-gradient(90deg, #000 25%, #111 50%, #000 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    
+    /* Sidebar Spacing */
+    .nav-link { margin-bottom: 8px; padding: 12px 24px; }
+    .workspace-group { margin-bottom: 32px; }
+
+    .identity-tab {
+        padding: 12px 16px; font-size: 10px; font-weight: 900; 
+        text-transform: uppercase; letter-spacing: 0.15em; color: rgba(255,255,255,0.3);
+        border-bottom: 2px solid transparent; transition: all 0.3s; cursor: pointer;
+    }
+    .identity-tab.active { color: white; border-bottom-color: var(--stu-accent); }
+    .identity-tab:hover:not(.active) { color: white; background: rgba(255,255,255,0.05); }
+
+    /* Operational Density Utilities */
+    .telemetry-card {
+        background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+        padding: 20px; border-radius: 24px; transition: all 0.3s;
+    }
+    .telemetry-card:hover { border-color: rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); }
+    
+    .status-pill {
+        padding: 4px 10px; border-radius: 6px; font-size: 9px; font-weight: 900;
+        letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .status-active { background: rgba(16, 185, 129, 0.1); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .status-risk { background: rgba(239, 68, 68, 0.1); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+    /* Neon Orange Profile Anchor */
+    .profile-anchor-neon {
+        background: #FF6B00 !important;
+        box-shadow: 0 10px 30px rgba(255, 107, 0, 0.2);
+    }
+    .profile-anchor-neon .text-white\/80 { color: #000000 !important; font-weight: 900; }
+    .profile-anchor-neon .text-white\/30 { color: rgba(0,0,0,0.5) !important; font-weight: 900; }
+    .profile-anchor-neon i { color: #000000 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div class="stu-shell">
+    <!-- 🏗️ SIDEBAR: COMMAND NAVIGATION -->
+    <aside class="stu-sidebar" aria-label="Main Navigation">
+        <div class="sidebar-brand">
+            <div class="os-badge">
+                <div class="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-[0_0_10px_#FF6B00]"></div>
+                <span class="text-[10px] font-black tracking-[0.2em] uppercase text-orange-500">Student Success OS</span>
+            </div>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-1" id="stu-sidebar-nav">
+            <div class="workspace-group">
+                <div class="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] px-6 mb-4">Workspace</div>
+                <a class="nav-link" hx-get="{% url 'student_dashboard_overview_partial' %}" hx-target="#workspace-core" hx-push-url="/dashboard/student/overview/" data-path="/overview/">
+                    <div class="nav-dot"></div>
+                    <i class="fas fa-grip-vertical w-4"></i><span>Dashboard</span>
+                </a>
+                <a class="nav-link" hx-get="{% url 'student_academic_radar_partial' %}" hx-target="#workspace-core" hx-push-url="/dashboard/student/radar/" data-path="/radar/">
+                    <div class="nav-dot"></div>
+                    <i class="fas fa-graduation-cap w-4"></i><span>Academic Radar</span>
+                </a>
+                <a class="nav-link" hx-get="{% url 'student_attendance_trend_partial' %}" hx-target="#workspace-core" hx-push-url="/dashboard/student/attendance-trend/" data-path="/attendance-trend/">
+                    <div class="nav-dot"></div>
+                    <i class="fas fa-chart-line w-4"></i><span>Attendance Trend</span>
+                </a>
+                <a class="nav-link" hx-get="{% url 'student_assignment_os_partial' %}" hx-target="#workspace-core" hx-push-url="/dashboard/student/assignments/" data-path="/assignments/">
+                    <div class="nav-dot"></div>
+                    <i class="fas fa-tasks-alt w-4"></i><span>Assignment OS</span>
+                </a>
+                <a class="nav-link" hx-get="{% url 'student_career_radar_partial' %}" hx-target="#workspace-core" hx-push-url="/dashboard/student/career/" data-path="/career/">
+                    <div class="nav-dot animate-pulse"></div>
+                    <i class="fas fa-rocket-launch w-4"></i><span>Career OS</span>
+                </a>
+            </div>
+            
+            <div class="workspace-group pt-8">
+                <div class="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] px-6 mb-4">Institutional</div>
+                <a class="nav-link" hx-get="{% url 'student_achievement_tracker_partial' %}" hx-target="#workspace-core" hx-push-url="/dashboard/student/achievements/" data-path="/achievements/">
+                    <div class="nav-dot"></div>
+                    <i class="fas fa-trophy w-4"></i><span>Goals</span>
+                    {% if interventions %}
+                    <div class="nav-badge">{{ interventions|length }}</div>
+                    {% endif %}
+                </a>
+                <a class="nav-link" hx-get="{% url 'student_support_hub_partial' %}" hx-target="#workspace-core" hx-push-url="/dashboard/student/support/" data-path="/support/">
+                    <div class="nav-dot"></div>
+                    <i class="fas fa-network-wired w-4"></i><span>Relationships</span>
+                </a>
+                <a class="nav-link" hx-get="{% url 'student_finance_ledger_partial' %}" hx-target="#workspace-core" hx-push-url="/dashboard/student/finance/" data-path="/finance/">
+                    <div class="nav-dot"></div>
+                    <i class="fas fa-vault w-4"></i><span>Finance</span>
+                </a>
+            </div>
+
+            <!-- 🔒 SYSTEM TERMINATION SECTION -->
+            <div class="workspace-group pt-8 mt-auto pb-4">
+                <div class="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] px-6 mb-4">System</div>
+                <a href="{% url 'logout' %}" class="nav-link group/logout hover:bg-red-500/10 transition-all duration-300">
+                    <div class="nav-dot bg-red-500/20 group-hover/logout:bg-red-500 group-hover/logout:shadow-[0_0_10px_#ef4444] transition-all"></div>
+                    <i class="fas fa-power-off w-4 text-white/20 group-hover/logout:text-red-500 transition-colors"></i>
+                    <span class="text-white/40 group-hover/logout:text-red-400 transition-colors">Sign Out</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="p-8 mt-auto border-t border-white/5 relative group cursor-pointer profile-anchor-neon transition-all z-[100]" 
+             hx-get="{% url 'student_identity_command_center_partial_route' %}"
+             hx-target="#global-drawer-content"
+             hx-trigger="click"
+             hx-on:click="openSideDrawer()"
+             role="button"
+             aria-label="Open Identity Command Center"
+             tabindex="0">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-black flex items-center justify-center font-black text-lg text-[#FF6B00] shadow-xl group-hover:scale-105 transition-all">
+                    {{ student.user.username|first|upper }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm font-black truncate text-white/80 group-hover:text-white transition-colors">{{ student.user.get_full_name|default:student.user.username }}</div>
+                    <div class="text-[9px] text-white/30 font-black uppercase tracking-widest">{{ student.enrollment_no }}</div>
+                </div>
+                <i class="fas fa-fingerprint text-white/10 group-hover:text-white/40 transition-colors text-sm"></i>
+            </div>
+            
+            <!-- Quick Context Badge -->
+            <div class="absolute -top-3 right-8 px-2 py-0.5 rounded-full bg-emerald-500 text-[8px] font-black text-white shadow-xl opacity-0 group-hover:opacity-100 transition-opacity">
+                IDENTITY ACTIVE
+            </div>
+        </div>
+    </aside>
+
+    <!-- 🏗️ GLOBAL UI ROOTS (Institutional Parity) -->
+    <div id="global-modal-root"></div>
+    <div id="global-drawer-root"></div>
+    <div id="toast-root"></div>
+
+    <!-- Side Drawer System (Context-Preserving) -->
+    <div id="drawer-overlay" aria-hidden="true"></div>
+    <div id="side-drawer" onclick="event.stopPropagation()" aria-label="Identity Command Center" role="complementary">
+        <div id="drawer-container" class="h-full flex flex-col">
+            <div id="global-drawer-content" class="flex-1 overflow-y-auto">
+                <!-- Initial Shimmer Surface -->
+                <div class="p-8 space-y-8">
+                    <div class="w-20 h-20 rounded-[32px] drawer-shimmer"></div>
+                    <div class="h-8 w-48 rounded-xl drawer-shimmer"></div>
+                    <div class="space-y-4">
+                        <div class="h-32 w-full rounded-3xl drawer-shimmer"></div>
+                        <div class="h-32 w-full rounded-3xl drawer-shimmer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏗️ MAIN WORKSPACE -->
+    <main class="stu-main" id="main-content" role="main">
+        <!-- Critical Notice Banner (Administrative Parity) -->
+        <div id="critical-banner" hx-get="{% url 'get_critical_banner' %}" hx-trigger="load"></div>
+
+        <header class="stu-topbar">
+            <div class="flex items-center gap-4">
+                <button class="mobile-nav-trigger" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation Menu">
+                    <i class="fa-solid fa-bars-staggered"></i>
+                </button>
+                <div class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-3">
+                    <div class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse shadow-[0_0_10px_#FF6B00]"></div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-white/40" id="header-context-label">Operational Hub</span>
+                </div>
+                <div class="flex items-center gap-3 text-[10px] font-black text-white/40 tracking-widest uppercase">
+                    <i class="fas fa-shield-check text-emerald-500"></i>
+                    Trust Score: <span class="text-white">{{ student.reputation_score }}</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                {% if is_degraded %}
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 text-[9px] font-black text-orange-400 uppercase tracking-widest animate-pulse">
+                    <i class="fas fa-microchip"></i> Intelligence Syncing
+                </div>
+                {% else %}
+                <div hx-get="{% url 'student_dashboard_overview_partial' %}"
+                     hx-target="#workspace-core"
+                     hx-trigger="click"
+                     role="button"
+                     tabindex="0"
+                     class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-400 uppercase tracking-widest cursor-pointer hover:bg-emerald-500/20 transition-all">
+                    <i class="fas fa-check-double"></i> Intelligence Synchronized
+                </div>
+                {% endif %}
+                
+                <div hx-get="{% url 'student_academic_radar_partial' %}"
+                     hx-target="#workspace-core"
+                     role="button"
+                     tabindex="0"
+                     class="flex items-center gap-4 bg-white/5 border border-white/10 px-4 py-2 rounded-xl cursor-pointer hover:border-emerald-500/30 transition-all">
+                    <div class="text-[9px] font-black text-white/30 uppercase tracking-widest">{{ next_session.subject }}</div>
+                    <div class="h-3 w-px bg-white/10"></div>
+                    <div class="text-[10px] font-black text-emerald-400">{{ next_session.countdown }}</div>
+                </div>
+                <button hx-get="{% url 'student_support_hub_partial' %}"
+                        hx-target="#workspace-core"
+                        aria-label="View Notifications"
+                        class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all hover:border-blue-500/30">
+                    <i class="fas fa-bell"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="workspace-canvas custom-scrollbar">
+            <!-- 🏗️ HERO MISSION SURFACE -->
+            <section class="hero-mission" aria-labelledby="hero-title">
+                <div class="hero-glow"></div>
+                <div class="relative z-10">
+                    <h1 class="hero-title" id="hero-title">{{ hero.greeting }}</h1>
+                    <p class="hero-motivation">{{ hero.motivation }}</p>
+                    
+                    <div class="flex gap-4 mt-8">
+                        <button hx-get="{% url 'student_daily_agenda_partial' %}"
+                                hx-target="#workspace-core"
+                                class="ops-commit-btn px-8">VIEW TODAY'S SESSIONS</button>
+                        <button hx-get="{% url 'student_risk_signals_partial' %}"
+                                hx-target="#workspace-core"
+                                class="command-edit-trigger bg-white/5 border border-white/10 px-8">CHECK RISK SIGNALS</button>
+                    </div>
+                </div>
+
+                <div class="confidence-meter group cursor-pointer" 
+                     hx-get="{% url 'student_confidence_breakdown_partial' %}" 
+                     hx-target="#workspace-core">
+                    <div class="score-val group-hover:scale-110 transition-transform">{{ hero.confidence_score }}%</div>
+                    <div class="score-label group-hover:text-emerald-400 transition-colors">View Analysis</div>
+                </div>
+            </section>
+
+
+            <!-- 🏗️ MASTER COMPOSITION GRID -->
+            <div class="workspace-grid">
+                
+                <!-- COLUMN 1: IDENTITY & PROGRESSION -->
+                <div class="space-y-8" id="identity-column">
+                    <div hx-get="{% url 'student_identity_hub_partial' %}" hx-trigger="load" hx-target="this">
+                        <div class="flex justify-center py-10"><div class="animate-spin h-6 w-6 border-2 border-emerald-500 border-t-transparent rounded-full"></div></div>
+                    </div>
+                </div>
+
+                <!-- COLUMN 2: EXECUTION & RADAR -->
+                <div class="space-y-8" id="workspace-core">
+                    <div hx-get="{{ initial_partial_url }}" hx-trigger="load" hx-target="this">
+                        <div class="flex justify-center py-20">
+                            <div class="animate-spin h-8 w-8 border-4 border-emerald-500 border-t-transparent rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLUMN 3: INTELLIGENCE FEED -->
+                <div class="space-y-8">
+                    <div class="ops-section h-full">
+                        <div class="section-label">Institutional Feed</div>
+                        <div class="space-y-2" id="operational-timeline-feed">
+                            <!-- Populated via Identity Hub Partial swap or dedicated feed partial -->
+                            <div class="text-center py-20 text-[10px] font-black text-white/20 uppercase tracking-widest">
+                                <i class="fas fa-pulse fa-spinner-third mb-4 block text-xl"></i>
+                                Syncing Activity...
+                            </div>
+                        </div>
+
+                        <div class="mt-8">
+                            <div class="section-label">Suggested Actions</div>
+                        <div class="space-y-3">
+                            {% for action in interventions %}
+                            <div class="stu-feed-item bg-{{ action.trigger_signal.weight|default:'blue' }}-500/5 border-{{ action.trigger_signal.weight|default:'blue' }}-500/10 cursor-pointer">
+                                <div class="w-8 h-8 rounded-lg bg-{{ action.trigger_signal.weight|default:'blue' }}-500/10 flex items-center justify-center">
+                                    <i class="fas fa-{% if action.trigger_signal.signal_type == 'ATTENDANCE_DECAY' %}user-clock{% else %}tasks{% endif %} text-{{ action.trigger_signal.weight|default:'blue' }}-500 text-xs"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-xs font-bold">{{ action.title }}</div>
+                                    <div class="text-[9px] text-white/30 font-black uppercase">{{ action.status }} | {{ action.due_date|default:'ASAP' }}</div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="text-center py-10">
+                                <div class="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">Institutional Activity Sync</div>
+                                <div class="text-[8px] text-white/10 mt-2 italic">No immediate interventions required.</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- 🏗️ GLOBAL UI ELEMENTS -->
+<div id="global-drawer-root"></div>
+<div id="global-modal-root"></div>
+<div id="toast-root"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- 🎯 FOCUS MODE HUD (Immersive Command Bar) -->
+<div id="focus-hud" class="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-2xl bg-black/80 backdrop-blur-xl border border-white/10 flex items-center gap-6 z-[2000] opacity-0 translate-y-10 pointer-events-none transition-all duration-500">
+    <div class="flex items-center gap-3">
+        <div class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
+        <span class="text-[10px] font-black text-white uppercase tracking-[0.2em]">Institutional Focus Active</span>
+    </div>
+    <div class="h-4 w-[1px] bg-white/10"></div>
+    <button class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-red-500/10 hover:text-red-400 text-[10px] font-black uppercase tracking-widest transition-all" onclick="toggleFocusMode()">
+        <i class="fas fa-times-circle mr-2"></i> Exit Focus
+    </button>
+</div>
+
+<!-- Command Palette (Ctrl+K) -->
+<div id="command-palette" class="fixed inset-0 z-[3000] bg-black/60 backdrop-blur-md hidden flex-col items-center pt-32 px-4 transition-all duration-200">
+    <div class="w-full max-w-2xl bg-[#0A0A0A] border border-white/10 rounded-2xl shadow-2xl overflow-hidden scale-95 transition-transform duration-200" id="command-palette-inner">
+        <div class="p-6 border-b border-white/5 flex items-center gap-4">
+            <i class="fas fa-search text-white/20 text-xl"></i>
+            <input type="text" id="cmd-search" class="w-full bg-transparent border-none text-white text-lg font-bold focus:outline-none placeholder-white/10" placeholder="Search workspace, institutional commands, search intelligence...">
+            <div class="px-2 py-1 rounded bg-white/5 text-[9px] font-black text-white/30 uppercase tracking-widest border border-white/5">ESC</div>
+        </div>
+        <div class="p-2 max-h-[400px] overflow-y-auto custom-scrollbar" id="command-results">
+            <div class="px-4 py-3 text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Quick Actions</div>
+            <a href="#" class="flex items-center gap-4 p-4 rounded-xl hover:bg-white/[0.03] transition-all group border border-transparent hover:border-white/5">
+                <div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center border border-orange-500/20 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-rocket-launch text-orange-500"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="text-sm font-black text-white/80 group-hover:text-white">Initialize Career OS</div>
+                    <div class="text-[11px] text-white/30 font-bold uppercase tracking-tight">Access progression intelligence</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/student_navigation.js' %}"></script>
+<script>
+    // 🎯 Focus Mode Logic
+    function toggleFocusMode() {
+        const hud = document.getElementById('focus-hud');
+        const isFocus = hud.classList.contains('opacity-100');
+        
+        if (isFocus) {
+            hud.classList.remove('opacity-100', 'translate-y-0');
+            hud.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
+            document.querySelector('.stu-sidebar').classList.remove('hidden');
+        } else {
+            hud.classList.add('opacity-100', 'translate-y-0');
+            hud.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+            document.querySelector('.stu-sidebar').classList.add('hidden');
+        }
+    }
+
+    // ⌨️ Command Palette Logic
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            const cp = document.getElementById('command-palette');
+            if (cp.classList.contains('hidden')) {
+                cp.classList.remove('hidden');
+                cp.classList.add('flex');
+                setTimeout(() => {
+                    document.getElementById('command-palette-inner').classList.remove('scale-95');
+                    document.getElementById('cmd-search').focus();
+                }, 10);
+            } else {
+                closeCommandPalette();
+            }
+        }
+        if (e.key === 'Escape') closeCommandPalette();
+    });
+</script>
+
+<!-- 🚀 Institutional Reliability Layer: State Machines & Capability Detectors -->
+<script src="{% static 'js/PerformanceCapabilityDetector.js' %}"></script>
+<script src="{% static 'js/IdentityDrawerStateMachine.js' %}"></script>
+
+<script>
+    /**
+     * 🛰️ Magnification Protocol: Presence OS
+     * Facilitates high-fidelity attendance scanning by 'popping out' the institutional pass.
+     */
+    window.magnifyQR = function(element) {
+        console.log("[PresenceOS] Magnification Protocol Initiated");
+        const qrTarget = document.getElementById('identity-qr-target');
+        const modal = document.getElementById('qr-magnifier-modal');
+        const magnifiedTarget = document.getElementById('magnified-qr-content');
+        
+        if (qrTarget && modal && magnifiedTarget) {
+            // Synchronize content
+            magnifiedTarget.innerHTML = qrTarget.innerHTML;
+            
+            // Upscale QR for Institutional Hardware
+            const img = magnifiedTarget.querySelector('img');
+            if (img && img.src.includes('qrserver.com')) {
+                img.src = img.src.replace('size=150x150', 'size=500x500');
+                img.className = "w-full h-full object-contain animate-in zoom-in duration-500";
+            }
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+            console.log("[PresenceOS] Magnification Synchronized");
+        } else {
+            console.error("[PresenceOS] Protocol Failure: Missing execution targets");
+        }
+    };
+
+    window.closeMagnifier = function() {
+        const modal = document.getElementById('qr-magnifier-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+    };
+
+    // Close on escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            window.closeSideDrawer();
+            window.closeMagnifier();
+        }
+    });
+
+    // Backdrop click
+    window.addEventListener('DOMContentLoaded', () => {
+        const overlay = document.getElementById('drawer-overlay');
+        if(overlay) overlay.onclick = window.closeSideDrawer;
+    });
+</script>
+
+    <!-- 🛰️ QR MAGNIFICATION OVERLAY: ATTENDANCE SCANNING -->
+    <div id="qr-magnifier-modal" class="fixed inset-0 z-[1000] hidden items-center justify-center bg-black/90 backdrop-blur-2xl animate-in fade-in duration-300">
+        <div class="relative max-w-sm w-full mx-6 p-10 bg-white rounded-[48px] shadow-[0_0_150px_rgba(255,255,255,0.15)] text-center animate-in zoom-in-95 duration-500">
+            <!-- Close Trigger -->
+            <button onclick="closeMagnifier()" class="absolute -top-16 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 hover:scale-110 transition-all duration-300">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+            
+            <div class="text-[10px] font-black text-black/20 uppercase tracking-[0.3em] mb-10">Institutional Scan Protocol Active</div>
+            
+            <div id="magnified-qr-content" class="w-full aspect-square bg-white rounded-3xl overflow-hidden flex items-center justify-center p-6 border-4 border-black/5">
+                <!-- High-Fidelity Content Injected Here -->
+            </div>
+
+            <div class="mt-10">
+                <div class="text-lg font-black text-black tracking-tighter mb-1">{{ student.user.get_full_name }}</div>
+                <div class="text-[11px] font-bold text-emerald-600 uppercase tracking-widest">{{ student.enrollment_no }}</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

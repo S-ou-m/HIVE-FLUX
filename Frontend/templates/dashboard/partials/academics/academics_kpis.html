@@ -1,0 +1,104 @@
+<!-- ROW 1: Hero KPI + Compact Cards (Overview Schema: 5-3-2-2) -->
+<div id="academics-kpi-slot" class="grid grid-cols-12 gap-6 mb-10 animate-fade-in">
+    <!-- Hero Card (5 cols) -->
+    <div class="col-span-5 kpi-hero-card academics-hero">
+        <div class="card-glow"></div>
+        <div class="kpi-content">
+            <div class="kpi-header">
+                <span class="label">Total Departments</span>
+                <span class="trend up">
+                    <i class="fas fa-caret-up"></i>
+                    {{ stats.growth.dept.percent }}%
+                </span>
+            </div>
+            <div class="main-value-row">
+                <h2 class="hero-value">{{ stats.total_depts }}</h2>
+                <div class="mini-chart-container">
+                    <svg width="60" height="24" viewBox="0 0 80 30">
+                        <path d="M0 25 L10 20 L20 22 L30 15 L40 18 L50 10 L60 12 L70 5 L80 8" fill="none" stroke="rgba(59, 130, 246, 0.5)" stroke-width="2" />
+                    </svg>
+                </div>
+            </div>
+            <p class="sub-text">{{ stats.active_depts }} active academic units</p>
+        </div>
+    </div>
+
+    <!-- Programs (3 cols) -->
+    <div class="col-span-3 kpi-compact-card">
+        <div class="kpi-header">
+            <span class="label">Academic Programs</span>
+        </div>
+        <div class="value-strip">
+            <span class="value">{{ stats.total_programs }}</span>
+            <span class="tag density-tag">{{ stats.avg_programs }} Density</span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-bar" style="width: 75%"></div>
+        </div>
+        <p class="sub-text">Programs across faculties</p>
+    </div>
+
+    <!-- Subjects (2 cols) -->
+    <div class="col-span-2 kpi-compact-card">
+        <div class="kpi-header">
+            <span class="label">Subject Stock</span>
+        </div>
+        <div class="value-strip">
+            <span class="value">{{ stats.total_subjects }}</span>
+        </div>
+        <div class="inventory-status">
+            <span class="status-dot healthy"></span>
+            <span class="status-text">Healthy</span>
+        </div>
+        <p class="sub-text">Academic Stock</p>
+    </div>
+
+    <!-- Risk (2 cols) -->
+    <div class="col-span-2 kpi-compact-card health-accent {% if stats.inactive_depts > 0 %}risk-state{% endif %}">
+        <div class="kpi-header">
+            <span class="label">Empty Depts</span>
+        </div>
+        <div class="health-display">
+            <span class="value">{{ stats.inactive_depts }}</span>
+            <span class="tag risk-tag">Critical</span>
+        </div>
+        <div class="health-labels">
+            <span class="health-dot {% if stats.inactive_depts == 0 %}active{% else %}alert{% endif %}"></span>
+            <span class="status-text">{% if stats.inactive_depts == 0 %}Clear{% else %}Setup Req.{% endif %}</span>
+        </div>
+        <p class="sub-text">Action items</p>
+    </div>
+</div>
+
+<style>
+    /* COMPACTED DIMENSIONS FOR MEDIUM SIZE */
+    .kpi-hero-card { position: relative; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); padding: 16px; overflow: hidden; display: flex; align-items: center; min-height: 120px; }
+    .card-glow { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at center, rgba(59, 130, 246, 0.05) 0%, transparent 70%); pointer-events: none; }
+    
+    .kpi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .kpi-header .label { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+    .hero-value { font-size: 32px; font-weight: 800; color: #fff; line-height: 1; letter-spacing: -0.02em; }
+    .main-value-row { display: flex; align-items: flex-end; gap: 12px; }
+    
+    .trend.up { font-size: 10px; color: #10b981; font-weight: 700; }
+    .sub-text { font-size: 10px; color: #475569; margin-top: 4px; font-weight: 600; }
+
+    .kpi-compact-card { background: rgba(30, 41, 59, 0.4); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); padding: 14px; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px; }
+    .kpi-compact-card .value { font-size: 24px; font-weight: 700; color: #fff; }
+    
+    .value-strip { display: flex; align-items: center; gap: 8px; }
+    .tag { font-size: 8px; font-weight: 800; padding: 1px 5px; border-radius: 4px; text-transform: uppercase; }
+    .density-tag { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .risk-tag { background: rgba(239, 68, 68, 0.1); color: #f87171; }
+
+    .progress-track { width: 100%; height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; margin: 6px 0; }
+    .progress-bar { height: 100%; background: #3b82f6; border-radius: 2px; }
+
+    .inventory-status, .health-labels { display: flex; align-items: center; gap: 5px; margin-top: 6px; }
+    .status-dot, .health-dot { width: 5px; height: 5px; border-radius: 50%; }
+    .status-dot.healthy, .health-dot.active { background: #10b981; box-shadow: 0 0 6px #10b981; }
+    .health-dot.alert { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+    .status-text { font-size: 9px; color: #94a3b8; font-weight: 600; }
+
+    .risk-state { border-color: rgba(239, 68, 68, 0.15) !important; background: rgba(239, 68, 68, 0.03) !important; }
+</style>

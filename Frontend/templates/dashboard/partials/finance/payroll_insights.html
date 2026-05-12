@@ -1,0 +1,43 @@
+<div id="payroll-stats-container" hx-swap-oob="true" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+    <!-- Monthly Liability -->
+    <div class="stat-card" style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Monthly Liability</p>
+                <h3 style="margin: 0.5rem 0 0; color: var(--text-primary);">₹{{ stats.total_liability|floatformat:2 }}</h3>
+            </div>
+            <span style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; padding: 0.5rem; border-radius: 8px;">💰</span>
+        </div>
+        <div style="margin-top: 1rem; font-size: 0.75rem; color: var(--text-secondary);">
+            For {{ month_name }} {{ year }}
+        </div>
+    </div>
+
+    <!-- Paid Amount -->
+    <div class="stat-card" style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Disbursed</p>
+                <h3 style="margin: 0.5rem 0 0; color: #22c55e;">₹{{ stats.total_paid|floatformat:2 }}</h3>
+            </div>
+            <span style="background: rgba(34, 197, 94, 0.1); color: #22c55e; padding: 0.5rem; border-radius: 8px;">✅</span>
+        </div>
+        <div style="margin-top: 1rem; font-size: 0.75rem; color: #22c55e;">
+            {{ stats.paid_count }} Payments processed
+        </div>
+    </div>
+
+    <!-- Pending -->
+    <div class="stat-card" style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Pending</p>
+                <h3 style="margin: 0.5rem 0 0; color: #eab308;">₹{{ stats.total_pending|floatformat:2 }}</h3>
+            </div>
+            <span style="background: rgba(234, 179, 8, 0.1); color: #eab308; padding: 0.5rem; border-radius: 8px;">⏳</span>
+        </div>
+        <div style="margin-top: 1rem; font-size: 0.75rem; color: #eab308;">
+            {{ stats.pending_count }} Records awaiting action
+        </div>
+    </div>
+</div>

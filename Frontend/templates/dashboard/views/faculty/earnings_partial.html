@@ -1,0 +1,462 @@
+{% load static %}
+
+<div class="earnings-console animate-slide-up">
+    <!-- --- ZONE 1: FINANCIAL STATE (Hero) --- -->
+    <div class="focus-zone hero-zone">
+        <div class="zone-header">
+            <h2 class="zone-title">Financial Intelligence Console</h2>
+            <div class="payout-state-pill {{ intel.payout.status_glow }}">
+                <div class="pulse-dot"></div>
+                <span>{{ intel.payout.status_label }} • Expected {{ intel.payout.expected_date }}</span>
+            </div>
+        </div>
+
+        <div class="kpi-intelligence-strip">
+            <div class="intel-kpi-card">
+                <div class="kpi-meta">Current Payout</div>
+                <div class="kpi-value text-gradient">{{ intel.payout.amount }}</div>
+                <div class="kpi-trend positive">{{ intel.payout.month|date:"F" }} Cycle</div>
+            </div>
+            
+            <div class="intel-kpi-card">
+                <div class="kpi-meta">Annual Compensation</div>
+                <div class="kpi-value">{{ intel.annual.amount }}</div>
+                <div class="kpi-trend positive">{{ intel.annual.trend }} growth</div>
+            </div>
+
+            <div class="intel-kpi-card">
+                <div class="kpi-meta">Tax & Compliance</div>
+                <div class="kpi-value">{{ intel.annual.ytd_paid }}</div>
+                <div class="kpi-trend">YTD Contribution</div>
+            </div>
+
+            <div class="intel-kpi-card highlight-confidence">
+                <div class="kpi-meta">Payout Confidence</div>
+                <div class="kpi-value text-{{ intel.confidence.color }}">{{ intel.confidence.label }}</div>
+                <div class="kpi-trend">{{ intel.confidence.rating }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- ZONE 2: COMPOSITION & INSIGHTS (Hybrid 70/30) --- -->
+    <div class="focus-zone-split grid-row">
+        <!-- Composition Matrix (70%) -->
+        <div class="col-span-8">
+            <div class="glass-panel composition-matrix">
+                <div class="panel-header">
+                    <span class="panel-label">Salary Composition Matrix</span>
+                    <i class="fa-solid fa-circle-info panel-info-trigger"></i>
+                </div>
+                
+                <div class="matrix-content">
+                    {% for item in intel.composition %}
+                    <div class="matrix-row" style="--row-color: {{ item.color }}">
+                        <div class="row-meta">
+                            <span class="row-label">{{ item.label }}</span>
+                            <span class="row-amount">{{ item.amount }}</span>
+                        </div>
+                        <div class="row-visual-track">
+                            <div class="row-bar" style="--row-width: {{ item.width }}%"></div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">No composition data available for current cycle.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Insights Engine (30%) -->
+        <div class="col-span-4">
+            <div class="glass-panel insights-engine">
+                <div class="panel-header">
+                    <span class="panel-label">Intelligence Engine</span>
+                    <div class="ai-status-tag">ACTIVE</div>
+                </div>
+
+                <div class="insights-list">
+                    {% for rec in intel.recommendations %}
+                    <div class="insight-card priority-{{ rec.priority|lower }}">
+                        <div class="insight-icon">
+                            <i class="fa-solid {{ rec.icon }}"></i>
+                        </div>
+                        <div class="insight-content">
+                            <div class="insight-title">{{ rec.title }}</div>
+                            <div class="insight-text">{{ rec.text }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="compensation-health-meter">
+                    <div class="meter-label">Compensation Health</div>
+                    <div class="meter-track">
+                        <div class="meter-fill" style="width: 92%"></div>
+                    </div>
+                    <div class="meter-value">92% • EXCELLENT</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- ZONE 3: HISTORY & FLOW (Footer) --- -->
+    <div class="focus-zone history-zone">
+        <div class="panel-header">
+            <span class="panel-label">Payout Flow & History</span>
+        </div>
+
+        <div class="smart-payout-grid">
+            {% for pr in intel.history %}
+            <div class="payout-row-card" 
+                 hx-get="{% url 'faculty_payout_details_drawer' pr.id %}" 
+                 hx-target="#drawer-container"
+                 onclick="openSideDrawer()">
+                <div class="row-date">
+                    <div class="date-month">{{ pr.get_month_display }}</div>
+                    <div class="date-year">{{ pr.year }}</div>
+                </div>
+                
+                <div class="row-main-intel">
+                    <div class="row-amount">₹{{ pr.net_salary|floatformat:0 }}</div>
+                    <div class="row-status">
+                        <div class="status-indicator active"></div>
+                        <span>{{ pr.get_status_display }}</span>
+                    </div>
+                </div>
+
+                <div class="row-trust-signals">
+                    <div class="trust-pill"><i class="fa-solid fa-shield-check"></i> Audit Verified</div>
+                    {% if pr.is_locked %}
+                    <div class="trust-pill"><i class="fa-solid fa-lock"></i> Payroll Locked</div>
+                    {% endif %}
+                </div>
+
+                <div class="row-actions">
+                    <button class="action-btn-ghost">View Breakdown <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">No historical payouts recorded.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Focus Zone Layout Engine */
+    .earnings-console {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        padding-bottom: 60px;
+    }
+
+    .focus-zone {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .zone-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .zone-title {
+        font-size: 24px;
+        font-weight: 900;
+        letter-spacing: -0.5px;
+        color: white;
+    }
+
+    /* Payout State Pill */
+    .payout-state-pill {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 16px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .payout-state-pill.warning .pulse-dot { background: var(--signal-warning); box-shadow: 0 0 10px var(--signal-warning); animation: pulse 2s infinite; }
+    .payout-state-pill.success .pulse-dot { background: var(--signal-success); box-shadow: 0 0 10px var(--signal-success); }
+
+    /* KPI Intelligence Strip */
+    .kpi-intelligence-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+
+    .intel-kpi-card {
+        background: var(--elevation-2);
+        border: 1px solid var(--border-glass);
+        padding: 24px;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        transition: var(--transition-smooth);
+    }
+
+    .intel-kpi-card:hover {
+        background: var(--elevation-3);
+        transform: var(--hover-lift);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .kpi-meta {
+        font-size: 10px;
+        font-weight: 900;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+
+    .kpi-value {
+        font-size: 28px;
+        font-weight: 900;
+        letter-spacing: -1px;
+    }
+
+    .kpi-trend {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-muted);
+    }
+
+    .kpi-trend.positive { color: var(--signal-success); }
+
+    /* Composition Matrix */
+    .composition-matrix {
+        padding: 24px;
+        min-height: 380px;
+    }
+
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .panel-label {
+        font-size: 11px;
+        font-weight: 900;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .matrix-content {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .matrix-row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .row-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .row-label { color: rgba(255, 255, 255, 0.7); }
+    .row-amount { color: white; }
+
+    .row-visual-track {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 100px;
+        overflow: hidden;
+    }
+
+    .row-bar {
+        height: 100%;
+        width: var(--row-width, 0%);
+        background: var(--row-color);
+        border-radius: 100px;
+        box-shadow: 0 0 10px var(--row-color);
+        opacity: 0.8;
+        transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Insights Engine */
+    .insights-engine {
+        padding: 24px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .ai-status-tag {
+        font-size: 9px;
+        font-weight: 900;
+        color: var(--blue-primary);
+        background: rgba(59, 130, 246, 0.1);
+        padding: 2px 8px;
+        border-radius: 6px;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .insights-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        flex: 1;
+    }
+
+    .insight-card {
+        display: flex;
+        gap: 16px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        border-radius: 14px;
+        transition: var(--transition-fast);
+    }
+
+    .insight-card:hover { background: rgba(255, 255, 255, 0.04); }
+
+    .insight-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--blue-primary);
+        font-size: 14px;
+    }
+
+    .insight-title {
+        font-size: 12px;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 2px;
+    }
+
+    .insight-text {
+        font-size: 11px;
+        color: var(--text-muted);
+        line-height: 1.4;
+    }
+
+    .compensation-health-meter {
+        margin-top: auto;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .meter-label {
+        font-size: 10px;
+        font-weight: 800;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+    }
+
+    .meter-track {
+        height: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 100px;
+        margin-bottom: 8px;
+    }
+
+    .meter-fill {
+        height: 100%;
+        background: var(--signal-success);
+        border-radius: 100px;
+        box-shadow: 0 0 10px var(--signal-success);
+    }
+
+    .meter-value {
+        font-size: 10px;
+        font-weight: 900;
+        color: var(--signal-success);
+    }
+
+    /* Smart Payout Grid */
+    .smart-payout-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .payout-row-card {
+        display: grid;
+        grid-template-columns: 100px 1fr 2fr 1fr;
+        align-items: center;
+        padding: 20px 32px;
+        background: var(--elevation-2);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+    }
+
+    .payout-row-card:hover {
+        background: var(--elevation-3);
+        border-color: rgba(255, 255, 255, 0.1);
+        transform: translateX(4px);
+    }
+
+    .row-date { display: flex; flex-direction: column; }
+    .date-month { font-size: 14px; font-weight: 900; color: white; }
+    .date-year { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+
+    .row-main-intel { display: flex; flex-direction: column; gap: 4px; }
+    .row-amount { font-size: 18px; font-weight: 900; color: white; }
+    .row-status { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; color: var(--text-muted); }
+    .status-indicator { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); }
+    .status-indicator.active { background: var(--signal-success); box-shadow: 0 0 8px var(--signal-success); }
+
+    .row-trust-signals {
+        display: flex;
+        gap: 12px;
+    }
+
+    .trust-pill {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--blue-primary);
+        background: rgba(59, 130, 246, 0.05);
+        padding: 4px 12px;
+        border-radius: 100px;
+        border: 1px solid rgba(59, 130, 246, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .action-btn-ghost {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: var(--transition-fast);
+        margin-left: auto;
+    }
+
+    .payout-row-card:hover .action-btn-ghost {
+        color: var(--blue-primary);
+    }
+</style>

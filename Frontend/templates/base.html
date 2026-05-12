@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hiveflux{% endblock %}</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+
+
+
+    <!-- Load Static Files -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/index.css' %}?v=1.2">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Tailwind Play CDN (Hydration Engine) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        muted: 'rgba(255,255,255,0.4)',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+    <div id="app">
+        <div id="mobile-sidebar-overlay" class="mobile-sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+        {% block content %}
+        {% endblock content %}
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.11"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.11/dist/ext/ws.js"></script>
+    <script>
+        // Global HTMX Error Handling: Force swap on 400/500 errors to show custom backend alerts
+        document.body.addEventListener('htmx:beforeSwap', function (evt) {
+            if (evt.detail.xhr.status === 500 || evt.detail.xhr.status === 400) {
+                evt.detail.shouldSwap = true;
+                evt.detail.isError = false;
+            }
+        });
+
+        document.body.addEventListener('htmx:configRequest', (event) => {
+            event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        });
+        
+        // CSS for Toast dynamically injected here for global use
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .toast {
+                background: rgba(11, 18, 33, 0.95);
+                border: 1px solid rgba(16, 185, 129, 0.2);
+                border-left: 4px solid #10b981;
+                border-radius: 12px;
+                padding: 16px 20px;
+                color: white;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+                backdrop-filter: blur(12px);
+                transition: opacity 0.3s ease, transform 0.3s ease;
+                font-family: inherit;
+                animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            .toast .icon { font-size: 18px; }
+            .toast p { margin: 0; font-size: 14px; font-weight: 600; letter-spacing: 0.3px; }
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Auto-dismiss toasts after 3 seconds
+        document.body.addEventListener('htmx:oobAfterSwap', function(evt) {
+            const toastContainer = document.getElementById('toast-container');
+            if (toastContainer && toastContainer.children.length > 0) {
+                setTimeout(() => {
+                    const toasts = toastContainer.querySelectorAll('.toast');
+                    toasts.forEach(t => {
+                        t.style.opacity = '0';
+                        setTimeout(() => t.remove(), 300);
+                    });
+                }, 3000);
+            }
+        });
+    </script>
+    <div id="toast-container" style="position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px;"></div>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/toast_system.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

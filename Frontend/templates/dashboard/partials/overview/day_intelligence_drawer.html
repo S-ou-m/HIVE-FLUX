@@ -1,0 +1,78 @@
+{% load static %}
+<div class="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+    <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 border border-orange-500/20">
+            <i class="fa-solid fa-calendar-day text-xl"></i>
+        </div>
+        <div>
+            <h2 class="text-xl font-black text-white tracking-tight">Day Intelligence</h2>
+            <p class="text-[10px] font-black text-white/30 uppercase tracking-widest">{{ day }} {{ month_name }}</p>
+        </div>
+    </div>
+    <button onclick="closeSideDrawer()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+</div>
+
+<div class="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+    <div class="space-y-4">
+        <div class="flex items-center justify-between px-1">
+            <label class="text-[10px] font-black text-white/30 uppercase tracking-widest">Operational Events</label>
+            <span class="text-[10px] font-black text-orange-500 uppercase tracking-widest">{{ events|length }} SIGNAL{{ events|length|pluralize|upper }}</span>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3">
+            {% for event in events %}
+            <div class="flex items-center gap-4 p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/[0.08] transition-all group border-l-4 
+                {% if event.type == 'financial' %}border-l-orange-500{% else %}border-l-blue-500{% endif %}">
+                
+                <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 text-sm group-hover:scale-110 transition-transform">
+                    {% if event.type == 'financial' %}
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    {% else %}
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    {% endif %}
+                </div>
+
+                <div class="flex-1">
+                    <p class="text-[9px] font-black uppercase tracking-widest opacity-30 mb-1">{{ event.type }}</p>
+                    <h4 class="text-sm font-bold text-white/90 leading-snug">{{ event.title }}</h4>
+                    <div class="flex items-center gap-2 mt-3">
+                        <div class="w-1.5 h-1.5 rounded-full {% if event.severity == 'warning' %}bg-orange-500{% else %}bg-blue-500{% endif %} animate-pulse"></div>
+                        <span class="text-[9px] font-black text-white/20 uppercase tracking-widest">Priority {{ event.severity|upper }}</span>
+                    </div>
+                </div>
+
+                <button class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/20 hover:text-white transition-all">
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+            </div>
+            {% empty %}
+            <div class="text-center py-24 bg-white/[0.02] rounded-[32px] border border-dashed border-white/5">
+                <i class="fa-solid fa-ghost text-4xl text-white/5 mb-6 block"></i>
+                <p class="text-xs font-black text-white/20 uppercase tracking-widest">Clear Operational Horizon</p>
+                <p class="text-[10px] text-white/10 mt-2">No intelligence signals recorded for this date.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Optimization Tip -->
+    {% if events %}
+    <div class="p-6 rounded-2xl bg-blue-500/5 border border-blue-500/10 mt-8">
+        <div class="flex gap-4">
+            <i class="fa-solid fa-lightbulb text-blue-500 mt-1"></i>
+            <div>
+                <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1">Operational Tip</p>
+                <p class="text-xs text-white/50 leading-relaxed">Consider sending proactive reminders for these events to maintain high institutional health scores.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<footer class="p-8 border-t border-white/5 bg-white/[0.02]">
+    <button onclick="closeSideDrawer()" class="w-full py-4 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black text-white/40 uppercase tracking-[0.2em] hover:text-white hover:bg-white/10 transition-all">
+        Close Intelligence Panel
+    </button>
+</footer>

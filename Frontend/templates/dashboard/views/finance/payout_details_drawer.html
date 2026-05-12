@@ -1,0 +1,123 @@
+<div class="drawer-header">
+    <h3 class="drawer-title">Payout Breakdown</h3>
+    <button class="drawer-close" onclick="closeSideDrawer()">×</button>
+</div>
+
+<div class="drawer-body">
+    <!-- Summary KPI -->
+    <div class="drawer-hero">
+        <div class="hero-label">{{ pr.get_month_display }} {{ pr.year }}</div>
+        <div class="hero-amount">₹{{ pr.net_salary|floatformat:0 }}</div>
+        <div class="hero-status text-{{ pr.status|lower }}">{{ pr.get_status_display }}</div>
+    </div>
+
+    <!-- Tabbed Content -->
+    <div class="drawer-tabs">
+        <div class="drawer-tab active" onclick="switchDrawerTab(this, 'breakdown')">Breakdown</div>
+        <div class="drawer-tab" onclick="switchDrawerTab(this, 'tax')">Tax & Compliance</div>
+        <div class="drawer-tab" onclick="switchDrawerTab(this, 'audit')">Audit Trail</div>
+    </div>
+
+    <div id="drawer-tab-content">
+        <!-- Breakdown Tab -->
+        <div class="tab-pane active" id="pane-breakdown">
+            <div class="component-list">
+                <div class="list-section">
+                    <div class="section-label">Earnings & Allowances</div>
+                    {% for name, amt in breakdown.earnings.items %}
+                    <div class="component-item">
+                        <span>{{ name }}</span>
+                        <span class="text-success">+ ₹{{ amt|floatformat:0 }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="list-section">
+                    <div class="section-label">Deductions</div>
+                    {% for name, amt in breakdown.deductions.items %}
+                    <div class="component-item">
+                        <span>{{ name }}</span>
+                        <span class="text-danger">- ₹{{ amt|floatformat:0 }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .drawer-hero {
+        text-align: center;
+        padding-bottom: 32px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .hero-label {
+        font-size: 11px;
+        font-weight: 900;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 8px;
+    }
+
+    .hero-amount {
+        font-size: 36px;
+        font-weight: 900;
+        color: white;
+        letter-spacing: -1.5px;
+        margin-bottom: 4px;
+    }
+
+    .hero-status {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+
+    .text-paid { color: var(--signal-success); }
+    .text-locked { color: var(--blue-primary); }
+    .text-draft { color: var(--signal-warning); }
+
+    .component-list {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+    }
+
+    .list-section {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .section-label {
+        font-size: 10px;
+        font-weight: 900;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+
+    .component-item {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .text-success { color: var(--signal-success); }
+    .text-danger { color: var(--signal-danger); }
+</style>
+
+<script>
+    function switchDrawerTab(tab, paneId) {
+        // Simple tab switcher logic
+        document.querySelectorAll('.drawer-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        // In a real impl, we would swap the pane content here.
+        // For now, we only have one pane implemented for brevity.
+    }
+</script>

@@ -1,0 +1,218 @@
+{% load static %}
+
+<div class="module-view-container animate-fade-in">
+    <div class="saas-grid-layout">
+        
+        <!-- ROW 1: HEADER & HERO -->
+        <header class="grid-section header-section">
+            <div class="col-span-8">
+                <div class="title-header-row">
+                    <div class="title-block">
+                        <h2 class="module-title">Faculty Intelligence Engine</h2>
+                        <p class="module-subtitle">Monitor institutional workload, academic distribution, and directory health.</p>
+                    </div>
+                    <div id="faculty-actions" class="module-actions"></div>
+                </div>
+                <div id="faculty-banner-slot" hx-get="{% url 'admin_faculty_stats_partial' %}?part=banner" hx-trigger="load">
+                     <div class="skeleton-banner"></div>
+                </div>
+            </div>
+            <div class="col-span-4">
+                <div id="faculty-hero-slot" hx-get="{% url 'admin_faculty_stats_partial' %}?part=hero" hx-trigger="load">
+                     <div class="skeleton-card hero-skeleton"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ROW 2: STATS -->
+        <section class="grid-section">
+            <div id="faculty-decision-cards-slot" class="col-span-12 grid-sub-4" hx-get="{% url 'admin_faculty_stats_partial' %}?part=cards" hx-trigger="load">
+                 <div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>
+            </div>
+        </section>
+
+        <!-- ROW 3: ANALYTICS -->
+        <section class="grid-section">
+            <div id="faculty-charts-container" class="col-span-12 grid-sub-2" hx-get="{% url 'admin_faculty_charts_partial' %}" hx-trigger="load">
+                <div class="skeleton-card chart-skeleton"></div><div class="skeleton-card chart-skeleton"></div>
+            </div>
+        </section>
+
+        <!-- ROW 4: DATA SURFACE (TABLE) -->
+        <section class="grid-section">
+            <div class="col-span-12">
+                <div class="data-surface-container">
+                    <div class="surface-tabs">
+                        <button class="surface-tab active" hx-get="{% url 'admin_faculty_directory_partial' %}" hx-target="#faculty-tab-content">Directory</button>
+                        <button class="surface-tab" hx-get="{% url 'admin_workload_partial' %}" hx-target="#faculty-tab-content">Workload</button>
+                    </div>
+                    <div id="faculty-tab-content" hx-get="{% url 'admin_faculty_directory_partial' %}" hx-trigger="load">
+                        <!-- Table Content -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<!-- ELITE SIDE DRAWER (SaaS Compensation) -->
+<div id="drawer-overlay" class="drawer-overlay hidden" onclick="closeDrawer()"></div>
+<div id="drawer-container" class="drawer-panel hidden">
+    <div id="drawer-content" class="h-full relative bg-white shadow-2xl">
+        <!-- Content loaded via HTMX -->
+        <div class="flex items-center justify-center h-full">
+            <div class="animate-pulse text-slate-400 font-bold">Initializing Engine...</div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --surface-bg: #0f172a;
+        --surface-border: rgba(255, 255, 255, 0.05);
+        --accent-primary: #3b82f6;
+    }
+
+    .saas-grid-layout { display: flex; flex-direction: column; gap: 32px; max-width: 1600px; margin: 0 auto; padding: 0 8px; }
+    .grid-section { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; align-items: start; }
+    .col-span-12 { grid-column: span 12; }
+    .col-span-8 { grid-column: span 8; }
+    .col-span-4 { grid-column: span 4; }
+    .grid-sub-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .grid-sub-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+
+    .module-title { font-size: 1.75rem; font-weight: 800; color: #f3f4f6; margin: 0; }
+    .module-subtitle { color: #9ca3af; font-size: 0.95rem; margin: 8px 0 20px; }
+    .title-header-row { display: flex; justify-content: space-between; align-items: flex-start; }
+
+    /* DATA SURFACE CONTAINER */
+    .data-surface-container {
+        background: var(--surface-bg);
+        border-radius: 16px;
+        border: 1px solid var(--surface-border);
+        overflow: hidden;
+    }
+
+    .surface-tabs {
+        display: flex;
+        background: rgba(255,255,255,0.01);
+        border-bottom: 1px solid var(--surface-border);
+        padding: 0 16px;
+    }
+
+    .surface-tab {
+        padding: 1.25rem 1.5rem;
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+    }
+
+    .surface-tab.active {
+        color: var(--accent-primary);
+        border-bottom-color: var(--accent-primary);
+    }
+
+    .surface-tab:hover:not(.active) { color: #f1f5f9; }
+
+    /* ELITE ACTION BUTTON */
+    .add-btn-elite {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(234, 88, 12, 0.2);
+    }
+
+    .add-btn-elite:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(234, 88, 12, 0.4);
+        filter: brightness(1.1);
+    }
+
+    /* SKELETONS */
+    .skeleton-card { background: #1f2937; border-radius: 16px; height: 140px; position: relative; overflow: hidden; }
+    .hero-skeleton { height: 160px; }
+    .chart-skeleton { height: 380px; }
+    .skeleton-banner { height: 70px; background: rgba(255,255,255,0.02); border-radius: 12px; margin-top: 12px; }
+
+    /* DRAWER SYSTEM */
+    .drawer-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .drawer-overlay.active { opacity: 1; }
+    
+    .drawer-panel {
+        position: fixed;
+        right: -920px;
+        top: 0;
+        width: 920px;
+        height: 100vh;
+        z-index: 1001;
+        background: #fff;
+        transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
+    }
+    .drawer-panel.active { right: 0; }
+    
+    .hidden { display: none; }
+</style>
+
+<script>
+    function openDrawer() {
+        const overlay = document.getElementById('drawer-overlay');
+        const drawer = document.getElementById('drawer-container');
+        
+        overlay.classList.remove('hidden');
+        drawer.classList.remove('hidden');
+        
+        // Trigger animations in next frame
+        setTimeout(() => {
+            overlay.classList.add('active');
+            drawer.classList.add('active');
+        }, 10);
+    }
+
+    function closeDrawer() {
+        const overlay = document.getElementById('drawer-overlay');
+        const drawer = document.getElementById('drawer-container');
+        
+        overlay.classList.remove('active');
+        drawer.classList.remove('active');
+        
+        // Hide after animation
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            drawer.classList.add('hidden');
+        }, 400);
+    }
+
+    document.addEventListener('click', (e) => {
+        const tab = e.target.closest('.surface-tab');
+        if (tab) {
+            const tabs = tab.parentElement.querySelectorAll('.surface-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+        }
+    });
+</script>

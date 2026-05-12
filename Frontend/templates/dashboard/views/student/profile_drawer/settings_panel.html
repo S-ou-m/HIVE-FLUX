@@ -1,0 +1,145 @@
+{% load static %}
+<div class="p-8 space-y-10 animate-in fade-in slide-in-from-right-4 duration-500">
+    
+    <!-- 🔙 Navigation Layer -->
+    <div class="flex items-center justify-between">
+        <button hx-get="{% url 'student_identity_command_center_partial_route' %}?tab=overview"
+                hx-target="#command-surface-viewport"
+                hx-swap="innerHTML"
+                class="flex items-center gap-2 text-white/40 hover:text-white transition-colors group">
+            <i class="fa-solid fa-arrow-left text-xs group-hover:-translate-x-1 transition-transform"></i>
+            <span class="text-[10px] font-black uppercase tracking-widest">Back to Identity</span>
+        </button>
+        <span class="px-2 py-1 bg-[#FF6B00]/10 border border-[#FF6B00]/20 text-[9px] text-[#FF6B00] font-black rounded uppercase">Config Mode</span>
+    </div>
+
+    <!-- 🏗️ Settings Header -->
+    <div>
+        <h2 class="text-3xl font-black text-white tracking-tighter leading-none">Command Preferences</h2>
+        <p class="text-xs text-white/40 mt-2">Adjust your personal governance and interface heuristics.</p>
+    </div>
+
+    <!-- 🛠️ Configuration Form -->
+    <form hx-post="{% url 'student_update_preferences' %}"
+          hx-target="#command-surface-viewport"
+          hx-swap="innerHTML"
+          class="space-y-8">
+        {% csrf_token %}
+        
+        {% if success %}
+        <div class="p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-[10px] font-bold text-green-400 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+            <i class="fa-solid fa-circle-check"></i>
+            Preferences Persisted Successfully
+        </div>
+        {% endif %}
+        
+        <!-- UI Heuristics -->
+        <div class="space-y-4">
+            <h3 class="text-[10px] font-black uppercase tracking-widest text-white/20">Interface Intelligence</h3>
+            
+            <div class="grid grid-cols-1 gap-4">
+                <!-- UI Density Selection -->
+                <div class="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                    <label class="block text-[10px] font-black text-white/40 uppercase mb-3">Workspace Density</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="ui_density" value="COMPACT" class="sr-only peer" {% if state.preferences.ui_density == 'COMPACT' %}checked{% endif %}>
+                            <div class="py-2 text-center text-[10px] font-bold border border-white/10 rounded-xl peer-checked:border-[#FF6B00] peer-checked:bg-[#FF6B00]/10 peer-checked:text-[#FF6B00] transition-all">COMPACT</div>
+                        </label>
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="ui_density" value="COZY" class="sr-only peer" {% if state.preferences.ui_density == 'COZY' %}checked{% endif %}>
+                            <div class="py-2 text-center text-[10px] font-bold border border-white/10 rounded-xl peer-checked:border-[#FF6B00] peer-checked:bg-[#FF6B00]/10 peer-checked:text-[#FF6B00] transition-all">COZY</div>
+                        </label>
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="ui_density" value="RELAXED" class="sr-only peer" {% if state.preferences.ui_density == 'RELAXED' %}checked{% endif %}>
+                            <div class="py-2 text-center text-[10px] font-bold border border-white/10 rounded-xl peer-checked:border-[#FF6B00] peer-checked:bg-[#FF6B00]/10 peer-checked:text-[#FF6B00] transition-all">RELAXED</div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Theme Accent Selector -->
+                <div class="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between">
+                    <div>
+                        <label class="text-[10px] font-black text-white/40 uppercase block mb-1">Brand Anchor</label>
+                        <div class="text-xs font-bold text-white">Institutional Accent Color</div>
+                    </div>
+                    <input type="color" name="theme_accent" value="{{ state.preferences.theme_accent|default:'#FF6B00' }}" 
+                           class="w-10 h-10 bg-transparent border-none cursor-pointer">
+                </div>
+            </div>
+        </div>
+
+        <!-- Personal Governance -->
+        <div class="space-y-4">
+            <h3 class="text-[10px] font-black uppercase tracking-widest text-white/20">Personal Governance</h3>
+            
+            <div class="space-y-3">
+                <!-- Focus Mode Toggle -->
+                <div class="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
+                            <i class="fa-solid fa-moon text-sm"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold text-white">Focus Mode</div>
+                            <div class="text-[10px] text-white/40">Mute non-critical institutional telemetry</div>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="focus_mode" value="true" class="sr-only peer" {% if state.preferences.focus_mode %}checked{% endif %}>
+                        <div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FF6B00]"></div>
+                    </label>
+                </div>
+
+                <!-- Quiet Hours Toggle -->
+                <div class="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+                            <i class="fa-solid fa-clock-z text-sm"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold text-white">Quiet Hours</div>
+                            <div class="text-[10px] text-white/40">Disable automated institutional nudges</div>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="quiet_hours" value="true" class="sr-only peer" {% if state.preferences.quiet_hours %}checked{% endif %}>
+                        <div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FF6B00]"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" 
+                class="w-full py-4 bg-brand text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl shadow-brand hover:scale-[1.02] active:scale-95 transition-all mt-4">
+            Save Heuristics
+        </button>
+    </form>
+
+    <!-- Security & Access -->
+    <div class="space-y-4">
+        <h3 class="text-[10px] font-black uppercase tracking-widest text-white/20">Security & Access</h3>
+        <button hx-get="{% url 'student_identity_command_center_partial_route' %}?tab=password"
+                hx-target="#command-surface-viewport"
+                hx-swap="innerHTML"
+                class="w-full p-5 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between group hover:border-blue-500/30 transition-all">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-key text-sm"></i>
+                </div>
+                <div class="text-left">
+                    <div class="text-sm font-bold text-white">Access Credentials</div>
+                    <div class="text-[10px] text-white/40">Manage passwords & security keys</div>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-[10px] text-white/20 group-hover:text-blue-400 transition-colors"></i>
+        </button>
+    </div>
+
+    <!-- Institutional Disclaimer -->
+    <div class="p-4 border border-white/5 rounded-2xl bg-white/[0.02]">
+        <p class="text-[9px] text-white/20 italic leading-relaxed text-center uppercase tracking-widest">
+            Identity Governance is managed under institutional compliance framework 2.4. Personalization persists across all authorized nodes.
+        </p>
+    </div>
+</div>

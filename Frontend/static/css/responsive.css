@@ -1,0 +1,172 @@
+/* ♿ Global Accessibility Focus States */
+:focus-visible {
+    outline: 2px solid var(--stu-accent, #FF6B00);
+    outline-offset: 4px;
+    box-shadow: 0 0 15px rgba(255, 107, 0, 0.3);
+}
+
+/* ♿ Accessibility: Skip Link */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 20px;
+    background: var(--stu-accent, #FF6B00);
+    color: white;
+    padding: 12px 24px;
+    z-index: 999999;
+    border-radius: 0 0 12px 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-decoration: none;
+    transition: top 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* 📱 Breakpoint: 1024px (Tablet/Small Desktop) */
+@media screen and (max-width: 1024px) {
+    :root {
+        --sidebar-width: 0px;
+    }
+
+    /* Grid Liquidation */
+    .dashboard-layout {
+        grid-template-columns: 1fr !important;
+    }
+
+    .dashboard-sidebar {
+        position: fixed !important;
+        left: -280px;
+        top: 0;
+        bottom: 0;
+        width: 280px !important;
+        z-index: 3000 !important; /* Above topbar */
+        transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        box-shadow: 20px 0 60px rgba(0,0,0,0.6) !important;
+        background: #05070d !important;
+    }
+
+    .dashboard-sidebar.mobile-active {
+        left: 0 !important;
+    }
+
+    /* Main Content Shift */
+    .dashboard-main {
+        width: 100vw !important;
+        margin-left: 0 !important;
+    }
+
+    /* KPI Grid Adaptation */
+    .grid-row, .command-grid, .status-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+    }
+
+    .col-span-12, .col-span-10, .col-span-8, .col-span-6, .col-span-4, .col-span-3,
+    .col-12, .col-8, .col-4 {
+        grid-column: span 2 !important;
+    }
+
+    /* Topbar Adjustments */
+    .dashboard-topbar {
+        padding: 0 16px !important;
+    }
+
+    .topbar-center, .topbar-search {
+        display: none !important;
+    }
+
+    .mobile-nav-trigger {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px;
+        color: white;
+        cursor: pointer;
+        margin-right: 12px;
+    }
+
+    /* Student OS Overrides */
+    .stu-shell {
+        flex-direction: column !important;
+    }
+
+    .stu-sidebar {
+        position: fixed !important;
+        left: -300px;
+        top: 0;
+        bottom: 0;
+        width: 300px !important;
+        transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    .stu-sidebar.mobile-active {
+        left: 0 !important;
+    }
+
+    .workspace-container {
+        padding: 16px !important;
+    }
+}
+
+/* 📱 Breakpoint: 768px (Mobile) */
+@media screen and (max-width: 768px) {
+    .grid-row, .command-grid, .status-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .col-span-12, .col-span-10, .col-span-8, .col-span-6, .col-span-4, .col-span-3,
+    .col-12, .col-8, .col-4 {
+        grid-column: span 1 !important;
+    }
+
+    .card-kpi {
+        padding: 16px !important;
+    }
+
+    .text-kpi-val {
+        font-size: 24px !important;
+    }
+
+    /* Floating Command Dock */
+    .command-dock {
+        left: 50% !important;
+        bottom: 16px !important;
+        width: calc(100% - 32px) !important;
+    }
+
+    .dock-inner {
+        width: 100% !important;
+        justify-content: space-around !important;
+        padding: 8px !important;
+    }
+
+    .dock-btn span {
+        display: none !important;
+    }
+}
+
+/* 🌑 Overlay Backdrop for Mobile Sidebar */
+.mobile-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 2500;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.mobile-sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}

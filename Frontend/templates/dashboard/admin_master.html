@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - College ERP{% endblock %}
+
+{% block extra_head %}
+<script>
+    (function() {
+        if (localStorage.getItem('sidebar_state') === 'compact') {
+            document.documentElement.classList.add('sidebar-compact-init');
+        }
+    })();
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- ========================================== -->
+<!-- DASHBOARD MASTER SHELL -->
+<!-- ========================================== -->
+<div class="dashboard-layout" id="dashboard-layout">
+    
+    <!-- ========================================== -->
+    <!-- SIDEBAR (STATIC LEFT) -->
+    <!-- ========================================== -->
+    {% include 'dashboard/partials/admin_sidebar.html' %}
+
+    <!-- ========================================== -->
+    <!-- MAIN CONTENT AREA (RIGHT SIDE) -->
+    <!-- ========================================== -->
+    <div class="dashboard-main">
+        
+        <!-- ========================================== -->
+        <!-- TOP NAVIGATION BAR -->
+        <!-- ========================================== -->
+        {% include 'dashboard/partials/admin_topbar.html' %}
+        <link rel="stylesheet" href="{% static 'css/communication.css' %}">
+
+        <!-- Critical Notice Banner (Injected via HTMX) -->
+        <div id="critical-banner" hx-get="{% url 'get_critical_banner' %}" hx-trigger="load"></div>
+
+        <!-- ========================================== -->
+        <!-- DYNAMIC HTMX CONTENT CONTAINER -->
+        <!-- ========================================== -->
+        <!-- This div will be updated by HTMX without hard refreshing -->
+        <main id="dashboard-content" 
+              class="dashboard-content animate-fade-in"
+              hx-get="{% if initial_load_url %}{{ initial_load_url }}{% else %}{% url 'admin_overview_partial' %}{% endif %}" 
+              hx-trigger="load">
+            {% block dashboard_content %}
+            <!-- Initial content will be loaded via HTMX on page load -->
+            <div class="loading-state" style="color: var(--text-secondary); text-align: center; padding: 2rem;">
+                Loading dashboard data...
+            </div>
+            {% endblock %}
+        </main>
+        
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- GLOBAL UI CONTAINERS -->
+<!-- ========================================== -->
+<div id="modal-container"></div>
+
+<!-- Global Side Drawer System -->
+<div id="drawer-overlay" class="side-drawer-overlay" onclick="closeSideDrawer()"></div>
+<div id="side-drawer" class="side-drawer">
+    <div id="drawer-container">
+        <div id="global-drawer-content"></div>
+        <div class="loading-state p-8 drawer-loader hidden">
+            <div class="animate-pulse text-muted font-black text-[10px] tracking-widest">LOADING INTELLIGENCE...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openSideDrawer() {
+        document.getElementById('drawer-overlay').classList.add('active');
+        document.getElementById('side-drawer').classList.add('active');
+    }
+
+    function closeSideDrawer() {
+        document.getElementById('drawer-overlay').classList.remove('active');
+        document.getElementById('side-drawer').classList.remove('active');
+    }
+
+    function openModal() {
+        const root = document.getElementById('global-modal-root');
+        const container = document.getElementById('modal-container');
+        if (root) root.classList.add('active');
+        if (container) container.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        const root = document.getElementById('global-modal-root');
+        const container = document.getElementById('modal-container');
+        if (root) root.classList.remove('active');
+        if (container) container.classList.remove('active');
+        document.body.style.overflow = '';
+        setTimeout(() => {
+            if (container) container.innerHTML = '';
+        }, 300);
+    }
+</script>
+{% endblock %}

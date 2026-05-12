@@ -1,0 +1,28 @@
+<div class="modal-backdrop" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation();">
+        <div class="modal-header">
+            <h3>{% if edit %}Edit Semester{% else %}Add New Semester{% endif %}</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <form hx-post="{% if edit %}{% url 'admin_semester_edit' semester.id %}{% else %}{% url 'admin_semester_create' %}{% endif %}" 
+              hx-target="#modal-container">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Semester Number</label>
+                    {{ form.number }}
+                </div>
+                <div class="form-group">
+                    <label>Program</label>
+                    {{ form.program }}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    {% if edit %}Update Semester{% else %}Save Semester{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,332 @@
+{% load static %}
+
+{% if part == 'banner' %}
+    <!-- 1. INSIGHT BANNER (Modular) -->
+    <div class="insight-stack">
+        {% if stats.insights %}
+        {% for insight in stats.insights %}
+        {% with delay_str=forloop.counter|add:forloop.counter|stringformat:"s"|add:"0ms" %}
+        <div class="insight-item signal-{{ insight.type }} animate-slide-in"
+            {% if True %}style="animation-delay: {{ delay_str }};"{% endif %}>
+            <div class="insight-content">
+                <span class="insight-text">{{ insight.text }}</span>
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+        {% else %}
+        <div class="insight-item signal-info">
+            <span class="insight-text">💡 Faculty directories are healthy. No capacity alerts at this time.</span>
+        </div>
+        {% endif %}
+    </div>
+
+{% elif part == 'hero' %}
+    <style>
+        .kpi-hero-elite {
+            background: rgba(17, 24, 39, 0.4);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 1.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .kpi-hero-elite::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-intel-header { display: flex; justify-content: space-between; align-items: center; }
+        .hero-intel-label { font-size: 0.7rem; font-weight: 800; color: #64748b; letter-spacing: 0.1em; text-transform: uppercase; }
+        .hero-trend-badge {
+            font-size: 0.65rem;
+            font-weight: 900;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .hero-trend-badge.positive { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.1); }
+        .hero-trend-badge.negative { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.1); }
+        
+        .hero-metric-row { margin: 1.5rem 0; }
+        .hero-metric-val { font-size: 2.75rem; font-weight: 900; color: #fff; letter-spacing: -0.03em; line-height: 1; }
+        
+        .hero-intel-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .velocity-text { font-size: 0.75rem; color: #94a3b8; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .recruit-icon { color: #6366f1; font-size: 0.85rem; }
+    </style>
+
+    <!-- 2. HERO KPI: RECRUITMENT VELOCITY (SaaS Elite) -->
+    <div class="kpi-hero-elite">
+        <div class="hero-intel-header">
+            <span class="hero-intel-label">Total Faculty Matrix</span>
+            <div class="hero-trend-badge {{ stats.growth.trend }}">
+                <i class="fa-solid {% if stats.growth.trend == 'positive' %}fa-arrow-trend-up{% else %}fa-arrow-trend-down{% endif %}"></i>
+                {{ stats.growth.percent }}%
+            </div>
+        </div>
+        
+        <div class="hero-metric-row">
+            <div class="hero-metric-val">{{ stats.total_faculty }}</div>
+            <div class="text-[10px] font-bold text-slate-500 uppercase mt-2">Active Profiles Synchronized</div>
+        </div>
+        
+        <div class="hero-intel-footer">
+            <div class="velocity-text">
+                <i class="fa-solid fa-user-plus recruit-icon"></i>
+                <span>{{ stats.growth.value }} New joiners this month</span>
+            </div>
+            <div class="live-dot"></div>
+        </div>
+    </div>
+{% elif part == 'cards' %}
+    <!-- 3. DECISION CARDS (SaaS Elite Edition) -->
+    <style>
+        .decision-card-elite {
+            background: rgba(17, 24, 39, 0.4);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .decision-card-elite::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .decision-card-elite:hover::before { opacity: 1; }
+        
+        .decision-card-elite.clickable:hover {
+            background: rgba(30, 41, 59, 0.5);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-5px);
+            cursor: pointer;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-intel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .icon-box-elite {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            position: relative;
+        }
+        .icon-box-elite::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 14px;
+            opacity: 0.1;
+        }
+
+        .status-tag-elite {
+            font-size: 0.6rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            border: 1px solid transparent;
+        }
+
+        .card-main-metric {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        .metric-value-elite { font-size: 2.25rem; font-weight: 900; color: #fff; letter-spacing: -0.02em; }
+        .metric-trend-elite { font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; gap: 2px; }
+
+        .card-intel-label { font-size: 0.85rem; font-weight: 700; color: #94a3b8; }
+        
+        .card-intel-footer {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .footer-text-intel { font-size: 0.7rem; color: #64748b; font-weight: 600; }
+        .footer-spark-mock { width: 40px; height: 16px; opacity: 0.3; }
+
+        /* Specific Variants */
+        .card-warning .icon-box-elite { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .card-warning .icon-box-elite::after { background: #f59e0b; }
+        .card-warning .status-tag-elite { background: rgba(245, 158, 11, 0.05); color: #f59e0b; border-color: rgba(245, 158, 11, 0.1); }
+        .card-warning .metric-trend-elite { color: #f59e0b; }
+
+        .card-info .icon-box-elite { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .card-info .icon-box-elite::after { background: #3b82f6; }
+        .card-info .status-tag-elite { background: rgba(59, 130, 246, 0.05); color: #3b82f6; border-color: rgba(59, 130, 246, 0.1); }
+        .card-info .metric-trend-elite { color: #3b82f6; }
+
+        .card-success .icon-box-elite { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .card-success .icon-box-elite::after { background: #10b981; }
+        .card-success .status-tag-elite { background: rgba(16, 185, 129, 0.05); color: #10b981; border-color: rgba(16, 185, 129, 0.1); }
+        .card-success .metric-trend-elite { color: #10b981; }
+
+        .card-indigo .icon-box-elite { background: rgba(99, 102, 241, 0.1); color: #818cf8; }
+        .card-indigo .icon-box-elite::after { background: #818cf8; }
+        .card-indigo .status-tag-elite { background: rgba(99, 102, 241, 0.05); color: #818cf8; border-color: rgba(99, 102, 241, 0.1); }
+        .card-indigo .metric-trend-elite { color: #818cf8; }
+
+        .pulse-glitch { animation: pulse-glitch 3s infinite; }
+        @keyframes pulse-glitch { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+    </style>
+
+    <!-- CAPACITY OVERLOAD -->
+    <div class="decision-card-elite clickable card-warning" hx-get="{% url 'admin_faculty_directory_partial' %}?filter=overloaded" hx-target="#faculty-tab-content">
+        <div class="card-intel-header">
+            <div class="icon-box-elite"><i class="fa-solid fa-bolt-lightning pulse-glitch"></i></div>
+            <span class="status-tag-elite">Capacity</span>
+        </div>
+        <div class="card-main-metric">
+            <span class="metric-value-elite">{{ stats.workload.overloaded }}</span>
+            <span class="metric-trend-elite">
+                <i class="fa-solid fa-arrow-trend-up"></i>
+                Critical
+            </span>
+        </div>
+        <div class="card-intel-label">Overloaded Staff</div>
+        <div class="card-intel-footer">
+            <span class="footer-text-intel">Avg {{ stats.workload.avg_sessions }} sessions/faculty</span>
+            <div class="footer-spark-mock"><i class="fa-solid fa-wave-square"></i></div>
+        </div>
+    </div>
+
+    <!-- UNASSIGNED IDLE -->
+    <div class="decision-card-elite clickable card-info" hx-get="{% url 'admin_faculty_directory_partial' %}?filter=idle" hx-target="#faculty-tab-content">
+        <div class="card-intel-header">
+            <div class="icon-box-elite"><i class="fa-solid fa-user-clock"></i></div>
+            <span class="status-tag-elite">Idle</span>
+        </div>
+        <div class="card-main-metric">
+            <span class="metric-value-elite">{{ stats.workload.idle }}</span>
+            <span class="metric-trend-elite">
+                <i class="fa-solid fa-arrow-trend-down"></i>
+                -12%
+            </span>
+        </div>
+        <div class="card-intel-label">Unassigned Staff</div>
+        <div class="card-intel-footer">
+            <span class="footer-text-intel">Available for new sections</span>
+            <div class="footer-spark-mock"><i class="fa-solid fa-chart-line"></i></div>
+        </div>
+    </div>
+
+    <!-- ACTIVE DEPARTMENTS -->
+    <div class="decision-card-elite card-success">
+        <div class="card-intel-header">
+            <div class="icon-box-elite"><i class="fa-solid fa-building-columns"></i></div>
+            <span class="status-tag-elite">Active</span>
+        </div>
+        <div class="card-main-metric">
+            <span class="metric-value-elite">{{ stats.academics.active_depts }}</span>
+            <span class="metric-trend-elite">
+                <i class="fa-solid fa-check-double"></i>
+                Stable
+            </span>
+        </div>
+        <div class="card-intel-label">Departments</div>
+        <div class="card-intel-footer">
+            <span class="footer-text-intel">Top: {{ stats.academics.top_dept }}</span>
+            <div class="footer-spark-mock"><i class="fa-solid fa-network-wired"></i></div>
+        </div>
+    </div>
+
+    <!-- PROFILE HEALTH -->
+    <div class="decision-card-elite card-indigo">
+        <div class="card-intel-header">
+            <div class="icon-box-elite"><i class="fa-solid fa-shield-halved"></i></div>
+            <span class="status-tag-elite">Health</span>
+        </div>
+        <div class="card-main-metric">
+            <span class="metric-value-elite">100%</span>
+            <span class="metric-trend-elite">
+                <i class="fa-solid fa-shield-heart"></i>
+                Optimal
+            </span>
+        </div>
+        <div class="card-intel-label">Profile Integrity</div>
+        <div class="card-intel-footer">
+            <span class="footer-text-intel">Analyzed {{ stats.workload.total_sessions }} sessions</span>
+            <div class="footer-spark-mock"><i class="fa-solid fa-microchip"></i></div>
+        </div>
+    </div>
+
+{% else %}
+    <!-- Intelligence Fallback -->
+{% endif %}
+
+<style>
+    /* MODULAR STYLES */
+    .h-full { height: 100%; }
+    
+    .kpi-hero-card {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .kpi-header { display: flex; justify-content: space-between; align-items: center; }
+    .kpi-label { font-size: 0.7rem; font-weight: 700; color: #9ca3af; letter-spacing: 0.05em; }
+    .kpi-trend { font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+    .kpi-trend.positive { color: #10b981; background: rgba(16, 185, 129, 0.1); }
+    .kpi-trend.negative { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+    .kpi-value { font-size: 2.5rem; font-weight: 800; color: #fff; margin: 0.5rem 0; }
+    .kpi-footer { font-size: 0.8rem; color: #9ca3af; display: flex; align-items: center; gap: 6px; }
+
+    .insight-stack { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+    .insight-item { padding: 10px 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.01); }
+    .signal-critical { border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.03); }
+    .signal-growth { border-left: 4px solid #10b981; background: rgba(16, 185, 129, 0.03); }
+    .signal-info { border-left: 4px solid #3b82f6; background: rgba(59, 130, 246, 0.03); }
+    .insight-text { font-size: 0.85rem; color: #d1d5db; }
+
+    .live-dot { width: 6px; height: 6px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+</style>

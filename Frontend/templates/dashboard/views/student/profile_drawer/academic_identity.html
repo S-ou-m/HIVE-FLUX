@@ -1,0 +1,45 @@
+<div class="space-y-6">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xs font-black uppercase tracking-widest text-white/40">Academic Identity</h3>
+        <span class="px-2 py-1 bg-[#FF6B00]/10 border border-[#FF6B00]/20 text-[10px] text-[#FF6B00] font-black rounded uppercase">Validated</span>
+    </div>
+
+    <!-- 🎯 Career Target Card -->
+    <div class="p-6 bg-gradient-to-br from-[#FF6B00]/20 to-transparent border border-white/10 rounded-3xl relative overflow-hidden group">
+        <div class="relative z-10">
+            <div class="text-[10px] font-black text-[#FF6B00] uppercase tracking-widest mb-1">Career Goal</div>
+            <div class="text-2xl font-black text-white mb-4 group-hover:text-[#FF6B00] transition-colors">{{ state.academic_identity.career_goal }}</div>
+            
+            <div class="flex items-center gap-6">
+                <div>
+                    <div class="text-[10px] text-white/40 uppercase font-black">Current Focus</div>
+                    <div class="text-xs font-bold text-white/80">{{ state.academic_identity.current_focus }}</div>
+                </div>
+                <div class="h-8 w-[1px] bg-white/10"></div>
+                <div>
+                    <div class="text-[10px] text-white/40 uppercase font-black">Success Confidence</div>
+                    <div class="text-xs font-bold text-white/80">{{ state.identity.trust_score }}%</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Background Icon -->
+        <i class="fa-solid fa-graduation-cap absolute -top-4 -right-4 text-8xl text-white/5 -rotate-12 transition-transform group-hover:rotate-0"></i>
+    </div>
+
+    <!-- 🤝 Institutional Support -->
+    <div class="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 text-lg font-black">
+                SM
+            </div>
+            <div>
+                <div class="text-[10px] text-white/40 uppercase font-black">Institutional Mentor</div>
+                <div class="text-sm font-bold text-white">{{ state.academic_identity.mentor }}</div>
+            </div>
+        </div>
+        <button class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white transition-all">
+            <i class="fa-solid fa-message text-xs"></i>
+        </button>
+    </div>
+</div>

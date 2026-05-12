@@ -1,0 +1,135 @@
+<aside class="dashboard-sidebar sidebar" id="main-sidebar">
+    <!-- 🏫 Tenant Context Header -->
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <div class="logo-icon bg-primary-glow">🎓</div>
+            <span class="logo-text">ERP <span class="text-primary font-bold">FACULTY</span></span>
+        </div>
+        <button class="sidebar-toggle-btn" id="sidebar-toggle" onclick="toggleSidebar()">
+            <i class="fa-solid fa-bars-staggered"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-content custom-scrollbar">
+        <!-- 🏠 OPERATIONS CONTROL -->
+        <div class="nav-group">
+            <div class="nav-group-header" onclick="toggleNavGroup(this)">
+                <div class="nav-group-label">Operations Control</div>
+                <i class="fa-solid fa-chevron-down group-toggle-icon"></i>
+            </div>
+            <div class="nav-group-content">
+                <a href="#" class="nav-item active" hx-get="{% url 'faculty_overview_partial' %}" hx-target="#dashboard-content" hx-push-url="{% url 'faculty_dashboard_overview' %}">
+                    <div class="nav-icon-box"><i class="fa-solid fa-microchip"></i></div>
+                    <span>Execution Engine</span>
+                    <div class="nav-badge badge-live">LIVE</div>
+                </a>
+                <a href="#" class="nav-item" hx-get="{% url 'admin_timetable_management' %}" hx-target="#dashboard-content" hx-push-url="/dashboard/faculty/timetable/">
+                    <div class="nav-icon-box"><i class="fa-solid fa-timeline"></i></div>
+                    <span>Timetable Management</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 📊 INTELLIGENCE SECTION -->
+        <div class="nav-group">
+            <div class="nav-group-header" onclick="toggleNavGroup(this)">
+                <div class="nav-group-label">Intelligence</div>
+                <i class="fa-solid fa-chevron-down group-toggle-icon"></i>
+            </div>
+            <div class="nav-group-content">
+                <a href="#" class="nav-item" hx-get="{% url 'faculty_performance_partial' %}" hx-target="#dashboard-content" hx-push-url="{% url 'faculty_dashboard_performance' %}">
+                    <div class="nav-icon-box"><i class="fa-solid fa-chart-line"></i></div>
+                    <span>Performance</span>
+                </a>
+                <a href="#" class="nav-item" hx-get="{% url 'faculty_attendance_dashboard' %}" hx-target="#dashboard-content" hx-push-url="{% url 'faculty_dashboard_attendance' %}">
+                    <div class="nav-icon-box"><i class="fa-solid fa-user-shield"></i></div>
+                    <span>Attendance Intelligence</span>
+                    <div class="nav-badge badge-new">PRO</div>
+                </a>
+                <a href="#" class="nav-item" hx-get="{% url 'faculty_assignment_review_hub' %}" hx-target="#dashboard-content" hx-push-url="{% url 'faculty_dashboard_assignments' %}">
+                    <div class="nav-icon-box"><i class="fa-solid fa-brain"></i></div>
+                    <span>Assignment Review</span>
+                    <div class="nav-badge badge-live">LIVE</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 💎 FINANCE & RESOURCES -->
+        <div class="nav-group">
+            <div class="nav-group-header" onclick="toggleNavGroup(this)">
+                <div class="nav-group-label">Finance & Resources</div>
+                <i class="fa-solid fa-chevron-down group-toggle-icon"></i>
+            </div>
+            <div class="nav-group-content">
+                <a href="#" class="nav-item" hx-get="{% url 'faculty_earnings_partial' %}" hx-target="#dashboard-content" hx-push-url="{% url 'faculty_dashboard_finance' %}">
+                    <div class="nav-icon-box"><i class="fa-solid fa-wallet"></i></div>
+                    <span>Earnings Intelligence</span>
+                </a>
+                <a href="#" class="nav-item" hx-get="{% url 'faculty_tax_documents_partial' %}" hx-target="#dashboard-content">
+                    <div class="nav-icon-box"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                    <span>Tax Documents</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- ⚙️ SYSTEM -->
+        <div class="nav-group">
+            <div class="nav-group-header" onclick="toggleNavGroup(this)">
+                <div class="nav-group-label">System</div>
+                <i class="fa-solid fa-chevron-down group-toggle-icon"></i>
+            </div>
+            <div class="nav-group-content">
+                <a href="#" class="nav-item" hx-get="{% url 'faculty_notifications_partial' %}" hx-target="#dashboard-content">
+                    <div class="nav-icon-box"><i class="fa-solid fa-bell"></i></div>
+                    <span>Notifications</span>
+                    <div class="nav-badge badge-alert">3</div>
+                </a>
+                <a href="#" class="nav-item" hx-get="{% url 'faculty_security_partial' %}" hx-target="#dashboard-content">
+                    <div class="nav-icon-box"><i class="fa-solid fa-shield-halved"></i></div>
+                    <span>Security</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🚪 FOOTER (User Identity) -->
+    <div class="sidebar-footer">
+        <!-- Operational Presence -->
+        <div class="sidebar-presence">
+            <div class="presence-glow"></div>
+            <div class="presence-content">
+                <div class="presence-indicator active"></div>
+                <span>NEURAL LINK STABLE</span>
+            </div>
+        </div>
+
+        <div class="user-identity-card">
+            <div class="user-avatar-box">
+                {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+            </div>
+            <div class="user-meta-info">
+                <span class="user-full-name">{{ request.user.get_full_name }}</span>
+            </div>
+        </div>
+        
+        <a href="{% url 'logout' %}" class="nav-item logout">
+            <div class="nav-icon-box"><i class="fa-solid fa-right-from-bracket"></i></div>
+            <span>Sign Out</span>
+        </a>
+    </div>
+</aside>
+
+<script>
+    function toggleNavGroup(header) {
+        const group = header.parentElement;
+        group.classList.toggle('collapsed');
+    }
+
+    // Navigation Highlighter Logic
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+</script>

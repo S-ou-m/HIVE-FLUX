@@ -1,0 +1,117 @@
+<div class="review-os-canvas animate-fade-in">
+    <!-- 🏗️ TOP COMMAND BAR -->
+    <div class="review-header-bar">
+        <div class="flex items-center gap-6">
+            <button class="btn-pil secondary" hx-get="{% url 'faculty_assignment_review_hub' %}" hx-target="#dashboard-content">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Operations
+            </button>
+            <div class="flex flex-col">
+                <span class="text-sm font-bold text-white">{{ sub.student.user.get_full_name }}</span>
+                <span class="text-[10px] text-muted uppercase tracking-widest">{{ sub.assignment.title }}</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div class="status-chip active">Reviewing: Section A</div>
+            <button class="btn-pil primary">
+                <i class="fas fa-check-double mr-2"></i> Lock & Finalize Grade
+            </button>
+        </div>
+    </div>
+
+    <!-- 🏗️ MAIN WORKSPACE (Split View) -->
+    <div class="review-main-split">
+        <!-- Center: Submission Canvas -->
+        <div class="submission-content-area custom-scrollbar" id="submission-canvas">
+            <div class="document-viewer">
+                <h2 class="text-2xl font-bold mb-8">Assignment Submission</h2>
+                <p class="mb-6">Student Enrollment: {{ sub.student.enrollment_no }}</p>
+                <div class="submission-text-placeholder">
+                    {{ sub.feedback|default:"The student's submission content would be rendered here via a PDF viewer or text extractor engine. This is a high-performance evaluation canvas designed for granular academic analysis." }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Intelligence Rail -->
+        <div class="intelligence-rail-right custom-scrollbar">
+            <!-- AI Assist Section -->
+            <div class="rubric-item">
+                <div class="intel-header">
+                    <i class="fas fa-robot text-primary mr-2"></i>
+                    <span>AI GRADING ASSIST</span>
+                </div>
+                <p class="text-xs text-muted leading-relaxed mb-4">
+                    Based on the class rubric and historical performance, the AI suggests a score of <span class="text-green-success font-bold">{{ sub.ai_confidence|floatformat:1|default:"8.0" }}/10</span>.
+                </p>
+                <div class="ai-insight-bubble">
+                    "Student shows strong understanding of normalization but index optimization explanation is shallow."
+                </div>
+            </div>
+
+            <!-- Rubric Engine -->
+            <div class="rubric-item">
+                <div class="intel-header">
+                    <i class="fas fa-th-list text-muted mr-2"></i>
+                    <span>EVALUATION RUBRIC</span>
+                </div>
+                <div class="flex flex-col gap-6">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-white">Conceptual Clarity</span>
+                        <input type="number" class="score-input" value="8" max="10">
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-white">Code/Logic Efficiency</span>
+                        <input type="number" class="score-input" value="7" max="10">
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-white">Documentation</span>
+                        <input type="number" class="score-input" value="9" max="10">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voice Commenting Placeholder -->
+            <div class="rubric-item">
+                <button class="btn-pil secondary w-full py-4 border-dashed">
+                    <i class="fas fa-microphone mr-2"></i> Start Voice Feedback
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏗️ BOTTOM ACTIVITY RAIL -->
+    <div class="activity-rail-bottom custom-scrollbar">
+        <div class="intel-header px-8 pt-4">
+            <i class="fas fa-history mr-2"></i>
+            <span>EVALUATION TIMELINE</span>
+        </div>
+        <div class="timeline-feed">
+            {% for event in events %}
+            <div class="timeline-event">
+                <div class="event-dot"></div>
+                <div class="event-content">
+                    <span class="event-type">{{ event.get_event_type_display }}</span>
+                    <span class="text-xs text-muted">{{ event.description }}</span>
+                    <span class="event-time">{{ event.created_at|timesince }} ago</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="p-8 text-center text-muted text-xs">No activity logged for this submission.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Review Memory: Store scroll position
+    const canvas = document.getElementById('submission-canvas');
+    canvas.addEventListener('scroll', () => {
+        localStorage.setItem('review_scroll_{{ sub.id }}', canvas.scrollTop);
+    });
+
+    // Restore scroll position
+    const savedPos = localStorage.getItem('review_scroll_{{ sub.id }}');
+    if (savedPos) {
+        canvas.scrollTop = savedPos;
+    }
+</script>

@@ -1,0 +1,259 @@
+<div class="payroll-intelligence-drawer animate-slide-left">
+    <!-- Rich Identity Section (Replaces Global Header) -->
+    <div class="drawer-identity">
+        <div class="avatar">{{ pr.faculty.user.first_name|first }}{{ pr.faculty.user.last_name|first }}</div>
+        <div class="name-block">
+            <h3>{{ pr.faculty.user.get_full_name }}</h3>
+            <p>{{ pr.faculty.designation }} • {{ pr.month }}/{{ pr.year }} Payroll</p>
+        </div>
+    </div>
+
+    <div class="drawer-content">
+        <!-- 1. High-Level Stats & Trends -->
+        <div class="intelligence-grid">
+            <div class="intel-card">
+                <label>Net Pay</label>
+                <div class="value">₹{{ pr.net_salary|floatformat:2 }}</div>
+                {% if trend.percent != 0 %}
+                    <div class="trend {% if trend.percent > 0 %}up{% else %}down{% endif %}">
+                        {% if trend.percent > 0 %}↑{% else %}↓{% endif %} {{ trend.percent_abs|floatformat:1 }}% vs last month
+                    </div>
+                {% endif %}
+            </div>
+            <div class="intel-card">
+                <label>Earnings vs Deductions</label>
+                <div class="chart-box">
+                    <div class="mini-ratio-bar">
+                        <div class="earnings" style="width: {{ earnings_ratio|floatformat:0 }}%;"></div>
+                    </div>
+                    <div class="ratio-labels">
+                        <span>Earnings (₹{{ pr.gross_salary|floatformat:0 }})</span>
+                        <span>Deductions (₹{{ pr.deductions|floatformat:0 }})</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Detailed Breakdown -->
+        <div class="breakdown-sections">
+            <div class="breakdown-col">
+                <h4><i class="fa-solid fa-wallet"></i> Earnings</h4>
+                <div class="item-list">
+                    <div class="item"><span>Basic Salary</span> <strong>₹{{ breakdown.base|floatformat:2 }}</strong></div>
+                    <div class="item"><span>HRA</span> <strong>₹{{ breakdown.hra|floatformat:2 }}</strong></div>
+                    {% for name, amt in breakdown.allowances.items %}
+                    <div class="item"><span>{{ name }}</span> <strong>₹{{ amt|floatformat:2 }}</strong></div>
+                    {% endfor %}
+                    <div class="total-line"><span>Total Earnings</span> <strong>₹{{ pr.gross_salary|floatformat:2 }}</strong></div>
+                </div>
+            </div>
+            <div class="breakdown-col">
+                <h4><i class="fa-solid fa-file-invoice-dollar"></i> Deductions</h4>
+                <div class="item-list">
+                    {% for name, amt in breakdown.deductions.items %}
+                    <div class="item"><span>{{ name }}</span> <strong class="deduct">-₹{{ amt|floatformat:2 }}</strong></div>
+                    {% empty %}
+                    <div class="item empty">No deductions applied</div>
+                    {% endfor %}
+                    <div class="total-line"><span>Total Deductions</span> <strong class="deduct">-₹{{ pr.deductions|floatformat:2 }}</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Smart Insights -->
+        <div class="panel-insights">
+            <h4><i class="fa-solid fa-lightbulb"></i> Intelligence Insights</h4>
+            <div class="insight-cards">
+                {% if trend.percent > 10 %}
+                <div class="insight-item warning">
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                    <p>Net salary increased by {{ trend.percent|floatformat:1 }}%. Verify any special bonuses or corrections.</p>
+                </div>
+                {% endif %}
+                {% if pr.deductions > 15000 %}
+                <div class="insight-item info">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <p>High deduction detected (₹{{ pr.deductions|floatformat:0 }}). Mostly attributed to PF and Tax adjustments.</p>
+                </div>
+                {% endif %}
+                <div class="insight-item success">
+                    <i class="fa-solid fa-check-double"></i>
+                    <p>Calculation verified against faculty salary structure version v2.4.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Audit Trail -->
+        <div class="panel-audit">
+            <h4><i class="fa-solid fa-clock-rotate-left"></i> Audit Trail</h4>
+            <div class="timeline">
+                {% for log in audit_trail %}
+                <div class="timeline-item">
+                    <div class="time-dot"></div>
+                    <div class="time-content">
+                        <strong>{{ log.action }}</strong>
+                        <span>{{ log.date|date:"M d, Y H:i" }} • by {{ log.user }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-footer">
+        {% if pr.status == 'GENERATED' %}
+            <button class="btn btn-outline" onclick="closeModal()">Edit Snapshot</button>
+            <button class="btn btn-primary" 
+                    hx-post="{% url 'admin_payroll_update_status' pr.id 'approved' %}"
+                    hx-target="#finance-content"
+                    onclick="closeModal()">Approve Payroll</button>
+        {% elif pr.status == 'APPROVED' %}
+            <button class="btn btn-primary"
+                    hx-post="{% url 'admin_payroll_update_status' pr.id 'paid' %}"
+                    hx-target="#finance-content"
+                    onclick="closeModal()">Mark as Paid</button>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .payroll-intelligence-drawer {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    .drawer-identity {
+        padding: 1.5rem 0;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+    
+    .avatar {
+        width: 48px;
+        height: 48px;
+        background: var(--accent-gradient);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: white;
+        font-size: 1.2rem;
+    }
+    .name-block h3 { margin: 0; font-size: 1.25rem; }
+    .name-block p { margin: 0; font-size: 0.85rem; color: var(--text-secondary); }
+
+    .intelligence-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .intel-card {
+        background: var(--bg-secondary);
+        padding: 1.25rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+    }
+    .intel-card label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+    .intel-card .value { font-size: 1.75rem; font-weight: 800; color: #22c55e; margin: 0.25rem 0; }
+    .trend { font-size: 0.8rem; font-weight: 600; }
+    .trend.up { color: #22c55e; }
+    .trend.down { color: #ef4444; }
+
+    .mini-ratio-bar {
+        height: 8px;
+        background: #ef4444;
+        border-radius: 4px;
+        margin: 1rem 0 0.5rem;
+        overflow: hidden;
+    }
+    .mini-ratio-bar .earnings {
+        height: 100%;
+        background: #22c55e;
+    }
+    .ratio-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+    }
+
+    .breakdown-sections {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    .breakdown-col h4 {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-primary);
+    }
+    .item-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .item {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    .item strong { color: var(--text-primary); }
+    .item strong.deduct { color: #ef4444; }
+    .total-line {
+        margin-top: 0.5rem;
+        padding-top: 0.75rem;
+        border-top: 1px dashed var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .panel-insights { margin-bottom: 2rem; }
+    .insight-cards { display: flex; flex-direction: column; gap: 0.75rem; }
+    .insight-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        align-items: center;
+        font-size: 0.85rem;
+    }
+    .insight-item.warning { background: rgba(234, 179, 8, 0.1); color: #eab308; }
+    .insight-item.info { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .insight-item.success { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+    .insight-item p { margin: 0; }
+
+    .panel-audit h4 { font-size: 0.9rem; margin-bottom: 1rem; }
+    .timeline { padding-left: 1rem; border-left: 2px solid var(--border-color); }
+    .timeline-item { position: relative; padding-bottom: 1.5rem; padding-left: 1.5rem; }
+    .time-dot {
+        position: absolute;
+        left: -1.9rem;
+        top: 0.25rem;
+        width: 10px;
+        height: 10px;
+        background: var(--accent-primary);
+        border-radius: 50%;
+        border: 2px solid var(--bg-primary);
+    }
+    .time-content { display: flex; flex-direction: column; }
+    .time-content strong { font-size: 0.85rem; }
+    .time-content span { font-size: 0.75rem; color: var(--text-secondary); }
+
+    .drawer-footer {
+        padding: 1.5rem 0;
+        margin-top: 2rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+</style>

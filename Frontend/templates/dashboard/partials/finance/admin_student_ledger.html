@@ -1,0 +1,118 @@
+<div class="animate-fade-in">
+    
+    <!-- 🏗️ PREMIUM DRAWER HEADER -->
+    <div style="padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px);">
+        <div>
+            <h2 style="margin: 0; font-size: 0.85rem; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 0.15em;">Financial Intelligence</h2>
+            <div style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-top: 2px;">Comprehensive Audit Ledger</div>
+        </div>
+        <button onclick="closeSideDrawer()" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); width: 32px; height: 32px; border-radius: 50%; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+
+    <div style="padding: 1.5rem;">
+    
+    <!-- 🏗️ HEADER: IDENTITY & KPI STRIP -->
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+            <div style="width: 48px; height: 48px; background: var(--primary-color); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">👤</div>
+            <div>
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--text-primary);">{{ student.user.get_full_name }}</h3>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">{{ student.enrollment_no }} | {{ student.department.code }} Sem {{ student.current_semester.number }}</div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
+            <div style="padding: 0.5rem; border-right: 1px solid var(--border-color);">
+                <div style="font-size: 0.6rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.25rem;">Total Liability</div>
+                <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">₹{{ total_liability|floatformat:2 }}</div>
+            </div>
+            <div style="padding: 0.5rem; border-right: 1px solid var(--border-color);">
+                <div style="font-size: 0.6rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.25rem;">Settled Amount</div>
+                <div style="font-size: 1.25rem; font-weight: 800; color: #22c55e;">₹{{ total_paid|floatformat:2 }}</div>
+            </div>
+            <div style="padding: 0.5rem;">
+                <div style="font-size: 0.6rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.25rem;">Net Balance</div>
+                <div style="font-size: 1.25rem; font-weight: 800; color: #ef4444;">₹{{ balance_due|floatformat:2 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏗️ LEDGER TABLE -->
+    <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="font-size: 0.8rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em; margin: 0;">Transaction History</h4>
+        <div style="display: flex; gap: 0.5rem;">
+            <span class="status-badge status-info" style="font-size: 0.6rem; border-radius: 4px;">{{ ledger|length }} Entries</span>
+        </div>
+    </div>
+
+    <div class="data-table-wrapper" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
+        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+            <thead style="background: rgba(255,255,255,0.02);">
+                <tr>
+                    <th style="padding: 1rem; text-align: left; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; border-bottom: 1px solid var(--border-color);">DATE & REF</th>
+                    <th style="padding: 1rem; text-align: left; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; border-bottom: 1px solid var(--border-color);">CONTEXT</th>
+                    <th style="padding: 1rem; text-align: right; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; border-bottom: 1px solid var(--border-color);">DEBIT</th>
+                    <th style="padding: 1rem; text-align: right; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; border-bottom: 1px solid var(--border-color);">CREDIT</th>
+                    <th style="padding: 1rem; text-align: center; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; border-bottom: 1px solid var(--border-color);">STATUS</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                {% for entry in ledger %}
+                <tr class="hover-row" style="transition: background 0.2s;">
+                    <td style="padding: 1rem;">
+                        <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">{{ entry.date|date:"d M Y" }}</div>
+                        <div style="font-size: 0.65rem; color: var(--text-secondary); font-family: monospace;">{{ entry.reference_id }}</div>
+                    </td>
+                    <td style="padding: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <span style="font-size: 1.1rem;">{{ entry.icon }}</span>
+                            <div style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary);">{{ entry.context }}</div>
+                        </div>
+                    </td>
+                    <td style="padding: 1rem; text-align: right; font-weight: 700; color: #ef4444; font-size: 0.9rem;">
+                        {% if entry.type == 'DEBIT' %}₹{{ entry.amount|floatformat:2 }}{% else %}-{% endif %}
+                    </td>
+                    <td style="padding: 1rem; text-align: right; font-weight: 700; color: #22c55e; font-size: 0.9rem;">
+                        {% if entry.type == 'CREDIT' %}₹{{ entry.amount|floatformat:2 }}{% else %}-{% endif %}
+                    </td>
+                    <td style="padding: 1rem; text-align: center;">
+                        <span class="status-badge {% if entry.status == 'PAID' or entry.status == 'SETTLED' %}status-success{% elif entry.status == 'FAILED' %}status-danger{% else %}status-warning{% endif %}" 
+                              style="font-size: 0.6rem; padding: 0.2rem 0.5rem;">
+                            {{ entry.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="padding: 3rem; text-align: center; color: var(--text-secondary); font-weight: 600;">No transactions found for this student.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 🏗️ ACTION FOOTER -->
+    <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+        <button class="btn btn-primary" 
+                style="flex: 1; padding: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;"
+                hx-get="{% url 'admin_payment_global_modal' %}"
+                hx-vals='{"student_id": "{{ student.id }}"}'
+                hx-target="#modal-container">
+            Record New Transaction
+        </button>
+        <button class="btn btn-secondary" 
+                style="padding: 1rem 1.5rem; background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); font-weight: 700;"
+                onclick="closeSideDrawer()">
+            Close Ledger
+        </button>
+    </div>
+
+</div>
+
+<style>
+    .hover-row:hover {
+        background: rgba(255,255,255,0.02);
+    }
+</style>

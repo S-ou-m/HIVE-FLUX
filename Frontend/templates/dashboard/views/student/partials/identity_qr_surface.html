@@ -1,0 +1,46 @@
+<div class="w-full h-full bg-white rounded-2xl flex items-center justify-center relative overflow-hidden animate-in zoom-in-95 duration-500">
+    <!-- 🏗️ INSTITUTIONAL TARGETING FRAMES -->
+    <div class="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-emerald-500/40"></div>
+    <div class="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-emerald-500/40"></div>
+    <div class="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-emerald-500/40"></div>
+    <div class="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-emerald-500/40"></div>
+    
+    <!-- 🛰️ DYNAMIC SECURITY RHYTHM (Faculty Parity) -->
+    <div class="qr-scan-line"></div>
+    <div class="absolute inset-0 bg-emerald-500/[0.01] animate-pulse"></div>
+    
+    <img src="{{ qr_url }}" alt="Secure Identity Pass" class="w-[85%] h-[85%] object-contain relative z-10 transition-transform hover:scale-105 duration-500">
+    
+    <!-- 🏗️ IDENTITY SIGNATURE OVERLAY (Hover Intelligence) -->
+    <div class="absolute inset-0 flex flex-col items-center justify-center opacity-0 hover:opacity-100 transition-all duration-500 bg-white/95 backdrop-blur-md z-20 cursor-none">
+        <div class="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mb-4 scale-50 group-hover:scale-100 transition-transform">
+            <i class="fas fa-fingerprint text-emerald-500 text-xl"></i>
+        </div>
+        <div class="text-[9px] font-black text-emerald-600 tracking-[0.3em] uppercase text-center">
+            <div class="mb-2">Identity Verified</div>
+            <div class="font-mono text-[8px] text-gray-400/80 font-bold tracking-normal">{{ token|truncatechars:16 }}</div>
+        </div>
+    </div>
+
+    <style>
+        .qr-scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #10b981, transparent);
+            box-shadow: 0 0 20px #10b981;
+            z-index: 15;
+            animation: qr-scan-kinetic 3s infinite ease-in-out;
+            opacity: 0.7;
+        }
+
+        @keyframes qr-scan-kinetic {
+            0% { top: 0%; opacity: 0; }
+            15% { opacity: 1; }
+            85% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+    </style>
+</div>

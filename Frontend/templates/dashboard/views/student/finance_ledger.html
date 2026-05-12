@@ -1,0 +1,121 @@
+<div class="finance-ledger-workspace animate-fade-in space-y-10">
+    
+    <!-- 🏗️ FINANCE HUB HEADER -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-black text-white">Finance OS</h2>
+            <p class="text-[10px] font-bold text-white/30 uppercase tracking-widest">Trust-Centric Financial Intelligence</p>
+        </div>
+        <div class="flex gap-3">
+            <button hx-get="{% url 'student_payment_orchestration_partial' %}"
+                    hx-target="#workspace-core"
+                    class="px-4 py-2 rounded-xl bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-orange-500/20 hover:scale-105 transition-all">
+                Settle Outstanding Balance
+            </button>
+        </div>
+    </div>
+
+    <!-- 🏗️ FINANCIAL TELEMETRY -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="stu-kpi-card relative overflow-hidden group">
+            <div class="text-[9px] font-black text-white/30 uppercase tracking-widest mb-2">Total Liability</div>
+            <div class="text-3xl font-black text-white">₹{{ total_liability }}</div>
+            <div class="mt-4 flex items-center justify-between">
+                <span class="text-[9px] font-black text-emerald-400 uppercase">Verified Aggregate</span>
+                <button class="text-[8px] font-black text-white/20 uppercase hover:text-white transition-colors" onclick="document.getElementById('fee-breakdown').classList.toggle('hidden')">View Breakdown</button>
+            </div>
+            
+            <!-- 🔍 Hidden Breakdown Surface -->
+            <div id="fee-breakdown" class="hidden mt-4 pt-4 border-t border-white/5 space-y-2 animate-in slide-in-from-top-2 duration-300">
+                {% for item in breakdown %}
+                <div class="flex justify-between text-[9px] font-bold text-white/40">
+                    <span>{{ item.label }}</span>
+                    <span class="text-white/60">₹{{ item.value|floatformat:2 }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            <i class="fas fa-receipt absolute -top-4 -right-4 text-7xl text-white/[0.02] group-hover:text-white/[0.05] transition-colors"></i>
+        </div>
+
+        <div class="stu-kpi-card relative overflow-hidden group">
+            <div class="text-[9px] font-black text-white/30 uppercase tracking-widest mb-2">Cleared Trust</div>
+            <div class="text-3xl font-black text-emerald-400">₹{{ total_paid }}</div>
+            <div class="mt-4 text-[9px] font-black text-white/20 uppercase tracking-widest">Digital Settlement Confirmed</div>
+            <i class="fas fa-check-double absolute -top-4 -right-4 text-7xl text-emerald-500/[0.02] group-hover:text-emerald-500/[0.05] transition-colors"></i>
+        </div>
+
+        <div class="stu-kpi-card border-orange-500/20 relative overflow-hidden group">
+            <div class="text-[9px] font-black text-orange-500 uppercase tracking-widest mb-2">Outstanding Balance</div>
+            <div class="text-3xl font-black text-white">₹{{ balance_due }}</div>
+            <div class="mt-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 rounded-full {% if risk_signal == 'CRITICAL' %}bg-red-500 animate-ping{% else %}bg-orange-500 animate-pulse{% endif %}"></div>
+                    <div class="text-[9px] font-black text-white/40 uppercase tracking-widest">Next Due: {{ next_due_date }}</div>
+                </div>
+                <span class="text-[8px] font-black {% if risk_signal == 'CRITICAL' %}text-red-400{% else %}text-orange-500/60{% endif %} uppercase">{{ risk_message }}</span>
+            </div>
+            <i class="fas fa-clock absolute -top-4 -right-4 text-7xl text-orange-500/[0.02] group-hover:text-orange-500/[0.05] transition-colors"></i>
+        </div>
+    </div>
+
+    <!-- 🏗️ TRANSACTION INTELLIGENCE -->
+    <div class="stu-kpi-card !p-0 overflow-hidden">
+        <div class="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+            <div class="text-[10px] font-black text-white/40 uppercase tracking-widest">Institutional Trust Ledger</div>
+            <div class="flex gap-2">
+                <div class="px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-[8px] font-black text-emerald-400 uppercase">RECONCILED</div>
+                <div class="px-2 py-1 rounded bg-white/5 border border-white/10 text-[8px] font-black text-white/30 uppercase tracking-widest">ID_VERIFIED</div>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-white/[0.02]">
+                        <th class="px-6 py-4 text-[9px] font-black text-white/20 uppercase tracking-widest">Ref ID</th>
+                        <th class="px-6 py-4 text-[9px] font-black text-white/20 uppercase tracking-widest">Context & Mode</th>
+                        <th class="px-6 py-4 text-[9px] font-black text-white/20 uppercase tracking-widest text-right">Liability</th>
+                        <th class="px-6 py-4 text-[9px] font-black text-white/20 uppercase tracking-widest text-right">Settlement</th>
+                        <th class="px-6 py-4 text-[9px] font-black text-white/20 uppercase tracking-widest text-center">Audit State</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    {% for entry in ledger %}
+                    <tr class="hover:bg-white/[0.01] transition-colors group">
+                        <td class="px-6 py-4">
+                            <div class="font-mono text-[9px] text-white/40">{{ entry.reference_id }}</div>
+                            <div class="text-[8px] font-black text-white/10 uppercase tracking-widest mt-1">{{ entry.verification }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[10px] text-white/20 group-hover:text-blue-400 transition-colors">
+                                    <i class="fas fa-{% if entry.mode == 'UPI' %}mobile-screen{% elif entry.mode == 'CARD' %}credit-card{% else %}building-columns{% endif %}"></i>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] font-black text-white/80 group-hover:text-white transition-colors">{{ entry.context }}</div>
+                                    <div class="text-[9px] text-white/20 uppercase">{{ entry.date|date:"d M Y" }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 font-black text-xs text-white text-right">{% if entry.debit > 0 %}₹{{ entry.debit }}{% else %}-{% endif %}</td>
+                        <td class="px-6 py-4 font-black text-xs text-emerald-400 text-right">{% if entry.credit > 0 %}₹{{ entry.credit }}{% else %}-{% endif %}</td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="inline-flex items-center gap-1.5 px-2 py-1 rounded 
+                                {% if entry.status == 'PAID' or entry.status == 'SETTLED' %}bg-emerald-500/10 border border-emerald-500/20 text-emerald-400
+                                {% elif entry.status == 'FAILED' %}bg-red-500/10 border border-red-500/20 text-red-400
+                                {% else %}bg-orange-500/10 border border-orange-500/20 text-orange-400{% endif %} 
+                                text-[8px] font-black uppercase tracking-widest">
+                                {{ entry.status }}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-white/20 font-black uppercase text-[10px] tracking-widest">No activity records found in ledger</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,47 @@
+<!-- 🏛️ Student Operational Identity Overview -->
+<div class="h-full flex flex-col bg-black text-white p-8 space-y-10">
+    
+    <!-- 🏗️ ZONE 1: Identity Ownership Surface -->
+    <div id="identity-surface-root" 
+         hx-get="{% url 'student_identity_command_center_partial_route' %}?tab=identity" 
+         hx-trigger="load"
+         class="mb-8">
+        <div class="h-24 bg-white/5 animate-pulse rounded-2xl"></div>
+    </div>
+
+    <!-- 🏗️ ZONE 2: Personal Governance Hub (NEW) -->
+    <div id="governance-root" 
+         hx-get="{% url 'student_identity_command_center_partial_route' %}?tab=governance" 
+         hx-trigger="load delay:100ms"
+         class="mb-6">
+    </div>
+
+    <!-- 🏗️ ZONE 3: Security Command Surface (Elevated) -->
+    <div id="security-root" 
+         hx-get="{% url 'student_identity_command_center_partial_route' %}?tab=security" 
+         hx-trigger="load delay:200ms"
+         class="mb-6">
+    </div>
+
+    <!-- 🏗️ ZONE 4: Academic Identity & Goals (NEW) -->
+    <div id="academic-identity-root" 
+         hx-get="{% url 'student_identity_command_center_partial_route' %}?tab=academics" 
+         hx-trigger="load delay:300ms"
+         class="mb-6">
+    </div>
+
+    <!-- 🏗️ ZONE 5: Operational Intelligence Layer (Repositioned) -->
+    <div id="telemetry-root" 
+         hx-get="{% url 'student_identity_command_center_partial_route' %}?tab=telemetry" 
+         hx-trigger="load delay:400ms"
+         class="mb-6">
+    </div>
+
+    <!-- 🏗️ ZONE 6: Institutional Services & Actions -->
+    <div id="actions-root" 
+         hx-get="{% url 'student_identity_command_center_partial_route' %}?tab=actions" 
+         hx-trigger="load delay:500ms">
+    </div>
+
+
+</div>

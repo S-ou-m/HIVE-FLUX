@@ -1,0 +1,23 @@
+{% for student in students %}
+<div class="search-result-item" 
+     hx-get="{% url 'admin_get_student_payment_context' student.id %}" 
+     hx-target="#context-container"
+     onclick="document.getElementById('search-results').style.display='none'">
+    <div style="flex: 1;">
+        <div class="res-name" style="font-weight: 600; font-size: 1rem; color: var(--text-primary);">
+            {% if student.user.get_full_name %}{{ student.user.get_full_name }}{% else %}{{ student.user.username }}{% endif %}
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-secondary); display: flex; gap: 0.75rem; margin-top: 0.15rem;">
+            <span>🆔 {{ student.enrollment_no }}</span>
+            <span>📚 {{ student.department.name|default:"General" }}</span>
+        </div>
+    </div>
+    <div style="text-align: right;">
+        <span class="status-badge status-warning" style="font-size: 0.6rem;">Pending Dues</span>
+    </div>
+</div>
+{% empty %}
+<div style="padding: 1.5rem; text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
+    No students found matching your query.
+</div>
+{% endfor %}

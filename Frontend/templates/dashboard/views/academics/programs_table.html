@@ -1,0 +1,113 @@
+<!-- OOB Swap for the Action Button -->
+<div id="academics-actions" hx-swap-oob="true">
+    <button class="btn btn-primary btn-saas" hx-get="{% url 'admin_program_create' %}" hx-target="#modal-container">
+        <i class="fa-solid fa-plus mr-2"></i> Add Program
+    </button>
+</div>
+
+<!-- TOP TOOLBAR -->
+<div class="saas-toolbar mb-6">
+    <div class="toolbar-left">
+        <div class="premium-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search programs..." 
+                   hx-get="{% url 'admin_programs_partial' %}" 
+                   hx-trigger="keyup changed delay:300ms" 
+                   hx-target="#academics-content">
+        </div>
+        <div class="premium-filter">
+            <select hx-get="{% url 'admin_programs_partial' %}" hx-target="#academics-content" name="filter">
+                <option value="">All Departments</option>
+                {% for dept in departments_list %}
+                <option value="{{ dept.id }}">{{ dept.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="toolbar-right">
+        <button class="icon-action-btn" title="Export CSV"><i class="fa-solid fa-file-export"></i></button>
+        <button class="icon-action-btn" title="Table Settings"><i class="fa-solid fa-gears"></i></button>
+    </div>
+</div>
+
+<!-- DATA TABLE -->
+<div class="saas-table-container premium-shadow">
+    <table class="saas-data-table">
+        <thead>
+            <tr>
+                <th class="w-1/3">PROGRAM NAME</th>
+                <th>DEPARTMENT</th>
+                <th class="text-center">DURATION</th>
+                <th class="text-center">STATUS</th>
+                <th class="text-right pr-6">ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prog in programs %}
+            <tr class="saas-row">
+                <!-- Identity -->
+                <td>
+                    <div class="dept-identity">
+                        <div class="dept-avatar active">
+                            {{ prog.name|slice:":1"|upper }}
+                        </div>
+                        <div class="dept-info">
+                            <span class="dept-name">{{ prog.name }}</span>
+                            <div class="dept-meta">
+                                <span class="meta-item"><i class="fa-solid fa-calendar-alt"></i> {{ prog.duration_years }} Year Track</span>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <!-- Department Link -->
+                <td>
+                    <span class="health-pill active" style="padding: 4px 12px; border-radius: 8px; text-transform: none; letter-spacing: normal;">
+                        {{ prog.department.name }}
+                    </span>
+                </td>
+
+                <!-- Duration -->
+                <td class="text-center">
+                    <div class="compact-stats">
+                        <span class="stat-main">{{ prog.duration_years }}</span>
+                        <span class="stat-sub">Years</span>
+                    </div>
+                </td>
+
+                <!-- Status -->
+                <td class="text-center">
+                    <div class="health-pill-container">
+                        <span class="health-pill active">
+                            <span class="pulse-dot"></span>
+                            Active
+                        </span>
+                    </div>
+                </td>
+
+                <!-- Actions -->
+                <td class="text-right pr-6">
+                    <div class="saas-action-group">
+                        <button class="saas-btn edit" title="Edit Program" hx-get="{% url 'admin_program_edit' prog.id %}" hx-target="#modal-container">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button class="saas-btn delete" title="Delete Program" hx-post="{% url 'admin_program_delete' prog.id %}" hx-confirm="Are you sure you want to PERMANENTLY delete this program? All linked subjects and semesters will be lost." hx-target="#academics-content">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">
+                    <div class="saas-empty-state">
+                        <div class="empty-icon">📜</div>
+                        <p class="empty-text">No programs have been defined yet.</p>
+                        <button class="btn btn-primary btn-sm mt-4" hx-get="{% url 'admin_program_create' %}" hx-target="#modal-container">Add New Program</button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

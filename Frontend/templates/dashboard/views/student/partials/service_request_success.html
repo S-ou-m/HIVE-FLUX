@@ -1,0 +1,35 @@
+<div class="col-span-full p-8 bg-emerald-500/10 border border-emerald-500/20 rounded-[32px] animate-in zoom-in-95 duration-500">
+    <div class="flex items-center gap-6">
+        <div class="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl animate-bounce">
+            <i class="fa-solid fa-check-to-slot"></i>
+        </div>
+        <div>
+            <h3 class="text-xl font-black text-white">Institutional Request Raised</h3>
+            <div class="flex items-center gap-2 mt-1">
+                <span class="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em]">Ticket Generated:</span>
+                <span class="text-[10px] font-mono text-white/60">{{ ticket_id }}</span>
+            </div>
+        </div>
+    </div>
+    <p class="mt-6 text-sm text-white/50 leading-relaxed italic">
+        Your formal request has been successfully injected into the institutional workflow. You will receive real-time updates as the node specialist reviews your documentation.
+    </p>
+    <div class="mt-8 flex gap-4">
+        <button hx-get="{% url 'student_service_portal_partial' service_slug=service_slug %}"
+                hx-target="#workspace-core"
+                class="px-6 py-3 bg-white/5 border border-white/10 text-[10px] font-black text-white/60 hover:text-white rounded-xl uppercase tracking-widest transition-all">
+            Return to Portal
+        </button>
+        <button hx-get="{% url 'student_view_ticket_status' ticket_id=ticket_id %}"
+                hx-target="#workspace-core"
+                class="px-6 py-3 bg-emerald-500 text-white text-[10px] font-black rounded-xl uppercase tracking-widest shadow-lg shadow-emerald-500/20">
+            View Ticket Status
+        </button>
+        <button hx-post="{% url 'student_add_to_roadmap' service_slug=service_slug %}"
+                hx-target="this"
+                hx-swap="outerHTML"
+                class="px-6 py-3 bg-blue-500 text-white text-[10px] font-black rounded-xl uppercase tracking-widest shadow-lg shadow-blue-500/20 transition-all">
+            Add to Degree Roadmap
+        </button>
+    </div>
+</div>

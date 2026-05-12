@@ -1,0 +1,320 @@
+{% load static %}
+
+<div class="attendance-scanner-env animate-slide-in-right">
+    <!-- 🏗️ ZONE 1: OPERATIONAL HEADER -->
+    <div class="scanner-header">
+        <div class="header-left">
+            <div class="session-indicator active">
+                <div class="pulse-dot"></div>
+                LIVE SESSION
+            </div>
+            <div class="session-meta">
+                <h2 class="text-xl font-black text-white">{{ session.subject_snapshot_name }}</h2>
+                <div class="flex gap-3 text-[10px] font-bold text-muted uppercase tracking-widest">
+                    <span>SEC {{ session.slot_instance.timetable_slot.timetable.section|default:"A" }}</span>
+                    <span>•</span>
+                    <span>ROOM {{ session.slot_instance.timetable_slot.room.name|default:"302" }}</span>
+                    <span>•</span>
+                    <span id="session-timer" data-start="{{ session.started_at|date:'c' }}">00:00 ELAPSED</span>
+                </div>
+            </div>
+        </div>
+        <button class="close-env-btn" onclick="closeSideDrawer()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- 🏗️ ZONE 2: SCANNING CANVAS -->
+    <div class="scanner-canvas-area">
+        <div class="scanner-viewport">
+            <div class="laser-sweep"></div>
+            <div class="scanner-crosshairs"></div>
+            
+            <div class="scanner-state-overlay" id="scanner-state">
+                <div class="state-ready">READY TO SCAN</div>
+                <div class="state-verifying hidden">
+                    <div class="spinner-ring"></div>
+                    <span>VERIFYING IDENTITY...</span>
+                </div>
+                <div class="state-success hidden">
+                    <i class="fas fa-check-circle text-success text-4xl mb-2"></i>
+                    <span id="success-name">STUDENT VERIFIED</span>
+                </div>
+                <div class="state-duplicate hidden">
+                    <i class="fas fa-exclamation-triangle text-amber-500 text-4xl mb-2"></i>
+                    <span id="warning-name" class="text-amber-500">ALREADY VERIFIED</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🕹️ SIMULATION CONTROLS -->
+        <div class="simulation-dock">
+            <div class="text-[10px] font-black text-muted uppercase tracking-widest mb-3 text-center">Operational Simulation</div>
+            <div class="flex gap-2">
+                <button class="sim-btn" onclick="ScannerOS.simulateScan('S101')">Simulate Scan A</button>
+                <button class="sim-btn" onclick="ScannerOS.simulateScan('S102')">Simulate Scan B</button>
+                <button class="sim-btn warning" onclick="ScannerOS.simulateScan('S101')">Test Duplicate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏗️ ZONE 3: INTELLIGENCE RAIL (Bottom) -->
+    <div class="scanner-intel-rail">
+        <div class="intel-metrics-hud">
+            <div class="intel-kpi">
+                <span class="label">Present</span>
+                <span class="value" id="count-present">{{ metrics.present }}</span>
+            </div>
+            <div class="intel-kpi">
+                <span class="label">Expected</span>
+                <span class="value">{{ metrics.expected }}</span>
+            </div>
+            <div class="intel-kpi">
+                <span class="label">Scan Rate</span>
+                <span class="value text-primary" id="scan-rate">{{ metrics.scan_rate }}</span>
+            </div>
+        </div>
+
+        <div class="live-scan-feed">
+            <div class="feed-header">RECENTLY VERIFIED</div>
+            <div class="feed-list custom-scrollbar" id="verification-feed">
+                <!-- Injected via JS -->
+                {% for record in recent_scans %}
+                <div class="feed-item animate-slide-up">
+                    <div class="item-avatar">{{ record.student.user.first_name|first }}</div>
+                    <div class="item-info">
+                        <div class="item-name">{{ record.student.user.get_full_name }}</div>
+                        <div class="item-meta">{{ record.marked_at|time }} • ENROLLED</div>
+                    </div>
+                    <i class="fas fa-check-circle text-success ml-auto"></i>
+                </div>
+                {% empty %}
+                <div class="feed-empty">WAITING FOR OPERATIONAL INPUT...</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CSRF for scanner_orchestrator.js -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+<style>
+    /* Kinetic Design Tokens */
+    .scanner-viewport.success-flash {
+        animation: success-flash 0.8s ease-out;
+    }
+    .scanner-viewport.warning-shiver {
+        animation: warning-shiver 0.5s ease-in-out;
+    }
+
+    @keyframes success-flash {
+        0% { box-shadow: 0 0 0 rgba(34, 197, 94, 0); }
+        50% { box-shadow: 0 0 100px rgba(34, 197, 94, 0.4); background: rgba(34, 197, 94, 0.1); }
+        100% { box-shadow: 0 0 0 rgba(34, 197, 94, 0); }
+    }
+
+    @keyframes warning-shiver {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    /* Existing Styles ... */
+    .attendance-scanner-env {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: #020617;
+        color: white;
+    }
+
+    .scanner-header {
+        padding: 32px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(15, 23, 42, 0.5);
+    }
+
+    .session-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 10px;
+        font-weight: 900;
+        color: var(--signal-success);
+        margin-bottom: 4px;
+    }
+
+    .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--signal-success);
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    .scanner-canvas-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        position: relative;
+    }
+
+    .scanner-viewport {
+        width: 100%;
+        max-width: 400px;
+        aspect-ratio: 1;
+        border: 2px solid rgba(59, 130, 246, 0.3);
+        border-radius: 40px;
+        position: relative;
+        overflow: hidden;
+        background: rgba(0, 0, 0, 0.4);
+        box-shadow: 0 0 50px rgba(59, 130, 246, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .laser-sweep {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(to right, transparent, #3b82f6, transparent);
+        box-shadow: 0 0 15px #3b82f6;
+        animation: laser-sweep 3s infinite linear;
+    }
+
+    @keyframes laser-sweep {
+        0% { top: 0%; }
+        100% { top: 100%; }
+    }
+
+    .scanner-state-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        letter-spacing: 2px;
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 14px;
+        text-transform: uppercase;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .simulation-dock {
+        margin-top: 40px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .sim-btn {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+        padding: 10px 16px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .sim-btn:hover { background: #3b82f6; color: white; }
+    .sim-btn.warning { color: #f59e0b; border-color: rgba(245, 158, 11, 0.2); background: rgba(245, 158, 11, 0.1); }
+
+    .scanner-intel-rail {
+        padding: 32px;
+        background: rgba(15, 23, 42, 0.8);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .intel-metrics-hud {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    .intel-kpi {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .intel-kpi .label { font-size: 9px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; }
+    .intel-kpi .value { font-size: 20px; font-weight: 900; }
+
+    .live-scan-feed {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .feed-header {
+        font-size: 10px;
+        font-weight: 900;
+        color: var(--text-muted);
+        letter-spacing: 2px;
+        margin-bottom: 16px;
+    }
+
+    .feed-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        margin-bottom: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .item-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        background: #3b82f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 12px;
+    }
+
+    .item-name { font-size: 13px; font-weight: 700; color: white; }
+    .item-meta { font-size: 10px; color: var(--text-muted); }
+</style>
+
+<script src="{% static 'js/scanner_orchestrator.js' %}"></script>
+<script>
+    // Initialize Scanner OS
+    ScannerOS.init('{{ session.id }}');
+
+    // Timer Logic
+    function startTimer() {
+        const timerEl = document.getElementById('session-timer');
+        if (!timerEl) return;
+        const start = new Date(timerEl.dataset.start);
+        
+        setInterval(() => {
+            const now = new Date();
+            const diff = Math.floor((now - start) / 1000);
+            const mins = Math.floor(diff / 60);
+            const secs = diff % 60;
+            timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} ELAPSED`;
+        }, 1000);
+    }
+    startTimer();
+</script>

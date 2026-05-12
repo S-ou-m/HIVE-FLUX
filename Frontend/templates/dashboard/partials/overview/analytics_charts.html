@@ -1,0 +1,126 @@
+<div class="col-span-8 analytics-card">
+    <div class="card-header">
+        <div class="header-main">
+            <h3>Enrollment Trend</h3>
+            <span class="mini-stat growth">
+                <i class="fas fa-arrow-{% if core.is_positive %}up{% else %}down{% endif %}"></i>
+                {{ core.growth_label }}
+            </span>
+        </div>
+        <div class="header-toggles">
+            <span class="toggle-btn active">6M</span>
+            <span class="toggle-btn">1Y</span>
+        </div>
+    </div>
+    <div class="chart-container compressed">
+        <canvas id="enrollmentChart"></canvas>
+    </div>
+</div>
+
+<div class="col-span-4 analytics-card">
+    <div class="card-header">
+        <h3>Financial Snapshot</h3>
+    </div>
+    <div class="chart-container donut compressed">
+        <canvas id="financeSnapshotChart"></canvas>
+        <div class="donut-center">
+            <span class="donut-label">Efficiency</span>
+            <span class="donut-value">{{ finance.efficiency }}%</span>
+        </div>
+    </div>
+    <div class="financial-depth-footer">
+        <div class="depth-item">
+            <span class="dot cleared"></span>
+            <span class="label">Cleared</span>
+            <span class="value">₹{{ finance.total_collected|floatformat:0 }}</span>
+        </div>
+        <div class="depth-item">
+            <span class="dot dues"></span>
+            <span class="label">Pending</span>
+            <span class="value">₹{{ finance.total_due|floatformat:0 }}</span>
+        </div>
+    </div>
+</div>
+
+<style>
+    .analytics-card { background: rgba(30, 41, 59, 0.4); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); padding: 16px; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .card-header h3 { font-size: 13px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+    
+    .mini-stat { font-size: 11px; font-weight: 700; margin-left: 12px; padding: 2px 8px; border-radius: 4px; }
+    .mini-stat.growth { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    
+    .header-toggles { display: flex; gap: 4px; background: rgba(255,255,255,0.03); padding: 2px; border-radius: 6px; }
+    .toggle-btn { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 4px; cursor: pointer; color: #64748b; }
+    .toggle-btn.active { background: #3b82f6; color: #fff; }
+
+    .chart-container.compressed { height: 160px; position: relative; }
+    
+    .donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
+    .donut-label { display: block; font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 700; }
+    .donut-value { display: block; font-size: 20px; font-weight: 800; color: #fff; }
+
+    .financial-depth-footer { display: flex; justify-content: space-around; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .depth-item { text-align: center; }
+    .depth-item .label { display: block; font-size: 10px; color: #64748b; margin-bottom: 2px; }
+    .depth-item .value { font-size: 13px; font-weight: 700; color: #fff; }
+    .depth-item .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 4px; }
+    .dot.cleared { background: #10b981; }
+    .dot.dues { background: #ef4444; }
+</style>
+
+<!-- Safe Data Transfer -->
+{{ trends.labels|json_script:"trends-labels-data" }}
+{{ trends.data|json_script:"trends-counts-data" }}
+{{ finance.snapshot.cleared|json_script:"fin-cleared" }}
+{{ finance.snapshot.dues|json_script:"fin-dues" }}
+{{ finance.snapshot.advance|json_script:"fin-advance" }}
+
+<script>
+    (function() {
+        const trendsLabels = JSON.parse(document.getElementById('trends-labels-data').textContent);
+        const trendsData = JSON.parse(document.getElementById('trends-counts-data').textContent);
+        const finCleared = JSON.parse(document.getElementById('fin-cleared').textContent) || 0;
+        const finDues = JSON.parse(document.getElementById('fin-dues').textContent) || 0;
+        const finAdvance = JSON.parse(document.getElementById('fin-advance').textContent) || 0;
+
+        new Chart(document.getElementById('enrollmentChart'), {
+            type: 'line',
+            data: {
+                labels: trendsLabels,
+                datasets: [{
+                    label: 'Admissions',
+                    data: trendsData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                    fill: true, tension: 0.4, borderWidth: 3, pointRadius: 0, hoverRadius: 6, pointBackgroundColor: '#3b82f6'
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#475569', font: { size: 10 } } },
+                    x: { grid: { display: false }, ticks: { color: '#475569', font: { size: 10 } } }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('financeSnapshotChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Cleared', 'Dues', 'Advance'],
+                datasets: [{
+                    data: [finCleared, finDues, finAdvance],
+                    backgroundColor: ['#10b981', '#ef4444', '#3b82f6'],
+                    borderWidth: 0, hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                cutout: '82%'
+            }
+        });
+    })();
+</script>

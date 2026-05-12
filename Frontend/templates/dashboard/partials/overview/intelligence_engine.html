@@ -1,0 +1,123 @@
+<div class="col-span-6 intelligence-card timeline-card">
+    <div class="card-header">
+        <div class="header-main">
+            <h3>Operational Timeline</h3>
+            <span class="badge info">Next 14D</span>
+        </div>
+    </div>
+    
+    <div class="timeline-body scroll-y">
+        {% if timeline %}
+            {% for event in timeline %}
+            <div class="timeline-item type-{{ event.type }} severity-{{ event.severity }}">
+                <div class="item-date">
+                    <span class="day">{{ event.date|date:"d" }}</span>
+                    <span class="month">{{ event.date|date:"M" }}</span>
+                </div>
+                <div class="item-details">
+                    <span class="item-category">{{ event.type|upper }}</span>
+                    <h4>{{ event.title }}</h4>
+                </div>
+                <div class="item-status">
+                    <span class="dot {{ event.severity }}"></span>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state-mini">
+                <p>No operational deadlines detected.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="col-span-6 intelligence-card calendar-card">
+    <div class="card-header">
+        <div class="header-main flex justify-between items-center w-full">
+            <h3 class="tracking-widest">{{ calendar.month_name }}</h3>
+            <div class="flex gap-2">
+                <button class="w-6 h-6 rounded bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all"
+                        hx-get="{% url 'admin_overview_intelligence_partial' %}?month={{ calendar.prev_month }}&year={{ calendar.prev_year }}"
+                        hx-target=".operations-row"
+                        hx-swap="innerHTML">
+                    <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                </button>
+                <button class="w-6 h-6 rounded bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all"
+                        hx-get="{% url 'admin_overview_intelligence_partial' %}?month={{ calendar.next_month }}&year={{ calendar.next_year }}"
+                        hx-target=".operations-row"
+                        hx-swap="innerHTML">
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="calendar-grid">
+        <div class="cal-header">S</div><div class="cal-header">M</div><div class="cal-header">T</div><div class="cal-header">W</div><div class="cal-header">T</div><div class="cal-header">F</div><div class="cal-header">S</div>
+        {% for week in calendar.matrix %}
+            {% for day in week %}
+                {% if day == 0 %}
+                    <div class="cal-day muted">-</div>
+                {% else %}
+                    <div class="cal-day 
+                        {% if day == calendar.today and calendar.is_current_month %}today{% endif %}
+                        {% for event in timeline %}{% if event.day == day %} has-event event-{{ event.type|slice:':3' }}{% endif %}{% endfor %}"
+                        {% for event in timeline %}{% if event.day == day %} 
+                        title="{{ event.title }}" 
+                        onclick="showDayIntelligence('{{ day }}', '{{ calendar.month_name }}')"
+                        {% endif %}{% endfor %}>
+                        {{ day }}
+                        {% for event in timeline %}{% if event.day == day %}
+                            <span class="event-indicator"></span>
+                        {% endif %}{% endfor %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </div>
+    <div class="calendar-legend">
+        <span class="legend-item"><span class="dot fin"></span> Finance</span>
+        <span class="legend-item"><span class="dot aca"></span> Academic</span>
+    </div>
+</div>
+
+<style>
+    .intelligence-card { background: rgba(30, 41, 59, 0.4); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); padding: 18px; height: 300px; display: flex; flex-direction: column; }
+    .card-header h3 { font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
+    
+    /* TIMELINE */
+    .timeline-body { flex: 1; overflow-y: auto; gap: 10px; display: flex; flex-direction: column; padding-right: 4px; }
+    .timeline-item { display: flex; align-items: center; gap: 16px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 12px; border-left: 3px solid transparent; transition: all 0.2s; }
+    .timeline-item:hover { background: rgba(255,255,255,0.05); }
+    
+    .timeline-item.type-financial { border-left-color: #f59e0b; }
+    .timeline-item.type-academic { border-left-color: #3b82f6; }
+    
+    .item-date { min-width: 44px; text-align: center; background: rgba(255,255,255,0.03); padding: 4px; border-radius: 8px; }
+    .item-date .day { display: block; font-size: 16px; font-weight: 800; color: #fff; }
+    .item-date .month { font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+    
+    .item-details { flex: 1; }
+    .item-category { font-size: 9px; font-weight: 800; color: #475569; letter-spacing: 0.05em; }
+    .item-details h4 { font-size: 13px; font-weight: 600; color: #f1f5f9; margin: 2px 0 0 0; }
+    
+    /* CALENDAR */
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; flex: 1; }
+    .cal-header { font-size: 10px; font-weight: 800; color: #475569; text-align: center; padding-bottom: 8px; }
+    .cal-day { font-size: 11px; color: #94a3b8; text-align: center; padding: 10px 0; border-radius: 8px; transition: all 0.2s; position: relative; }
+    .cal-day:hover:not(.muted) { background: rgba(255,255,255,0.05); color: #fff; cursor: pointer; }
+    .cal-day.muted { color: #334155; }
+    .cal-day.today { background: #3b82f6 !important; color: #fff !important; font-weight: 800; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+    
+    .has-event { font-weight: 700; color: #fff; }
+    .event-indicator { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; }
+    .event-fin .event-indicator { background: #f59e0b; }
+    .event-aca .event-indicator { background: #3b82f6; }
+    
+    .calendar-legend { display: flex; gap: 16px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .legend-item { font-size: 10px; color: #64748b; display: flex; align-items: center; gap: 4px; }
+    .legend-item .dot { width: 6px; height: 6px; border-radius: 50%; }
+    .dot.fin { background: #f59e0b; }
+    .dot.aca { background: #3b82f6; }
+    
+    .empty-state-mini { text-align: center; padding: 40px; color: #475569; font-size: 12px; }
+</style>

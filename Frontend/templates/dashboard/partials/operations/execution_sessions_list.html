@@ -1,0 +1,169 @@
+<div class="sessions-execution-container animate-fade-in">
+    <div class="execution-section-header">
+        <h2 class="section-title">Daily Operational Load</h2>
+        <div class="section-actions">
+            <button class="saas-btn sync-btn" hx-get="{% url 'execution_sessions_partial' %}" hx-target="#engine-workspace">
+                <i class="fa-solid fa-rotate"></i> Sync Matrix
+            </button>
+        </div>
+    </div>
+
+    <div class="sessions-grid">
+        {% for session in sessions %}
+        <div class="session-card {% if session.status == 'LIVE' %}is-live{% endif %}">
+            <div class="session-main">
+                <div class="session-identity-group">
+                    <div class="session-status-orb">
+                        {% if session.status == 'SCHEDULED' %}
+                            <i class="fa-solid fa-clock"></i>
+                        {% elif session.status == 'LIVE' %}
+                            <i class="fa-solid fa-satellite-dish"></i>
+                        {% else %}
+                            <i class="fa-solid fa-check-double"></i>
+                        {% endif %}
+                    </div>
+                    <div class="session-info">
+                        <div class="session-title-line">
+                            <h3 class="subject-name">{{ session.subject_snapshot_name }}</h3>
+                            <span class="status-badge {{ session.status|lower }}">{{ session.get_status_display }}</span>
+                        </div>
+                        <div class="session-meta-line">
+                            <span class="meta-item"><i class="fa-solid fa-user-tie"></i> {{ session.faculty_snapshot_name }}</span>
+                            <span class="meta-item"><i class="fa-solid fa-location-dot"></i> {{ session.slot_instance.timetable_slot.room.name|default:"Main Hall" }}</span>
+                            <span class="meta-item"><i class="fa-solid fa-stopwatch"></i> {{ session.slot_instance.timetable_slot.start_time|time:"H:i" }} - {{ session.slot_instance.timetable_slot.end_time|time:"H:i" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="session-metrics-group">
+                    <div class="metric-block">
+                        <span class="metric-label">Attendance</span>
+                        <div class="metric-value-container">
+                            <span class="current-value">{{ session.present_count }}</span>
+                            <span class="target-value">/ {{ session.expected_count|default:"60" }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="session-actions">
+                        {% if session.status == 'SCHEDULED' %}
+                        <button class="action-btn primary-action" 
+                                hx-post="{% url 'api_session_control' session.id 'start' %}"
+                                hx-target="closest .session-card"
+                                hx-swap="outerHTML">
+                            Go Live
+                        </button>
+                        {% elif session.status == 'LIVE' %}
+                        <button class="action-btn emerald-action" 
+                                hx-get="{% url 'execution_scanner_partial' %}?session_id={{ session.id }}"
+                                hx-target="#engine-workspace">
+                            Open Scanner
+                        </button>
+                        <button class="action-btn secondary-action"
+                                hx-get="{% url 'api_manual_marking_drawer' session.id %}"
+                                hx-target="#global-drawer-content"
+                                onclick="openSideDrawer()">
+                            Manual
+                        </button>
+                        <button class="action-btn outline-action"
+                                hx-post="{% url 'api_session_control' session.id 'complete' %}"
+                                hx-target="closest .session-card"
+                                hx-swap="outerHTML">
+                            End
+                        </button>
+{% else %}
+                        <button class="action-btn secondary-action" 
+                                hx-get="{% url 'execution_scanner_partial' %}?session_id={{ session.id }}"
+                                hx-target="#engine-workspace">
+                            Review
+                        </button>
+                        <button class="action-btn outline-action"
+                                hx-get="{% url 'api_manual_marking_drawer' session.id %}"
+                                hx-target="#global-drawer-content"
+                                onclick="openSideDrawer()">
+                            Override
+                        </button>
+{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="execution-empty-state">
+            <div class="empty-icon-box">
+                <i class="fa-solid fa-calendar-xmark"></i>
+            </div>
+            <h3>No Active Workload</h3>
+            <p>There are no sessions scheduled for this operational cycle.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .execution-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding: 0 4px; }
+    .section-title { font-size: 20px; font-weight: 800; color: #fff; }
+    
+    .saas-btn { 
+        background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-primary);
+        padding: 10px 20px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .saas-btn:hover { border-color: var(--primary-color); color: var(--primary-color); background: var(--primary-glow); }
+
+    .sessions-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+
+    .session-card { 
+        background: var(--bg-surface); 
+        border: 1px solid var(--border-color); 
+        border-radius: var(--radius-lg); 
+        padding: 1.5rem; 
+        transition: all 0.3s ease;
+    }
+    .session-card:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .session-card.is-live { border-color: rgba(16, 185, 129, 0.3); background: linear-gradient(90deg, var(--bg-surface) 0%, rgba(16, 185, 129, 0.02) 100%); }
+
+    .session-main { display: flex; justify-content: space-between; align-items: center; }
+    .session-identity-group { display: flex; align-items: center; gap: 1.5rem; }
+    
+    .session-status-orb { 
+        width: 52px; height: 52px; background: var(--bg-elevated); border-radius: 14px;
+        display: flex; align-items: center; justify-content: center; color: var(--text-secondary);
+        font-size: 20px; border: 1px solid var(--border-color);
+    }
+    .is-live .session-status-orb { background: rgba(16, 185, 129, 0.1); color: #10B981; border-color: rgba(16, 185, 129, 0.3); }
+
+    .session-title-line { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+    .subject-name { font-size: 18px; font-weight: 800; color: #fff; }
+    
+    .status-badge { font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid transparent; }
+    .status-badge.scheduled { background: rgba(148, 163, 184, 0.1); color: #94A3B8; border-color: rgba(148, 163, 184, 0.2); }
+    .status-badge.live { background: rgba(16, 185, 129, 0.1); color: #10B981; border-color: rgba(16, 185, 129, 0.2); }
+    
+    .session-meta-line { display: flex; gap: 20px; font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+    .meta-item i { margin-right: 8px; color: var(--primary-color); opacity: 0.7; }
+
+    .session-metrics-group { display: flex; align-items: center; gap: 3rem; }
+    .metric-block { text-align: right; }
+    .metric-label { display: block; font-size: 10px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .metric-value-container { display: flex; align-items: baseline; justify-content: flex-end; gap: 4px; }
+    .current-value { font-size: 24px; font-weight: 900; color: #fff; }
+    .target-value { font-size: 14px; font-weight: 700; color: var(--text-secondary); }
+
+    .session-actions { display: flex; gap: 10px; }
+    .action-btn { 
+        padding: 10px 24px; border-radius: 10px; font-weight: 800; font-size: 13px; 
+        cursor: pointer; transition: all 0.2s; border: 1px solid transparent; 
+    }
+    .primary-action { background: var(--primary-color); color: #fff; }
+    .primary-action:hover { background: var(--primary-hover); transform: scale(1.02); }
+    .emerald-action { background: #10B981; color: #fff; }
+    .emerald-action:hover { background: #059669; }
+    .outline-action { background: transparent; border-color: var(--border-color); color: var(--text-primary); }
+    .outline-action:hover { background: rgba(255,255,255,0.05); border-color: var(--text-secondary); }
+    .secondary-action { background: var(--bg-elevated); color: var(--text-primary); border-color: var(--border-color); }
+
+    .execution-empty-state { text-align: center; padding: 5rem 0; background: rgba(0,0,0,0.2); border-radius: var(--radius-lg); border: 2px dashed var(--border-color); }
+    .empty-icon-box { font-size: 48px; color: var(--border-color); margin-bottom: 1.5rem; }
+    .execution-empty-state h3 { font-size: 20px; font-weight: 800; color: var(--text-secondary); margin-bottom: 8px; }
+    .execution-empty-state p { font-size: 14px; color: var(--text-secondary); opacity: 0.7; }
+</style>

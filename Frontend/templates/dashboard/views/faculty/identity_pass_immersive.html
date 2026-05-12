@@ -1,0 +1,464 @@
+{% load static %}
+<!-- d:\ERP_cms\Frontend\templates\dashboard\views\faculty\identity_pass_immersive.html -->
+
+<div class="identity-pass-environment animate-fade-in" id="identity-pass-env">
+    
+    <!-- 🏗️ ZONE 1: INSTITUTIONAL HEADER (Operational Calm) -->
+    <div class="pass-header">
+        <div class="header-left">
+            <div class="institutional-logo">
+                <i class="fas fa-shield-alt text-blue-500"></i>
+            </div>
+            <div>
+                <div class="text-[10px] font-black text-muted uppercase tracking-widest">Campus Identity OS</div>
+                <div class="text-sm font-bold text-white">Institutional Pass</div>
+            </div>
+        </div>
+        <button class="close-pass-btn" onclick="closeSideDrawer()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- 🏗️ ZONE 2: THE IDENTITY CANVAS -->
+    <div class="pass-canvas">
+        
+        <!-- THE PASS CARD (Glassmorphism) -->
+        <div class="identity-card-glass">
+            <div class="card-shimmer"></div>
+            
+            <div class="card-body">
+                <div class="flex justify-between items-start mb-8">
+                    <div class="faculty-capsule">
+                        <div class="avatar-pass">
+                            {% if faculty.user.first_name %}
+                                {{ faculty.user.first_name|first }}{{ faculty.user.last_name|first }}
+                            {% else %}
+                                {{ faculty.user.username|first|upper }}
+                            {% endif %}
+                        </div>
+                        <div class="ml-3">
+                            <div class="text-lg font-black text-white leading-tight">
+                                {{ faculty.user.get_full_name|default:faculty.user.username }}
+                            </div>
+                            <div class="text-[10px] font-bold text-blue-400 uppercase tracking-wider">
+                                {% if faculty.designation %}{{ faculty.designation }}{% else %}Institutional Admin{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="trust-badge">
+                        <i class="fas fa-certificate text-[10px]"></i>
+                        <span>VERIFIED</span>
+                    </div>
+                </div>
+
+                <!-- THE ROTATING QR (Secure Signal) -->
+                <div class="qr-secure-container">
+                    <div id="identity-qr" class="qr-render"></div>
+                    <div class="qr-security-overlay">
+                        <div class="security-rhythm"></div>
+                    </div>
+                </div>
+
+                <div class="security-meta">
+                    <div class="flex items-center gap-2 mb-1">
+                        <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                        <span class="text-[10px] font-bold text-white/60 tracking-widest uppercase">Identity Active</span>
+                    </div>
+                    <div class="text-[9px] text-white/30 font-medium">Valid for campus check-in & verification</div>
+                </div>
+            </div>
+
+            <!-- CARD FOOTER (Dynamic Signals) -->
+            <div class="card-footer-signals">
+                <div class="signal-kpi">
+                    <div class="label">Trust Score</div>
+                    <div class="value flex items-center gap-2">
+                        <span id="pass-trust-score">{{ pass.trust_score }}</span>
+                        <div class="w-12 h-1 bg-white/10 rounded-full overflow-hidden">
+                            <div class="h-full bg-blue-500" style="width: {{ pass.trust_score }}%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="signal-kpi text-right">
+                    <div class="label">Next Rotation</div>
+                    <div class="value" id="rotation-timer">00:{{ pass.expires_in|stringformat:"02d" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANTI-SPOOFING LAYER: KINETIC TIMESTAMP -->
+        <div class="kinetic-security-strip">
+            <div class="security-timestamp" id="security-timestamp">--:--:-- --</div>
+            <div class="security-watermark">INSTITUTIONAL_IDENTITY_OS_SECURE_SIGNAL</div>
+        </div>
+    </div>
+
+    <!-- 🏗️ ZONE 3: ACTIVITY TIMELINE (Audit Intelligence) -->
+    <div class="pass-audit-rail">
+        <div class="rail-header">RECENT IDENTITY ACTIVITY</div>
+        <div class="activity-list custom-scrollbar">
+            <div class="activity-item">
+                <div class="activity-icon bg-blue-500/10">
+                    <i class="fas fa-fingerprint text-blue-500 text-[10px]"></i>
+                </div>
+                <div class="activity-details">
+                    <div class="title">Digital ID Initialized</div>
+                    <div class="meta">System • Just Now</div>
+                </div>
+            </div>
+            <!-- Future events injected here -->
+            <div class="activity-empty">NO RECENT SCANS DETECTED</div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .identity-pass-environment {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: #020617;
+        color: white;
+        overflow: hidden;
+    }
+
+    .pass-header {
+        padding: 24px 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(15, 23, 42, 0.5);
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .institutional-logo {
+        width: 40px;
+        height: 40px;
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    .close-pass-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        font-size: 20px;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .close-pass-btn:hover { color: white; }
+
+    .pass-canvas {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        position: relative;
+    }
+
+    .identity-card-glass {
+        width: 100%;
+        max-width: 360px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 32px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-shimmer {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%);
+        background-size: 200% 100%;
+        animation: shimmer 4s infinite linear;
+    }
+
+    @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    .card-body {
+        padding: 32px;
+        position: relative;
+    }
+
+    .faculty-capsule {
+        display: flex;
+        align-items: center;
+    }
+
+    .avatar-pass {
+        width: 44px;
+        height: 44px;
+        background: var(--blue-primary);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 18px;
+    }
+
+    .trust-badge {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 9px;
+        font-weight: 900;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .qr-secure-container {
+        background: white;
+        padding: 16px;
+        border-radius: 24px;
+        margin: 32px 0;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+    }
+
+    .qr-render img {
+        width: 180px !important;
+        height: 180px !important;
+    }
+
+    .qr-security-overlay {
+        position: absolute;
+        inset: 0;
+        border: 2px solid rgba(59, 130, 246, 0.2);
+        border-radius: 24px;
+        pointer-events: none;
+    }
+
+    .security-rhythm {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: rgba(59, 130, 246, 0.4);
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        animation: rhythm 2s infinite linear;
+    }
+
+    @keyframes rhythm {
+        0% { top: 0%; opacity: 0; }
+        50% { opacity: 1; }
+        100% { top: 100%; opacity: 0; }
+    }
+
+    .card-footer-signals {
+        padding: 20px 32px;
+        background: rgba(255, 255, 255, 0.03);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .signal-kpi .label { font-size: 8px; font-weight: 900; color: rgba(255, 255, 255, 0.3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .signal-kpi .value { font-size: 14px; font-weight: 900; color: white; }
+
+    .kinetic-security-strip {
+        margin-top: 40px;
+        text-align: center;
+    }
+
+    .security-timestamp {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 16px;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.8);
+        letter-spacing: 2px;
+        margin-bottom: 8px;
+    }
+
+    .security-watermark {
+        font-size: 8px;
+        font-weight: 900;
+        color: rgba(255, 255, 255, 0.1);
+        letter-spacing: 4px;
+        animation: marquee 20s linear infinite;
+        white-space: nowrap;
+    }
+
+    @keyframes marquee {
+        0% { transform: translateX(50%); }
+        100% { transform: translateX(-50%); }
+    }
+
+    .pass-audit-rail {
+        padding: 32px;
+        background: rgba(15, 23, 42, 0.8);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .rail-header {
+        font-size: 10px;
+        font-weight: 900;
+        color: var(--text-muted);
+        letter-spacing: 2px;
+        margin-bottom: 16px;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .activity-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .activity-details .title { font-size: 12px; font-weight: 700; color: white; }
+    .activity-details .meta { font-size: 10px; color: var(--text-muted); }
+    
+    .activity-empty {
+        padding: 20px;
+        text-align: center;
+        font-size: 10px;
+        font-weight: 800;
+        color: rgba(255, 255, 255, 0.1);
+        letter-spacing: 1px;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+    const IdentityOS = {
+        sessionId: '{{ session.id }}',
+        token: '{{ pass.token }}',
+        expiresIn: {{ pass.expires_in }},
+        qr: null,
+        retryCount: 0,
+
+        init() {
+            this.tryInitQR();
+            this.startRotationTimer();
+            this.initSecurityClock();
+            this.optimizeDisplay();
+        },
+
+        tryInitQR() {
+            if (typeof QRCode === 'undefined') {
+                if (this.retryCount < 10) {
+                    this.retryCount++;
+                    setTimeout(() => this.tryInitQR(), 200);
+                } else {
+                    console.error("QRCode library failed to load");
+                }
+                return;
+            }
+            this.initQR();
+        },
+
+        initQR() {
+            const container = document.getElementById('identity-qr');
+            if (!container) return;
+            
+            container.innerHTML = ''; // Clear
+            this.qr = new QRCode(container, {
+                text: this.token,
+                width: 180,
+                height: 180,
+                colorDark: "#020617",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        },
+
+        startRotationTimer() {
+            let timeLeft = this.expiresIn;
+            const timerEl = document.getElementById('rotation-timer');
+            
+            const tick = () => {
+                if (timeLeft <= 0) {
+                    this.refreshToken();
+                    return;
+                }
+                timeLeft--;
+                const secs = timeLeft.toString().padStart(2, '0');
+                timerEl.textContent = `00:${secs}`;
+                setTimeout(tick, 1000);
+            };
+            tick();
+        },
+
+        async refreshToken() {
+            try {
+                const response = await fetch(`/dashboard/faculty/identity/refresh/?sid=${this.sessionId}`);
+                const data = await response.json();
+                
+                this.token = data.token;
+                this.expiresIn = data.expires_in;
+                
+                // Update QR
+                this.qr.clear();
+                this.qr.makeCode(this.token);
+                
+                // Restart timer
+                this.startRotationTimer();
+                
+                // Log event internally
+                console.log("🔄 IDENTITY_ROTATED");
+            } catch (e) {
+                console.error("Identity refresh failed", e);
+            }
+        },
+
+        initSecurityClock() {
+            const clockEl = document.getElementById('security-timestamp');
+            const update = () => {
+                const now = new Date();
+                clockEl.textContent = now.toTimeString().split(' ')[0] + ' ' + (now.getMilliseconds() / 10).toFixed(0).padStart(2, '0');
+                requestAnimationFrame(update);
+            };
+            update();
+        },
+
+        optimizeDisplay() {
+            // Enterprise UX: Wake Lock & Max Brightness suggestion
+            if ('wakeLock' in navigator) {
+                navigator.wakeLock.request('screen').catch(() => {});
+            }
+            
+            // Note: Auto-brightness usually requires user permission or specific PWA context
+            // We suggest it via the high-fidelity UI.
+        }
+    };
+
+    IdentityOS.init();
+</script>

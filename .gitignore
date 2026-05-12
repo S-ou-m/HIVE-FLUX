@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Environment
+.env
+venv/
+env/
+ENV/
+
+# VSCode
+.vscode/
+
+# Static build
+staticfiles/
+
+# Media
+media/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Cache
+.pytest_cache/
+.cache/
+
+# Migrations cache
+*.pyc
+
+# Celery
+celerybeat-schedule
+
+# Secrets
+secret.key
+
+# SQLite temp
+*.sqlite3
+
+# Runtime
+*.pid
+
+# Coverage
+htmlcov/
+.coverage
+
+# Node
+node_modules/

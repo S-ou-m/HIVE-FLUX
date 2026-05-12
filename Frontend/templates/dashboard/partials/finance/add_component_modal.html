@@ -1,0 +1,154 @@
+<style>
+    .add-comp-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(10px);
+        z-index: 2100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .add-comp-modal {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        width: 440px;
+        box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+        overflow: hidden;
+    }
+    .modal-head {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .modal-body { padding: 2rem; }
+    .modal-foot {
+        padding: 1.5rem 2rem;
+        background: rgba(255,255,255,0.02);
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+    .comp-item-option {
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .comp-item-option:hover {
+        background: rgba(249, 115, 22, 0.05);
+        border-color: var(--primary-color);
+    }
+    .comp-item-option.selected {
+        background: rgba(249, 115, 22, 0.1);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 1px var(--primary-color);
+    }
+</style>
+
+<div class="add-comp-overlay animate-fade-in" id="add-comp-modal-root" onclick="this.remove()">
+    <div class="add-comp-modal animate-slide-up" onclick="event.stopPropagation()">
+        <div class="modal-head">
+            <h4 style="margin: 0; font-weight: 800; font-size: 1.1rem; color: #fff;">Institutional Components</h4>
+            <button onclick="document.getElementById('add-comp-modal-root').remove()" style="background: transparent; border: none; color: var(--text-secondary); cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div class="modal-body" style="max-height: 450px; overflow-y: auto;">
+            <div style="position: sticky; top: -2rem; background: var(--bg-surface); padding-bottom: 1.5rem; z-index: 10; margin-top: -0.5rem;">
+                <div style="position: relative;">
+                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-size: 0.75rem; color: var(--text-secondary);"></i>
+                    <input type="text" id="comp-search" placeholder="Search by name or type..." 
+                           class="setup-input" style="width: 100%; padding-left: 2.5rem; font-size: 0.8rem; background: rgba(255,255,255,0.03);"
+                           onkeyup="filterComponents(this.value)">
+                </div>
+            </div>
+            
+            <div id="comp-options-list">
+                {% regroup components by get_type_display as grouped_list %}
+                {% for group in grouped_list %}
+                <div class="group-wrapper" style="margin-bottom: 1.5rem;">
+                    <span style="font-size: 0.6rem; font-weight: 800; text-transform: uppercase; color: var(--primary-color); letter-spacing: 1px; display: block; margin-bottom: 0.75rem;">{{ group.grouper }}s</span>
+                    {% for comp in group.list %}
+                    <div class="comp-item-option" onclick="selectComp(this, '{{ comp.id }}')" data-name="{{ comp.name|lower }}">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div class="comp-icon {% if comp.type == 'ALLOWANCE' %}icon-allowance{% else %}icon-deduction{% endif %}" style="width: 32px; height: 32px; font-size: 0.6rem;">
+                                {% if comp.type == 'ALLOWANCE' %}＋{% else %}－{% endif %}
+                            </div>
+                            <div>
+                                <p style="font-size: 0.85rem; font-weight: 700; margin: 0; color: #fff;">{{ comp.name }}</p>
+                                <p style="font-size: 0.65rem; color: var(--text-secondary); margin: 0;">{{ comp.get_calc_type_display }} • {{ comp.get_impact_type_display }}</p>
+                            </div>
+                        </div>
+                        <div class="check-mark" style="color: var(--primary-color); opacity: 0;"><i class="fa-solid fa-circle-check"></i></div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% empty %}
+                <div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">
+                    <div style="font-size: 2rem; opacity: 0.1; margin-bottom: 1rem;"><i class="fa-solid fa-box-open"></i></div>
+                    <p style="font-size: 0.85rem; font-weight: 600; color: #fff; margin-bottom: 0.25rem;">No New Components Found</p>
+                    <p style="font-size: 0.7rem; opacity: 0.6;">All institutional components for this college are already present in the setup.</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <input type="hidden" id="selected-comp-id-input" name="comp_id">
+        </div>
+
+        <div class="modal-foot">
+            <button onclick="document.getElementById('add-comp-modal-root').remove()" class="btn-cancel">Cancel</button>
+            <button id="btn-add-to-setup" 
+                    class="btn-save shadow-lg"
+                    style="opacity: 0.5; pointer-events: none;"
+                    hx-get="{% url 'admin_salary_setup_render_comp_row' faculty.id %}"
+                    hx-include="#selected-comp-id-input"
+                    hx-target="#component-list"
+                    hx-swap="beforeend"
+                    hx-on::after-request="document.getElementById('add-comp-modal-root').remove(); htmx.trigger('#salary-setup-form input[name=\'base_salary\']', 'change')">
+                Add to Setup
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterComponents(val) {
+        const query = val.toLowerCase();
+        document.querySelectorAll('.comp-item-option').forEach(el => {
+            const name = el.getAttribute('data-name');
+            const wrapper = el.closest('.group-wrapper');
+            if (name.includes(query)) {
+                el.style.display = 'flex';
+            } else {
+                el.style.display = 'none';
+            }
+            
+            // Hide group if no visible items
+            const visibleItems = wrapper.querySelectorAll('.comp-item-option[style*="display: flex"]').length;
+            wrapper.style.display = visibleItems > 0 ? 'block' : 'none';
+        });
+    }
+
+    function selectComp(el, id) {
+        document.querySelectorAll('.comp-item-option').forEach(opt => {
+            opt.classList.remove('selected');
+            opt.querySelector('.check-mark').style.opacity = '0';
+        });
+        el.classList.add('selected');
+        el.querySelector('.check-mark').style.opacity = '1';
+        document.getElementById('selected-comp-id-input').value = id;
+        
+        const btn = document.getElementById('btn-add-to-setup');
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
+    }
+</script>

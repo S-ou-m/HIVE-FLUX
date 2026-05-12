@@ -1,0 +1,46 @@
+<div class="relative group">
+    <!-- 🚀 Identity Header -->
+    <div class="flex items-start justify-between">
+        <div class="flex gap-6">
+            <!-- Avatar Surface -->
+            <div class="relative">
+                <div class="w-24 h-24 rounded-[32px] bg-brand flex items-center justify-center text-4xl font-black text-white shadow-brand group-hover:scale-105 transition-transform">
+                    {{ state.identity.name|first|upper }}
+                </div>
+                <!-- Presence Pulse -->
+                <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-black rounded-2xl border-4 border-black flex items-center justify-center">
+                    <div class="w-4 h-4 bg-green-500 rounded-full animate-pulse shadow-[0_0_15px_#22c55e]"></div>
+                </div>
+            </div>
+
+            <!-- Identity Metadata -->
+            <div class="pt-2">
+                <h2 class="text-3xl font-black text-white tracking-tighter leading-none">{{ state.identity.name }}</h2>
+                <div class="flex items-center gap-3 mt-3">
+                    <span class="text-[10px] font-black text-white/40 uppercase tracking-widest">{{ state.identity.execution_id }}</span>
+                    <span class="w-1 h-1 bg-white/20 rounded-full"></span>
+                    <span class="px-2 py-0.5 bg-brand-soft border border-brand-soft text-[9px] text-brand font-black rounded uppercase">Verified</span>
+                </div>
+                <div class="mt-4 flex gap-2">
+                    <span class="px-3 py-1 bg-white/5 border border-white/10 text-[10px] text-white/60 font-bold rounded-lg">{{ state.identity.department }}</span>
+                    <span class="px-3 py-1 bg-white/5 border border-white/10 text-[10px] text-white/60 font-bold rounded-lg">Sem {{ state.identity.semester }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ⚙️ Manage Identity CTA -->
+        <button class="w-12 h-12 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white transition-all group/btn"
+                hx-get="{% url 'student_identity_command_center_partial_route' %}?tab=settings"
+                hx-target="#command-surface-viewport"
+                hx-swap="innerHTML">
+            <i class="fa-solid fa-user-gear text-sm group-hover/btn:rotate-45 transition-transform"></i>
+        </button>
+    </div>
+
+    <!-- 📝 Student Bio (Ownership Layer) -->
+    <div class="mt-8 p-4 bg-white/5 border border-white/10 rounded-2xl">
+        <p class="text-xs text-white/60 leading-relaxed italic">
+            "{{ state.identity.bio }}"
+        </p>
+    </div>
+</div>

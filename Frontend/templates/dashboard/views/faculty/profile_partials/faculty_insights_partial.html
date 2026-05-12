@@ -1,0 +1,25 @@
+<!-- d:\ERP_cms\Frontend\templates\dashboard\views\faculty\profile_partials\faculty_insights_partial.html -->
+<div class="glass-panel p-5">
+    <div class="text-[10px] text-muted font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+        <i class="fas fa-brain text-blue-500"></i> Insights Engine
+    </div>
+    
+    <div class="space-y-3">
+        {% for insight in hub.insights %}
+        <div class="bg-{{ insight.type }}-500/5 border-l-2 border-{{ insight.type }}-500 p-3 rounded-r-lg hover-lift group">
+            <div class="text-xs font-black text-{{ insight.type }}-500 flex items-center gap-2 mb-1">
+                <i class="fas {{ insight.icon }}"></i> {{ insight.title }}
+                <span class="ml-auto text-[9px] bg-{{ insight.type }}-500/20 px-2 py-0.5 rounded text-{{ insight.type }}-400">{{ insight.confidence|floatformat:2 }} CONFIDENCE</span>
+            </div>
+            <div class="text-[11px] text-white/70">{{ insight.description }}</div>
+            <div class="text-[10px] font-black text-{{ insight.type }}-400 mt-2 cursor-pointer group-hover:underline uppercase tracking-widest flex items-center gap-1">
+                💡 {{ insight.action_label }} <i class="fas fa-arrow-right"></i>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-xs text-muted font-bold p-4 text-center border border-dashed border-white/10 rounded-lg">
+            No predictive insights available yet.
+        </div>
+        {% endfor %}
+    </div>
+</div>

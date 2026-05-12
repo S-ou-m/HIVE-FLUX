@@ -1,0 +1,23 @@
+<div id="students-content" hx-swap-oob="true">
+    {% include 'dashboard/views/students_table.html' %}
+</div>
+
+<!-- Empty the modal container -->
+<div id="modal-container"></div>
+
+<!-- Success Toast styling -->
+<div id="toast-message" style="position: fixed; top: 20px; right: 20px; background: #22c55e; color: white; padding: 1rem 1.5rem; border-radius: var(--radius-sm); box-shadow: 0 8px 30px rgba(0,0,0,0.3); z-index: 9999; animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), fadeOut 0.5s ease 3.5s forwards; display: flex; align-items: center; gap: 0.75rem; font-weight: 500;">
+    <span style="font-size: 1.2rem;">✅</span> Student enrolled successfully!
+</div>
+
+<script>
+    setTimeout(() => {
+        const t = document.getElementById('toast-message');
+        if(t) t.remove();
+    }, 4000);
+</script>
+
+<style>
+    @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
+</style>

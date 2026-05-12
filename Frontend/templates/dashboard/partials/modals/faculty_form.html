@@ -1,0 +1,239 @@
+<div class="modal-backdrop" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation();" style="max-width: 650px; padding: 0;">
+        
+        <div class="modal-header" style="padding: 1.5rem 1.5rem 1rem;">
+            <h3>{% if edit %}Update Faculty Profile{% else %}Onboard New Faculty{% endif %}</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        
+        <!-- PROGRESS TRACKER -->
+        <div class="stepper" style="display: flex; gap: 0.5rem; padding: 0.5rem 1.5rem; background: var(--bg-surface-hover); border-bottom: 1px solid var(--border-color);">
+            <div class="step active" id="step-nav-1">1. Personal</div>
+            <div class="step" id="step-nav-2">2. Professional</div>
+            <div class="step" id="step-nav-3">3. Address</div>
+            <div class="step" id="step-nav-4">4. Review {% if edit %}& Status{% endif %}</div>
+        </div>
+        
+        <form id="faculty-onboarding-form" 
+              hx-post="{% if edit %}{% url 'admin_faculty_edit' faculty.id %}{% else %}{% url 'admin_faculty_create' %}{% endif %}" 
+              hx-target="{% if edit %}#faculty-content{% else %}#modal-container{% endif %}" 
+              hx-indicator="#submit-spinner">
+            {% csrf_token %}
+            <div class="modal-body" style="padding: 1.5rem;">
+                
+                <!-- STEP 1: PERSONAL INFO -->
+                <div class="form-step" id="step-1">
+                    <h4 class="section-title">Personal Details</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>First Name</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            {{ form.last_name }}
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Email Address {% if not edit %}(used as Username){% endif %}</label>
+                            {{ form.email }}
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Phone No</label>
+                            {{ form.phone_no }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: PROFESSIONAL INFO -->
+                <div class="form-step" id="step-2" style="display: none;">
+                    <h4 class="section-title">Professional Details</h4>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>Department</label>
+                            {{ form.department }}
+                        </div>
+                        <div class="form-group">
+                            <label>Designation / Title</label>
+                            {{ form.designation }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: ADDRESS -->
+                <div class="form-step" id="step-3" style="display: none;">
+                    <h4 class="section-title">Address</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Street Address</label>
+                            {{ form.address_line1 }}
+                        </div>
+                        <div class="form-group">
+                            <label>City</label>
+                            {{ form.city }}
+                        </div>
+                        <div class="form-group">
+                            <label>State</label>
+                            {{ form.state }}
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>PIN Code</label>
+                            {{ form.pincode }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 4: REVIEW & STATUS -->
+                <div class="form-step" id="step-4" style="display: none;">
+                    <h4 class="section-title">{% if edit %}Account Status & Review{% else %}Review & Submit{% endif %}</h4>
+                    
+                    {% if edit %}
+                    <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.1); padding: 1.5rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <h5 style="color: var(--text-primary); margin-bottom: 0.25rem;">Institutional Access</h5>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary);">Toggle faculty system activation status</p>
+                            </div>
+                            <label class="switch-container" style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
+                                {{ form.is_active }}
+                                <span style="font-weight: 600; font-size: 0.9rem; color: var(--color-orange);">Active Account</span>
+                            </label>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if not edit %}
+                    <div style="background: rgba(250, 204, 21, 0.1); border: 1px solid rgba(250, 204, 21, 0.3); color: var(--color-yellow); padding: 1.5rem; border-radius: var(--radius-sm); font-size: 0.9rem; margin-bottom: 1rem;">
+                        <strong>Account Creation Notice</strong><br><br>
+                        A user account will be generated automatically for this faculty member.<br>
+                        <ul style="margin-top: 1rem; margin-left: 1.5rem; line-height: 1.8;">
+                            <li><strong>Username:</strong> <span id="preview-username" style="color:white; font-family:monospace; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">Faculty Email</span></li>
+                            <li><strong>Password:</strong> <span style="color:white; font-family:monospace; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">Faculty123!</span></li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Please ensure all details are correct before saving.</p>
+                </div>
+            </div>
+            
+            <div class="modal-footer" style="display: flex; justify-content: space-between; padding: 1.5rem; border-top: 1px solid var(--border-color); background: var(--bg-surface-hover);">
+                <button type="button" class="btn btn-secondary" id="btn-prev" style="display: none; background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);" onclick="changeStep(-1)">Back</button>
+                <button type="button" class="btn btn-secondary" id="btn-cancel" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);" onclick="closeModal()">Cancel</button>
+                
+                <div style="display: flex; gap: 0.5rem; margin-left: auto;">
+                    <button type="button" class="btn btn-primary" id="btn-next" onclick="changeStep(1)">Next Step</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit" style="display: none; box-shadow: 0 8px 20px rgba(249,115,22,0.3); align-items: center;">
+                        <span id="submit-text">{% if edit %}Save Changes{% else %}Add Faculty{% endif %}</span>
+                        <span id="submit-spinner" class="htmx-indicator">⏳</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    if (typeof currentStep === 'undefined') {
+        var currentStep = 1;
+    } else {
+        currentStep = 1;
+    }
+    
+    const totalSteps = 4;
+
+    function closeModal() {
+        document.getElementById('modal-container').innerHTML = '';
+    }
+
+    function changeStep(direction) {
+        if (direction === 1) {
+            const stepDiv = document.getElementById(`step-${currentStep}`);
+            const inputs = stepDiv.querySelectorAll('input:not([readonly]), select');
+            let isValid = true;
+            inputs.forEach(input => {
+                if (!input.checkValidity()) {
+                    input.reportValidity();
+                    isValid = false;
+                }
+            });
+            if (!isValid) return;
+        }
+
+        document.getElementById(`step-${currentStep}`).style.display = 'none';
+        document.getElementById(`step-nav-${currentStep}`).classList.remove('active');
+        
+        currentStep += direction;
+        
+        document.getElementById(`step-${currentStep}`).style.display = 'block';
+        document.getElementById(`step-nav-${currentStep}`).classList.add('active');
+        
+        document.getElementById('btn-prev').style.display = currentStep > 1 ? 'block' : 'none';
+        document.getElementById('btn-cancel').style.display = currentStep === 1 ? 'block' : 'none';
+        
+        if (currentStep === totalSteps) {
+            document.getElementById('btn-next').style.display = 'none';
+            document.getElementById('btn-submit').style.display = 'flex';
+            if (document.getElementById('preview-username')) {
+                const emailVal = document.getElementById('id_email').value;
+                document.getElementById('preview-username').innerText = emailVal || 'Provided Email';
+            }
+        } else {
+            document.getElementById('btn-next').style.display = 'block';
+            document.getElementById('btn-submit').style.display = 'none';
+        }
+    }
+</script>
+
+<style>
+    .stepper {
+        display: flex;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        overflow-x: auto;
+    }
+    .step {
+        padding: 0.5rem 0.75rem;
+        border-radius: var(--radius-sm);
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+    .step.active {
+        background: rgba(249, 115, 22, 0.1);
+        color: var(--color-orange);
+        font-weight: 500;
+    }
+    .section-title {
+        font-size: 12px;
+        letter-spacing: 1px;
+        color: var(--color-orange);
+        text-transform: uppercase;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+    .htmx-indicator {
+        display: none;
+        margin-left: 0.5rem;
+        font-size: 1rem;
+    }
+    .htmx-request .htmx-indicator {
+        display: inline-block;
+        animation: spin 2s linear infinite;
+    }
+    .htmx-request #submit-text {
+        opacity: 0.7;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    
+    .form-control:focus {
+        border-color: var(--color-orange);
+        box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+        outline: none;
+    }
+
+    .switch-container input[type="checkbox"] {
+        width: 1.5rem;
+        height: 1.5rem;
+        accent-color: var(--color-orange);
+        cursor: pointer;
+    }
+</style>
+>

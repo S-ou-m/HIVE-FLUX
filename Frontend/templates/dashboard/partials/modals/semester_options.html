@@ -1,0 +1,4 @@
+<option value="">Select Semester</option>
+{% for sem in semesters %}
+    <option value="{{ sem.id }}">Semester {{ sem.number }}</option>
+{% endfor %}

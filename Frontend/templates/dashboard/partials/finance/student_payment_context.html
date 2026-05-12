@@ -1,0 +1,191 @@
+<div class="animate-fade-in" style="display: grid; grid-template-columns: 1.5fr 1.1fr; gap: 2.5rem; align-items: start; padding: 0.5rem;">
+    
+    <!-- LEFT COLUMN: Intelligence & Data (Scrollable) -->
+    <div style="display: flex; flex-direction: column; gap: 2rem; overflow-y: auto; padding-right: 1.5rem; height: 100%;">
+        
+        <!-- 1. Anchored Summary Strip (The "Source of Truth") -->
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.75rem; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1.25rem; margin-bottom: 1.25rem;">
+                <div>
+                    <div style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;">Total Billed</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">
+                        ₹{% if total_billed > 0 %}{{ total_billed|floatformat:2 }}{% else %}0.00 <span style="font-size: 0.7rem; opacity: 0.5; display: block;">(Exp: ₹{{ expected_amount|floatformat:0 }})</span>{% endif %}
+                    </div>
+                </div>
+                <div style="border-left: 1px solid rgba(255,255,255,0.08); border-right: 1px solid rgba(255,255,255,0.08);">
+                    <div style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;">Paid to Date</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #22c55e;">₹{{ total_paid|floatformat:2 }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;">Total Outstanding</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #ef4444;">₹{{ actual_balance|floatformat:2 }}</div>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="flex: 1; margin-right: 2.5rem;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.5rem;">
+                        <span style="color: var(--text-secondary); font-weight: 500;">Payment Progress</span>
+                        <span style="color: var(--text-primary); font-weight: 700;">{{ progress_percent }}% Paid</span>
+                    </div>
+                    <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.02);">
+                        <div id="pb-fill-{{ student.id }}" data-w="{{ progress_percent }}" style="width: 0%; height: 100%; background: linear-gradient(90deg, #22c55e, #4ade80); border-radius: 4px; transition: width 0.8s ease;"></div>
+                    </div>
+                    <script>setTimeout(()=>{const e=document.getElementById('pb-fill-{{ student.id }}');if(e)e.style.width=e.dataset.w+'%'},50)</script>
+                </div>
+                {% if credit_balance > 0 %}
+                <div class="advance-badge-pulse" style="background: rgba(234, 179, 8, 0.08); padding: 0.6rem 1.25rem; border-radius: 12px; border: 1px solid rgba(234, 179, 8, 0.15); display: flex; align-items: center; gap: 0.75rem; transition: all 0.3s ease;">
+                    <div style="font-size: 1.25rem;">✨</div>
+                    <div>
+                        <div style="font-size: 0.6rem; color: #eab308; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Advance Available</div>
+                        <div style="font-size: 1rem; font-weight: 800; color: #eab308;">₹{{ credit_balance|floatformat:2 }}</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 2. Invoice Ledger Section -->
+        <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                <h4 style="font-size: 0.8rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Pending Invoices</h4>
+                <div style="height: 1px; flex: 1; background: var(--border-color); margin: 0 1.5rem; opacity: 0.3;"></div>
+                <span class="status-badge status-info" style="font-size: 0.6rem; border-radius: 20px; padding: 0.25rem 0.75rem;">{{ pending_invoices|length }} Active</span>
+            </div>
+            
+            <div id="invoice-list-container" style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for inv in pending_invoices %}
+                <div class="invoice-card-modern" 
+                     hx-get="{% url 'admin_payment_record_modal' inv.id %}" 
+                     hx-target="#payment-entry-container"
+                     onclick="document.querySelectorAll('.invoice-card-modern').forEach(c=>c.classList.remove('active')); this.classList.add('active');"
+                     style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <span>Semester {{ inv.semester.number }} Fees</span>
+                                {% if inv.is_auto_generated %}
+                                <span style="font-size: 0.6rem; padding: 3px 6px; background: rgba(59, 130, 246, 0.15); color: #3b82f6; border-radius: 4px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;">✨ Auto Generated</span>
+                                {% endif %}
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.45rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <span>📅 Issued: {{ inv.issued_date|date:"d M Y" }}</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 800; color: #ef4444; font-size: 1.1rem;">₹{{ inv.balance_due|floatformat:2 }}</div>
+                            <div style="font-size: 0.75rem; color: #ef4444; opacity: 0.8; margin-top: 0.35rem; font-weight: 600;">Due: {{ inv.due_date|date:"d M" }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div style="text-align: center; padding: 4rem 1.5rem; background: rgba(34, 197, 94, 0.02); border-radius: 16px; border: 1px dashed rgba(34, 197, 94, 0.3);">
+                    <div style="font-size: 2.5rem; margin-bottom: 1.25rem;">✅</div>
+                    <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary);">Everything is Settled</div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.75rem;">No pending invoices found for {{ student.user.first_name }}.</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 3. Recent Activity (Sleek List) -->
+        <div style="margin-top: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                <h4 style="font-size: 0.8rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Recent Transactions</h4>
+                <div style="height: 1px; flex: 1; background: var(--border-color); margin: 0 1.5rem; opacity: 0.3;"></div>
+            </div>
+            
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
+                {% for pay in recent_payments %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.03); transition: background 0.2s;">
+                    <div style="display: flex; align-items: center; gap: 1.25rem;">
+                        <div style="width: 36px; height: 36px; background: rgba(34, 197, 94, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">💳</div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 0.9rem; color: #22c55e;">+ ₹{{ pay.amount_paid|floatformat:2 }}</div>
+                            <div style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 500;">via {{ pay.mode }}</div>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-primary);">{{ pay.payment_date|date:"d M Y" }}</div>
+                        <div style="font-size: 0.65rem; color: var(--text-secondary);">TXN Ref: {{ pay.reference_id|slice:":8"|upper }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Sticky Action Panel (The "Transaction Engine") -->
+    <div style="position: sticky; top: 0; display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <div id="payment-entry-container" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px; padding: 2rem; box-shadow: 0 12px 40px rgba(0,0,0,0.3); border-top: 4px solid var(--primary-color);">
+            <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-secondary);">
+                <div style="width: 80px; height: 80px; background: rgba(249, 115, 22, 0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem;">💳</div>
+                <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.75rem;">Ready to Record</div>
+                <div style="font-size: 0.8rem; line-height: 1.6; margin-bottom: 2rem;">Select an invoice from the left or record an unallocated payment below.</div>
+                
+                <button class="btn btn-primary" 
+                        style="width: 100%; padding: 1rem; font-weight: 700; border-radius: 12px; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);"
+                        hx-get="{% url 'admin_advance_payment_modal' student.id %}"
+                        hx-target="#payment-entry-container">
+                    Record Advance Payment
+                </button>
+            </div>
+        </div>
+
+        <!-- SaaS Intelligence Card -->
+        <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05)); border: 1px solid rgba(59, 130, 246, 0.1); border-radius: 16px; padding: 1.5rem;">
+            <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                <div style="font-size: 1.5rem;">🤖</div>
+                <div>
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem;">Audit Insights</div>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+                        Student is expected to pay <strong>₹{{ expected_amount|floatformat:0 }}</strong> for the current academic session based on the standard fee structure.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+    .invoice-card-modern {
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .invoice-card-modern:hover {
+        transform: translateY(-2px);
+        border-color: var(--primary-color);
+        background: rgba(249, 115, 22, 0.02) !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+    .invoice-card-modern.active {
+        border-color: var(--primary-color);
+        background: rgba(249, 115, 22, 0.05) !important;
+        box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+    }
+    .invoice-card-modern.active::after {
+        content: "➜";
+        position: absolute;
+        right: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--primary-color);
+        font-weight: 900;
+        animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn {
+        from { opacity: 0; transform: translate(-10px, -50%); }
+        to { opacity: 1; transform: translate(0, -50%); }
+    }
+    .advance-badge-pulse {
+        animation: pulseSubtle 3s infinite ease-in-out;
+    }
+    @keyframes pulseSubtle {
+        0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.1); }
+        50% { box-shadow: 0 0 0 6px rgba(234, 179, 8, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+    }
+</style>

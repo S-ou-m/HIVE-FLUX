@@ -1,0 +1,105 @@
+<!-- 🚨 INSTITUTIONAL EMERGENCY: CRITICAL DIRECTIVE BANNER -->
+<div class="critical-banner animate-pulse-subtle" id="critical-banner-container">
+    <div class="banner-content">
+        <div class="pulse-indicator"></div>
+        <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; opacity: 0.7;">Critical Directive</span>
+            <span style="font-size: 14px; font-weight: 800; letter-spacing: -0.01em;">{{ notice.title }}</span>
+        </div>
+    </div>
+
+    <div class="banner-controls">
+        <button class="btn-banner-view" 
+                hx-get="{% url 'notice_center' %}" 
+                hx-target="#dashboard-content"
+                hx-push-url="true">
+            Process Intelligence <i class="fa-solid fa-arrow-right-long" style="margin-left: 8px;"></i>
+        </button>
+        <button class="btn-banner-close" 
+                hx-post="{% url 'mark_notice_read' notice.id %}" 
+                hx-target="#critical-banner-container"
+                hx-swap="outerHTML">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+</div>
+
+<style>
+    .critical-banner {
+        background: linear-gradient(90deg, #FF3B30 0%, #8E1F19 100%);
+        color: white;
+        padding: 14px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 10px 40px rgba(255, 59, 48, 0.3);
+        position: relative;
+        z-index: 1000;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .banner-content {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .pulse-indicator {
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        border-radius: 50%;
+        box-shadow: 0 0 15px #fff;
+        animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+
+    @keyframes pulse-ring {
+        0% { transform: scale(0.33); opacity: 1; }
+        80%, 100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    .btn-banner-view {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-banner-view:hover {
+        background: #fff;
+        color: #FF3B30;
+        transform: translateY(-1px);
+    }
+
+    .btn-banner-close {
+        background: transparent;
+        border: none;
+        color: rgba(255,255,255,0.5);
+        cursor: pointer;
+        padding: 8px;
+        font-size: 16px;
+        transition: color 0.2s;
+    }
+
+    .btn-banner-close:hover {
+        color: #fff;
+    }
+
+    @keyframes pulse-subtle {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.95; }
+    }
+    .animate-pulse-subtle {
+        animation: pulse-subtle 2s infinite ease-in-out;
+    }
+</style>

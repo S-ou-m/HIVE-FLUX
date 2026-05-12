@@ -1,0 +1,85 @@
+<div class="col-span-5 kpi-hero-card">
+    <div class="card-glow"></div>
+    <div class="kpi-content">
+        <div class="kpi-header">
+            <span class="label">Total Students</span>
+            <span class="trend {% if core.is_positive %}up{% else %}down{% endif %}">
+                <i class="fas fa-caret-{% if core.is_positive %}up{% else %}down{% endif %}"></i>
+                {{ core.growth_label }}
+            </span>
+        </div>
+        <div class="main-value-row">
+            <h2 class="hero-value">{{ core.total }}</h2>
+            <div class="mini-chart-container">
+                <!-- Mini Trend Sparkline (Mocked Path) -->
+                <svg width="80" height="30" viewBox="0 0 80 30">
+                    <path d="M0 25 L10 20 L20 22 L30 15 L40 18 L50 10 L60 12 L70 5 L80 8" fill="none" stroke="rgba(34, 197, 94, 0.5)" stroke-width="2" />
+                </svg>
+            </div>
+        </div>
+        <p class="sub-text">Active across all departments</p>
+    </div>
+</div>
+
+<div class="col-span-3 kpi-compact-card">
+    <div class="kpi-header">
+        <span class="label">Collection efficiency</span>
+    </div>
+    <div class="value-strip">
+        <span class="value">{{ finance.efficiency }}%</span>
+    </div>
+    <div class="progress-track">
+        <div class="progress-bar" style="--efficiency: {{ finance.efficiency|default:0 }}%; width: var(--efficiency);"></div>
+    </div>
+    <p class="sub-text">₹{{ finance.total_collected|floatformat:0 }} collected</p>
+</div>
+
+<div class="col-span-2 kpi-compact-card">
+    <div class="kpi-header">
+        <span class="label">Payment Risks</span>
+    </div>
+    <div class="value-strip">
+        <span class="value">{{ risk.count }}</span>
+        <span class="tag risk-tag">Immediate</span>
+    </div>
+    <p class="sub-text">Overdue Invoices</p>
+</div>
+
+<div class="col-span-2 kpi-compact-card health-accent">
+    <div class="kpi-header">
+        <span class="label">System Health</span>
+    </div>
+    <div class="health-display">
+        <span class="value">{{ health_score }}%</span>
+    </div>
+    <div class="health-labels">
+        <span class="health-dot active"></span>
+        <span class="status-text">No critical alerts</span>
+    </div>
+</div>
+
+<style>
+    .kpi-hero-card { position: relative; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); padding: 20px; overflow: hidden; display: flex; align-items: center; }
+    .card-glow { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at center, rgba(59, 130, 246, 0.05) 0%, transparent 70%); pointer-events: none; }
+    
+    .kpi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .kpi-header .label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+    .hero-value { font-size: 42px; font-weight: 800; color: #fff; line-height: 1; letter-spacing: -0.02em; }
+    .main-value-row { display: flex; align-items: flex-end; gap: 20px; }
+    
+    .trend.up { font-size: 11px; color: #10b981; font-weight: 700; }
+    .sub-text { font-size: 11px; color: #475569; margin-top: 6px; }
+
+    .kpi-compact-card { background: rgba(30, 41, 59, 0.4); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); padding: 16px; }
+    .kpi-compact-card .value { font-size: 24px; font-weight: 700; color: #fff; }
+    
+    .progress-track { width: 100%; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; margin: 8px 0; }
+    .progress-bar { height: 100%; background: #3b82f6; border-radius: 2px; }
+    
+    .tag { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+    .risk-tag { background: rgba(239, 68, 68, 0.1); color: #f87171; }
+    
+    .health-labels { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+    .health-dot.active { width: 6px; height: 6px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; }
+    .status-text { font-size: 10px; color: #94a3b8; font-weight: 600; }
+</style>

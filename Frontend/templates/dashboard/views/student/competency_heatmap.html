@@ -1,0 +1,52 @@
+<div class="competency-heatmap-workspace animate-fade-in space-y-10">
+    
+    <!-- 🏗️ HEADER: SKILL FINGERPRINT -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-black text-white">Competency Fingerprint</h2>
+            <p class="text-[10px] font-bold text-white/30 uppercase tracking-widest">Multi-Dimensional Mastery Analysis</p>
+        </div>
+        <div class="os-badge">
+            <span class="text-[9px] font-black tracking-widest uppercase">Verified Knowledge Graph</span>
+        </div>
+    </div>
+
+    <!-- 🏗️ HEATMAP GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for skill in skills %}
+        <div class="stu-kpi-card group hover:border-{{ skill.tone }}-500/40 transition-all">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <div class="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">{{ skill.category }}</div>
+                    <div class="text-sm font-black text-white">{{ skill.name }}</div>
+                </div>
+                <div class="w-8 h-8 rounded-lg bg-{{ skill.tone }}-500/10 flex items-center justify-center">
+                    <i class="fas fa-microchip text-xs text-{{ skill.tone }}-400"></i>
+                </div>
+            </div>
+
+            <!-- MASTERY RADIAL / BAR -->
+            <div class="space-y-4">
+                <div class="flex justify-between items-baseline">
+                    <div class="text-[24px] font-black text-white">{{ skill.level }}%</div>
+                    <div class="text-[9px] font-black text-{{ skill.tone }}-400 uppercase">Mastery Level</div>
+                </div>
+                <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full bg-{{ skill.tone }}-500 rounded-full transition-all duration-1000" style="width: {{ skill.level }}%"></div>
+                </div>
+            </div>
+
+            <div class="mt-6 flex gap-2">
+                <span class="px-2 py-1 rounded-md bg-white/5 border border-white/10 text-[8px] font-black text-white/40 uppercase">Syllabus-Aligned</span>
+                <span class="px-2 py-1 rounded-md bg-white/5 border border-white/10 text-[8px] font-black text-white/40 uppercase">Verified</span>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full py-20 text-center">
+            <i class="fas fa-project-diagram text-white/10 text-4xl mb-4"></i>
+            <div class="text-[10px] font-black text-white/20 uppercase tracking-widest">Knowledge Graph Syncing...</div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>

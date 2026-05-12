@@ -1,0 +1,20 @@
+<div class="space-y-4 animate-in zoom-in-95 duration-500">
+    <h3 class="text-[10px] font-black text-white/40 uppercase tracking-widest text-center">Placement Synchronization</h3>
+    <div class="p-8 bg-emerald-500/10 border border-emerald-500/20 rounded-[32px] text-center space-y-4">
+        <div class="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto text-emerald-400 text-2xl animate-bounce">
+            <i class="fa-solid fa-cloud-check"></i>
+        </div>
+        <div>
+            <div class="text-sm font-bold text-white uppercase tracking-tight">Identity Synced</div>
+            <div class="text-[10px] text-emerald-400 font-black uppercase tracking-widest mt-1">Live in Placement Cell</div>
+        </div>
+        <p class="text-[10px] text-white/40 leading-relaxed italic">
+            Your optimized professional identity has been successfully pushed to the institutional placement framework. Recruiters can now access your ERP-verified signals.
+        </p>
+        <button hx-get="{% url 'student_resume_builder_partial' %}"
+                hx-target="#workspace-core"
+                class="w-full py-3 bg-white/5 border border-white/10 text-[9px] font-black text-white/60 hover:text-white rounded-xl uppercase tracking-widest transition-all">
+            Return to Builder
+        </button>
+    </div>
+</div>

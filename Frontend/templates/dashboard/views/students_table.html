@@ -1,0 +1,125 @@
+<!-- OOB Swaps for Insights Strip -->
+<div id="stat-total-found" hx-swap-oob="true" class="insight-card" style="background: var(--bg-surface); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem;">
+    <div class="insight-icon" style="background: rgba(249, 115, 22, 0.1); color: var(--color-orange); padding: 0.75rem; border-radius: var(--radius-sm); font-size: 1.25rem;">👨‍🎓</div>
+    <div>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Total Found</p>
+        <h3 class="stat-value" style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">{{ total_found }}</h3>
+    </div>
+</div>
+
+<div id="stat-active-depts" hx-swap-oob="true" class="insight-card" style="background: var(--bg-surface); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem;">
+    <div class="insight-icon" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9; padding: 0.75rem; border-radius: var(--radius-sm); font-size: 1.25rem;">🏛️</div>
+    <div>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Active Depts</p>
+        <h3 class="stat-value" style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">{{ active_depts }}</h3>
+    </div>
+</div>
+
+<div class="data-table-wrapper animate-fade-in">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="cursor: pointer;" 
+                    hx-get="{% url 'admin_students_partial' %}?sort=enrollment&order={% if current_filters.sort == 'enrollment' and current_filters.order == 'asc' %}desc{% else %}asc{% endif %}&search={{ current_filters.search }}&dept={{ current_filters.dept }}&sem={{ current_filters.sem }}&year={{ current_filters.year }}"
+                    hx-target="#students-content">
+                    ENROLLMENT {% if current_filters.sort == 'enrollment' %}{% if current_filters.order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                </th>
+                <th style="cursor: pointer;" 
+                    hx-get="{% url 'admin_students_partial' %}?sort=name&order={% if current_filters.sort == 'name' and current_filters.order == 'asc' %}desc{% else %}asc{% endif %}&search={{ current_filters.search }}&dept={{ current_filters.dept }}&sem={{ current_filters.sem }}&year={{ current_filters.year }}"
+                    hx-target="#students-content">
+                    STUDENT NAME {% if current_filters.sort == 'name' %}{% if current_filters.order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                </th>
+                <th>EMAIL</th>
+                <th>PHONE NO</th>
+                <th style="cursor: pointer;" 
+                    hx-get="{% url 'admin_students_partial' %}?sort=dept&order={% if current_filters.sort == 'dept' and current_filters.order == 'asc' %}desc{% else %}asc{% endif %}&search={{ current_filters.search }}&dept={{ current_filters.dept }}&sem={{ current_filters.sem }}&year={{ current_filters.year }}"
+                    hx-target="#students-content">
+                    DEPARTMENT {% if current_filters.sort == 'dept' %}{% if current_filters.order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                </th>
+                <th style="cursor: pointer;" 
+                    hx-get="{% url 'admin_students_partial' %}?sort=semester&order={% if current_filters.sort == 'semester' and current_filters.order == 'asc' %}desc{% else %}asc{% endif %}&search={{ current_filters.search }}&dept={{ current_filters.dept }}&sem={{ current_filters.sem }}&year={{ current_filters.year }}"
+                    hx-target="#students-content">
+                    SEMESTER {% if current_filters.sort == 'semester' %}{% if current_filters.order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                </th>
+                <th style="cursor: pointer;" 
+                    hx-get="{% url 'admin_students_partial' %}?sort=year&order={% if current_filters.sort == 'year' and current_filters.order == 'asc' %}desc{% else %}asc{% endif %}&search={{ current_filters.search }}&dept={{ current_filters.dept }}&sem={{ current_filters.sem }}&year={{ current_filters.year }}"
+                    hx-target="#students-content">
+                    YEAR {% if current_filters.sort == 'year' %}{% if current_filters.order == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                </th>
+                <th>ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td style="font-family: monospace; color: var(--color-orange);">{{ student.enrollment_no }}</td>
+                <td style="font-weight: 500;">{{ student.user.first_name }} {{ student.user.last_name }}</td>
+                <td style="color: var(--text-secondary);">{{ student.user.email }}</td>
+                <td style="color: var(--text-secondary);">{{ student.phone_no|default:"-" }}</td>
+                <td>{{ student.department.name|default:"-" }}</td>
+                <td>{% if student.current_semester %}Sem {{ student.current_semester.number }}{% else %}-{% endif %}</td>
+                <td>{{ student.admission_year }}</td>
+                <td>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="action-btn" 
+                                title="Edit Student" 
+                                hx-get="{% url 'admin_student_edit' student.id %}" 
+                                hx-target="#modal-container"
+                                style="color: var(--primary-color);">
+                            ✏️
+                        </button>
+                        <button class="action-btn" 
+                                title="Remove Student" 
+                                hx-post="{% url 'admin_student_delete' student.id %}" 
+                                hx-confirm="Are you sure?" 
+                                hx-target="#students-content"
+                                style="color: #ef4444;">
+                            🗑️
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="empty-state" style="padding: 4rem 2rem;">
+                    <div class="empty-icon" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">🕵️‍♂️</div>
+                    <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;">No students found</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Try adjusting your filters or search terms.</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- PAGINATION CONTROLS -->
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="pagination-wrapper animate-fade-in" style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+    <div class="pagination-info" style="font-size: 0.85rem; color: var(--text-secondary);">
+        Showing <span style="color: var(--text-primary); font-weight: 600;">{{ page_obj.start_index }}</span> to <span style="color: var(--text-primary); font-weight: 600;">{{ page_obj.end_index }}</span> of <span style="color: var(--text-primary); font-weight: 600;">{{ total_found }}</span> students
+    </div>
+    <div class="pagination-actions" style="display: flex; gap: 0.5rem;">
+        {% if page_obj.has_previous %}
+        <button class="btn btn-secondary" 
+                hx-get="{% url 'admin_students_partial' %}?page={{ page_obj.previous_page_number }}&search={{ current_filters.search }}&dept={{ current_filters.dept }}&sem={{ current_filters.sem }}&year={{ current_filters.year }}&sort={{ current_filters.sort }}&order={{ current_filters.order }}" 
+                hx-target="#students-content"
+                style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+            Previous
+        </button>
+        {% endif %}
+
+        <div style="display: flex; gap: 0.25rem; align-items: center;">
+            <span style="font-size: 0.85rem; color: var(--text-secondary); margin: 0 1rem;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        </div>
+
+        {% if page_obj.has_next %}
+        <button class="btn btn-secondary" 
+                hx-get="{% url 'admin_students_partial' %}?page={{ page_obj.next_page_number }}&search={{ current_filters.search }}&dept={{ current_filters.dept }}&sem={{ current_filters.sem }}&year={{ current_filters.year }}&sort={{ current_filters.sort }}&order={{ current_filters.order }}" 
+                hx-target="#students-content"
+                style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+            Next
+        </button>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

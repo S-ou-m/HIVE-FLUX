@@ -1,0 +1,221 @@
+<style>
+    .setup-drawer-wrapper {
+        display: flex;
+        height: 100%;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+    .setup-main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid var(--border-color);
+    }
+    .setup-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .setup-header h3 { font-size: 1.25rem; font-weight: 700; color: #fff; }
+    .setup-header p { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
+    
+    .setup-body {
+        padding: 1.5rem;
+        overflow-y: auto;
+        flex: 1;
+    }
+    .setup-section { margin-bottom: 2rem; }
+    .section-title {
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .input-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .input-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); }
+    .setup-input {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.6rem 0.8rem;
+        color: #fff;
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .setup-input:focus { border-color: var(--primary-color); }
+    
+    .component-card {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        transition: border-color 0.2s;
+    }
+    .component-card:hover { border-color: var(--border-hover); }
+    .comp-info { display: flex; align-items: center; gap: 0.75rem; }
+    .comp-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+    }
+    .icon-allowance { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .icon-deduction { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    
+    .setup-footer {
+        padding: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        background: var(--bg-secondary);
+    }
+    .btn-save {
+        background: var(--primary-color);
+        color: #fff;
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .btn-cancel {
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .preview-sidebar {
+        width: 320px;
+        background: #000;
+        position: relative;
+        overflow: hidden;
+    }
+    .preview-sidebar::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top right, rgba(249,115,22,0.1), transparent 70%);
+        pointer-events: none;
+    }
+</style>
+
+<div class="setup-drawer-wrapper">
+    <div class="setup-main-content">
+        <div class="setup-header">
+            <div>
+                <h3>Compensation Setup</h3>
+                <p>{{ faculty.user.get_full_name }} • {{ faculty.designation }}</p>
+            </div>
+            <button onclick="closeDrawer()" class="btn-cancel" style="padding: 5px 10px;">✕</button>
+        </div>
+
+        <div class="setup-body">
+            <form id="salary-setup-form">
+                <section class="setup-section">
+                    <span class="section-title">Base Configuration</span>
+                    <div class="setup-grid">
+                        <div class="input-group">
+                            <label>Monthly Base Salary</label>
+                            <input type="number" name="base_salary" value="{{ profile.base_salary|default:'0' }}" 
+                                   class="setup-input"
+                                   hx-get="{% url 'admin_salary_preview_hx' faculty.id %}"
+                                   hx-trigger="keyup changed delay:300ms, change"
+                                   hx-target="#preview-sidebar">
+                        </div>
+                        <div class="input-group">
+                            <label>Tax Regime</label>
+                            <select name="tax_regime" class="setup-input"
+                                   hx-get="{% url 'admin_salary_preview_hx' faculty.id %}"
+                                   hx-trigger="change"
+                                   hx-target="#preview-sidebar"
+                                   hx-include="[name='base_salary'], #salary-setup-form input">
+                                <option value="">Select Regime</option>
+                                {% for r in regimes %}
+                                <option value="{{ r.id }}" {% if profile.tax_regime_id == r.id %}selected{% endif %}>{{ r.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="setup-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span class="section-title" style="margin-bottom: 0;">Salary Components</span>
+                        <button type="button" 
+                                class="btn-save" 
+                                style="font-size: 0.65rem; padding: 4px 8px;"
+                                hx-get="{% url 'admin_salary_setup_add_comp' faculty.id %}"
+                                hx-target="body"
+                                hx-swap="beforeend">
+                            + Add Custom
+                        </button>
+                    </div>
+                    
+                    <div class="component-list" id="component-list">
+                        {% for comp in components %}
+                        <div class="component-card">
+                            <div class="comp-info">
+                                <div class="comp-icon {% if comp.type == 'ALLOWANCE' %}icon-allowance{% else %}icon-deduction{% endif %}">
+                                    {% if comp.type == 'ALLOWANCE' %}＋{% else %}－{% endif %}
+                                </div>
+                                <div>
+                                    <p style="font-size: 0.85rem; font-weight: 700;">{{ comp.name }}</p>
+                                    <p style="font-size: 0.65rem; color: var(--text-secondary);">{{ comp.get_calc_type_display }} • {{ comp.get_impact_type_display }}</p>
+                                </div>
+                            </div>
+                            <div style="width: 80px; position: relative;">
+                                <input type="number" name="comp_{{ comp.id }}" value="{{ comp.default_value }}" 
+                                       class="setup-input" style="width: 100%; text-align: right; padding-right: 20px; font-size: 0.75rem;"
+                                       hx-get="{% url 'admin_salary_preview_hx' faculty.id %}"
+                                       hx-trigger="keyup changed delay:300ms, change"
+                                       hx-target="#preview-sidebar"
+                                       hx-include="[name='base_salary']">
+                                <span style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 0.6rem; color: var(--text-secondary);">
+                                    {% if comp.calc_type == 'PERCENTAGE' %}%{% else %}₹{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+            </form>
+        </div>
+
+        <div class="setup-footer">
+            <button type="button" onclick="closeDrawer()" class="btn-cancel">Cancel</button>
+            <button type="button" 
+                    class="btn-save shadow-lg"
+                    hx-post="{% url 'admin_salary_setup_save' faculty.id %}"
+                    hx-target="#drawer-content"
+                    hx-include="#salary-setup-form">
+                Save Profile
+            </button>
+        </div>
+    </div>
+
+    <!-- PREVIEW SIDEBAR -->
+    <div id="preview-sidebar" class="preview-sidebar">
+        <div style="padding: 2rem; opacity: 0.4; font-size: 0.8rem; text-align: center; height: 100%; display: flex; align-items: center; justify-content: center; font-style: italic;">
+            Adjust values to see projection...
+        </div>
+    </div>
+</div>

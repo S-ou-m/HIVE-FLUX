@@ -1,0 +1,29 @@
+<div class="component-card animate-fade-in" id="comp-row-{{ comp.id }}">
+    <div class="comp-info">
+        <div class="comp-icon {% if comp.type == 'ALLOWANCE' %}icon-allowance{% else %}icon-deduction{% endif %}">
+            {% if comp.type == 'ALLOWANCE' %}＋{% else %}－{% endif %}
+        </div>
+        <div>
+            <p style="font-size: 0.85rem; font-weight: 700;">{{ comp.name }}</p>
+            <p style="font-size: 0.65rem; color: var(--text-secondary);">{{ comp.get_calc_type_display }} • {{ comp.get_impact_type_display }}</p>
+        </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 80px; position: relative;">
+            <input type="number" name="comp_{{ comp.id }}" value="{{ comp.default_value }}" 
+                   class="setup-input" style="width: 100%; text-align: right; padding-right: 20px; font-size: 0.75rem;"
+                   hx-get="{% url 'admin_salary_preview_hx' faculty_id %}"
+                   hx-trigger="keyup changed delay:300ms, change"
+                   hx-target="#preview-sidebar"
+                   hx-include="#salary-setup-form input, #salary-setup-form select">
+            <span style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 0.6rem; color: var(--text-secondary);">
+                {% if comp.calc_type == 'PERCENTAGE' %}%{% else %}₹{% endif %}
+            </span>
+        </div>
+        <button type="button" 
+                style="background: transparent; border: none; color: #ef4444; cursor: pointer; font-size: 0.8rem;"
+                onclick="this.closest('.component-card').remove(); htmx.trigger('#salary-setup-form input[name=\'base_salary\']', 'change')">
+            <i class="fa-solid fa-trash-can"></i>
+        </button>
+    </div>
+</div>

@@ -1,0 +1,110 @@
+{% load static %}
+<div class="modal-content glass-panel p-10 animate-fade-in" style="max-width: 800px; width: 95%; border-radius: 32px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(10, 10, 10, 0.85);">
+    <!-- Header Layer -->
+    <div class="flex justify-between items-start mb-12">
+        <div class="flex gap-6">
+            <div class="w-16 h-16 rounded-2xl bg-{{ color }}-500/10 border border-{{ color }}-500/20 flex items-center justify-center text-{{ color }}-500 shadow-xl shadow-{{ color }}-500/5">
+                <i class="fas {{ icon }} text-2xl"></i>
+            </div>
+            <div>
+                <h2 class="text-3xl font-black text-white tracking-tight leading-tight">{{ title }}</h2>
+                <p class="text-[10px] font-black text-muted uppercase tracking-[0.2em] mt-2 opacity-70">{{ subtitle }}</p>
+            </div>
+        </div>
+        <button class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-muted hover:text-white hover:bg-white/10 transition-all group" onclick="closeModal()">
+            <i class="fas fa-times group-hover:rotate-90 transition-transform duration-300"></i>
+        </button>
+    </div>
+
+    <!-- Intelligence Placeholder: SaaS Grade Operational State -->
+    <div id="drilldown-data-container" 
+         hx-get="{% url 'admin_timetable_drilldown_content_action' %}?type={{ color }}" 
+         hx-trigger="load delay:1.2s" 
+         hx-swap="innerHTML transition:true"
+         class="flex flex-col items-center justify-center py-20 bg-white/2 rounded-3xl border border-white/5 border-dashed">
+        <div class="relative mb-8">
+            <div class="w-24 h-24 rounded-full border-4 border-{{ color }}-500/10 border-t-{{ color }}-500 animate-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <i class="fas {{ icon }} text-2xl text-{{ color }}-500/50"></i>
+            </div>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-2">Analyzing Institutional Data</h3>
+        <p class="text-xs text-muted text-center max-w-sm px-4 leading-relaxed">
+            The orchestration engine is currently synthesizing real-time telemetry for <span class="text-{{ color }}-400 font-bold">{{ title }}</span>. 
+            Deep-link visualization will be available once the simulation matrix is finalized.
+        </p>
+        
+        <div class="mt-10 flex gap-3">
+            <div class="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-black text-muted uppercase tracking-widest">
+                <i class="fas fa-microchip mr-2 text-{{ color }}-500"></i> Neural Engine Active
+            </div>
+            <div class="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-black text-muted uppercase tracking-widest">
+                <i class="fas fa-shield-halved mr-2 text-green-500"></i> Data Secured
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-end mt-10 gap-4 pt-8 border-t border-white/5">
+        <button class="px-8 py-3 rounded-xl border border-white/10 text-[11px] font-black text-muted uppercase hover:bg-white/5 hover:text-white transition-all" onclick="closeModal()">
+            Dismiss
+        </button>
+        <button class="px-10 py-3 rounded-xl bg-{{ color }}-600 text-[11px] font-black text-white uppercase hover:bg-{{ color }}-500 shadow-lg shadow-{{ color }}-600/20 transition-all flex items-center gap-3">
+            <i class="fas fa-sync-alt fa-spin"></i>
+            <span>Refresh Intelligence</span>
+        </button>
+    </div>
+</div>
+
+<style>
+    .bg-purple-500\/10 { background-color: rgba(168, 85, 247, 0.1); }
+    .border-purple-500\/20 { border-color: rgba(168, 85, 247, 0.2); }
+    .text-purple-500 { color: #a855f7; }
+    .text-purple-400 { color: #c084fc; }
+    .bg-purple-600 { background-color: #9333ea; }
+    .hover\:bg-purple-500:hover { background-color: #a855f7; }
+    .shadow-purple-600\/20 { box-shadow: 0 10px 15px -3px rgba(147, 51, 234, 0.2); }
+
+    .bg-blue-500\/10 { background-color: rgba(59, 130, 246, 0.1); }
+    .border-blue-500\/20 { border-color: rgba(59, 130, 246, 0.2); }
+    .text-blue-500 { color: #3b82f6; }
+    .text-blue-400 { color: #60a5fa; }
+    .bg-blue-600 { background-color: #2563eb; }
+    .hover\:bg-blue-500:hover { background-color: #3b82f6; }
+    .shadow-blue-600\/20 { box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2); }
+
+    .bg-green-500\/10 { background-color: rgba(34, 197, 94, 0.1); }
+    .border-green-500\/20 { border-color: rgba(34, 197, 94, 0.2); }
+    .text-green-500 { color: #22c55e; }
+    .text-green-400 { color: #4ade80; }
+    .bg-green-600 { background-color: #16a34a; }
+    .hover\:bg-green-500:hover { background-color: #22c55e; }
+    .shadow-green-600\/20 { box-shadow: 0 10px 15px -3px rgba(22, 163, 74, 0.2); }
+
+    .bg-orange-500\/10 { background-color: rgba(249, 115, 22, 0.1); }
+    .border-orange-500\/20 { border-color: rgba(249, 115, 22, 0.2); }
+    .text-orange-500 { color: #f97316; }
+    .text-orange-400 { color: #fb923c; }
+    .bg-orange-600 { background-color: #ea580c; }
+    .hover\:bg-orange-500:hover { background-color: #f97316; }
+    .shadow-orange-600\/20 { box-shadow: 0 10px 15px -3px rgba(234, 88, 12, 0.2); }
+
+    .bg-red-500\/10 { background-color: rgba(239, 68, 68, 0.1); }
+    .border-red-500\/20 { border-color: rgba(239, 68, 68, 0.2); }
+    .text-red-500 { color: #ef4444; }
+    .text-red-400 { color: #f87171; }
+    .bg-red-600 { background-color: #dc2626; }
+    .hover\:bg-red-500:hover { background-color: #ef4444; }
+    .shadow-red-600\/20 { box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.2); }
+
+    .bg-cyan-500\/10 { background-color: rgba(6, 182, 212, 0.1); }
+    .border-cyan-500\/20 { border-color: rgba(6, 182, 212, 0.2); }
+    .text-cyan-500 { color: #06b6d4; }
+    .text-cyan-400 { color: #22d3ee; }
+    .bg-cyan-600 { background-color: #0891b2; }
+    .hover\:bg-cyan-500:hover { background-color: #06b6d4; }
+    .shadow-cyan-600\/20 { box-shadow: 0 10px 15px -3px rgba(8, 145, 178, 0.2); }
+
+    .animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+</style>

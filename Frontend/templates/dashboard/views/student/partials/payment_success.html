@@ -1,0 +1,25 @@
+<div class="mt-8 p-8 bg-emerald-500/10 border border-emerald-500/20 rounded-[40px] animate-in zoom-in-95 duration-500 text-center">
+    <div class="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-3xl mx-auto mb-6 animate-bounce">
+        <i class="fa-solid fa-check-double"></i>
+    </div>
+    
+    <h3 class="text-2xl font-black text-white mb-2">Settlement Confirmed</h3>
+    <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-6">Institutional Ledger Updated</p>
+    
+    <div class="max-w-xs mx-auto p-6 bg-black/20 rounded-3xl border border-white/5 space-y-3 mb-8">
+        <div class="flex justify-between text-[10px] font-bold text-white/30 uppercase tracking-widest">
+            <span>TXN ID</span>
+            <span class="text-white">{{ transaction_id }}</span>
+        </div>
+        <div class="flex justify-between text-[10px] font-bold text-white/30 uppercase tracking-widest">
+            <span>Settled Amount</span>
+            <span class="text-white">₹{{ amount }}</span>
+        </div>
+    </div>
+
+    <button hx-get="{% url 'student_finance_ledger_partial' %}"
+            hx-target="#workspace-core"
+            class="px-10 py-4 bg-emerald-500 text-white text-[10px] font-black rounded-2xl uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20 hover:scale-105 transition-all">
+        Return to Finance OS
+    </button>
+</div>

@@ -1,0 +1,15 @@
+<div id="vpa-input-container" class="p-6 bg-white/[0.03] border border-white/5 rounded-3xl animate-in fade-in slide-in-from-top-2 duration-500">
+    <div class="text-[9px] font-black text-white/20 uppercase tracking-widest mb-4">UPI VPA Configuration</div>
+    <div class="relative flex items-center gap-3">
+        <input type="text" name="vpa" id="vpa-field" placeholder="example@upi" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/10 focus:border-orange-500 outline-none transition-all">
+        <button hx-post="{% url 'student_verify_vpa_partial' %}"
+                hx-include="#vpa-field"
+                hx-target="#vpa-verification-surface"
+                class="px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black text-white/40 uppercase tracking-widest hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all">
+            Verify
+        </button>
+    </div>
+    <div id="vpa-verification-surface" class="mt-4">
+        <p class="text-[9px] text-white/30 italic">"Verify your Virtual Payment Address to enable institutional settlement."</p>
+    </div>
+</div>

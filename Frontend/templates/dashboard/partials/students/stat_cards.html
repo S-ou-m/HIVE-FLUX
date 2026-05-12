@@ -1,0 +1,186 @@
+{% load humanize %}
+
+<!-- Elite SaaS: Insight & Alert Layer (Prioritized) -->
+{% if stats.insights %}
+<div class="insight-banner animate-slide-down" style="margin-bottom: 1.5rem;">
+    <div class="insight-banner-content">
+        <div class="insight-stack">
+            {% for insight in stats.insights %}
+            <div class="insight-item insight-{{ insight.type }}">
+                <span class="insight-text">{{ insight.text }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Elite SaaS: High-Density Hierarchical Grid -->
+<div class="summary-cards-grid animate-fade-in">
+    <!-- 1. Hero KPI: Enrollment Health (WIDE) -->
+    <div class="stat-card hero-card clickable" 
+         hx-get="{% url 'admin_students_partial' %}?v=1" 
+         hx-target="#students-content" 
+         hx-push-url="true"
+         onclick="syncUrlState('search', '')">
+        <div class="card-header">
+            <div>
+                <p class="metric-label">Total Enrollment</p>
+                <h3 class="metric-value hero-value">{{ stats.total_students }}</h3>
+                <p class="confidence-tag">{{ stats.meta.confidence }}</p>
+            </div>
+            <div class="hero-icon">👨‍🎓</div>
+        </div>
+        <div class="card-footer">
+            <span class="trend-badge {% if stats.growth.trend == 'positive' %}positive{% else %}negative{% endif %}">
+                {% if stats.growth.trend == 'positive' %}↑{% else %}↓{% endif %} {{ stats.growth.percent }}%
+            </span>
+            {% if stats.growth.prediction %}
+                <span class="micro-stat prediction-text">{{ stats.growth.prediction }}</span>
+            {% else %}
+                <span class="micro-stat">Trailing 30-day growth</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 2. Collection Efficiency -->
+    <div class="stat-card clickable"
+         hx-get="{% url 'admin_students_partial' %}?financial=advance&v=1"
+         hx-target="#students-content"
+         hx-push-url="true"
+         onclick="syncUrlState('financial', 'advance')">
+        <div class="card-header">
+            <div>
+                <p class="metric-label">Collection Efficiency</p>
+                <h3 class="metric-value">{{ stats.finance.collection_efficiency }}%</h3>
+            </div>
+            <div class="icon-box finance-icon">💰</div>
+        </div>
+        <div class="card-footer">
+            <span class="micro-stat">Avg ₹{{ stats.finance.avg_payment|intcomma }} / student</span>
+        </div>
+    </div>
+
+    <!-- 3. Risk Indicator -->
+    <div class="stat-card clickable {% if stats.finance.risk_count > 0 %}risk-state alert-border{% endif %}"
+         hx-get="{% url 'admin_students_partial' %}?financial=dues&v=1"
+         hx-target="#students-content"
+         hx-push-url="true"
+         onclick="syncUrlState('financial', 'dues')">
+        <div class="card-header">
+            <div>
+                <p class="metric-label">Students at Risk</p>
+                <h3 class="metric-value">{{ stats.finance.risk_count }}</h3>
+            </div>
+            <div class="icon-box risk-icon">⚠️</div>
+        </div>
+        <div class="card-footer">
+            <span class="micro-stat">₹{{ stats.finance.total_outstanding|intcomma }} outstanding</span>
+        </div>
+    </div>
+
+    <!-- 4. Academic Distribution -->
+    <div class="stat-card">
+        <div class="card-header">
+            <div>
+                <p class="metric-label">Academic Distribution</p>
+                <h3 class="metric-value">{{ stats.academics.active_depts }} <span style="font-size: 0.8rem;">Depts</span></h3>
+            </div>
+            <div class="icon-box academic-icon">🏛️</div>
+        </div>
+        <div class="card-footer">
+            <span class="trend-badge neutral">Top: {{ stats.academics.top_dept }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Elite Freshness Timer -->
+<div class="live-status-bar">
+    <span class="pulsing-dot"></span>
+    <span id="live-timer-text">Live • Syncing...</span>
+</div>
+
+<style>
+    /* 12-Column Hierarchical Grid */
+    .summary-cards-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 1rem;
+    }
+    @media (max-width: 1400px) { .summary-cards-grid { grid-template-columns: 1.5fr 1fr 1fr; } .academic-icon { display: none; } }
+    @media (max-width: 1024px) { .summary-cards-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 768px) { .summary-cards-grid { grid-template-columns: 1fr; } }
+
+    .stat-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.25rem;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .hero-card { background: linear-gradient(135deg, var(--bg-surface), rgba(59, 130, 246, 0.05)); }
+    .hero-value { font-size: 2.2rem; }
+    .hero-icon { font-size: 2.5rem; opacity: 0.2; position: absolute; right: 1.5rem; top: 1.5rem; }
+
+    .stat-card.clickable:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+
+    /* Insight Stacking */
+    .insight-stack { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 4px; }
+    .insight-item {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        white-space: nowrap;
+        border: 1px solid transparent;
+    }
+    .insight-critical { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.2); }
+    .insight-growth { background: rgba(34, 197, 94, 0.1); color: #22c55e; border-color: rgba(34, 197, 94, 0.2); }
+    .insight-info { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-color: rgba(59, 130, 246, 0.2); }
+
+    /* Freshness Indicator */
+    .live-status-bar { text-align: right; font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+    .pulsing-dot { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 0 rgba(34, 197, 94, 0.4); animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+
+    .confidence-tag { font-size: 0.65rem; color: var(--text-secondary); margin-top: 4px; font-weight: 500; }
+    .prediction-text { color: #f59e0b; font-weight: 600; }
+</style>
+
+<script>
+    (function() {
+        // Elite SaaS: Freshness Timer (Attached to window to prevent redeclaration)
+        const serverTime = new Date("{{ stats.meta.server_time }}");
+        const timerEl = document.getElementById('live-timer-text');
+        if (!timerEl) return;
+        
+        function updateTimer() {
+            const now = new Date();
+            const diff = Math.floor((now - serverTime) / 1000);
+            if (diff < 5) timerEl.innerText = "Live • Updated just now";
+            else timerEl.innerText = `Live • Updated ${diff}s ago`;
+        }
+        
+        if (window._liveTimer) clearInterval(window._liveTimer);
+        window._liveTimer = setInterval(updateTimer, 1000);
+        updateTimer();
+    })();
+
+    // Canonical State Debounce (Use var or window to allow HTMX re-entry)
+    var _canonicalTimeout; 
+    function syncUrlState(param, value) {
+        if (_canonicalTimeout) clearTimeout(_canonicalTimeout);
+        _canonicalTimeout = setTimeout(() => {
+            console.log(`Syncing Canonical State: ${param}=${value}`);
+            // State rehydration logic can be added here
+        }, 150);
+    }
+</script>

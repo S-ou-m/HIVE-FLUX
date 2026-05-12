@@ -1,0 +1,135 @@
+{% load static %}
+<div class="modal-content glass-panel p-10 animate-fade-in" style="max-width: 650px; width: 95%; border-radius: 32px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(10, 10, 10, 0.8);">
+    <!-- Header: Operational Authority -->
+    <div class="flex justify-between items-start mb-10">
+        <div class="flex gap-5">
+            <div class="w-14 h-14 rounded-2xl bg-blue-600/10 border border-blue-600/20 flex items-center justify-center text-blue-500 shadow-lg shadow-blue-600/10">
+                <i class="fas fa-calendar-plus text-2xl"></i>
+            </div>
+            <div>
+                <h2 class="text-3xl font-black text-white tracking-tight leading-tight">Create Timetable</h2>
+                <p class="text-[10px] font-black text-muted uppercase tracking-[0.2em] mt-1.5 opacity-70">Institutional Blueprint Initialization</p>
+            </div>
+        </div>
+        <button class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-muted hover:text-white hover:bg-white/10 transition-all group" onclick="closeModal()">
+            <i class="fas fa-times group-hover:rotate-90 transition-transform duration-300"></i>
+        </button>
+    </div>
+
+    <!-- Orchestration Form -->
+    <form hx-post="{% url 'admin_timetable_create' %}" hx-target="#dashboard-content" hx-indicator="#form-spinner" onsubmit="closeModal()">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-10">
+            <!-- Department Logic -->
+            <div class="flex flex-col gap-2.5">
+                <div class="flex items-center gap-2 mb-1">
+                    <i class="fas fa-building text-[10px] text-blue-500"></i>
+                    <label class="text-[9px] font-black text-muted uppercase tracking-widest">Department</label>
+                </div>
+                {{ form.department }}
+            </div>
+
+            <!-- Program Logic -->
+            <div class="flex flex-col gap-2.5">
+                <div class="flex items-center gap-2 mb-1">
+                    <i class="fas fa-graduation-cap text-[10px] text-purple-500"></i>
+                    <label class="text-[9px] font-black text-muted uppercase tracking-widest">Academic Program</label>
+                </div>
+                {{ form.program }}
+            </div>
+
+            <!-- Semester Logic -->
+            <div class="flex flex-col gap-2.5">
+                <div class="flex items-center gap-2 mb-1">
+                    <i class="fas fa-layer-group text-[10px] text-green-500"></i>
+                    <label class="text-[9px] font-black text-muted uppercase tracking-widest">Semester Phase</label>
+                </div>
+                {{ form.semester }}
+            </div>
+
+            <!-- Section Logic -->
+            <div class="flex flex-col gap-2.5">
+                <div class="flex items-center gap-2 mb-1">
+                    <i class="fas fa-users text-[10px] text-orange-500"></i>
+                    <label class="text-[9px] font-black text-muted uppercase tracking-widest">Section Division</label>
+                </div>
+                {{ form.section }}
+            </div>
+
+            <!-- Academic Year -->
+            <div class="flex flex-col gap-2.5">
+                <div class="flex items-center gap-2 mb-1">
+                    <i class="fas fa-calendar-check text-[10px] text-cyan-500"></i>
+                    <label class="text-[9px] font-black text-muted uppercase tracking-widest">Academic Session</label>
+                </div>
+                {{ form.academic_year }}
+            </div>
+
+            <!-- Effective Date -->
+            <div class="flex flex-col gap-2.5">
+                <div class="flex items-center gap-2 mb-1">
+                    <i class="fas fa-clock text-[10px] text-red-500"></i>
+                    <label class="text-[9px] font-black text-muted uppercase tracking-widest">Effective From</label>
+                </div>
+                {{ form.effective_from }}
+            </div>
+        </div>
+
+        <!-- Action Matrix -->
+        <div class="flex items-center justify-between pt-8 border-t border-white/5">
+            <div class="flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                <span class="text-[9px] font-bold text-muted uppercase tracking-widest">System Ready</span>
+            </div>
+            <div class="flex gap-4">
+                <button type="button" class="px-8 py-3 rounded-xl border border-white/10 text-[11px] font-black text-muted uppercase hover:bg-white/5 hover:text-white transition-all" onclick="closeModal()">
+                    Discard
+                </button>
+                <button type="submit" class="px-10 py-3 rounded-xl bg-blue-600 text-[11px] font-black text-white uppercase hover:bg-blue-500 shadow-lg shadow-blue-600/20 transition-all flex items-center gap-3 group">
+                    <span id="form-spinner" class="htmx-indicator group-active:block"><i class="fas fa-circle-notch animate-spin"></i></span>
+                    <span>Initialize Blueprint</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    /* Premium Form Controls */
+    .modal-content select, 
+    .modal-content input {
+        background: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 16px !important;
+        padding: 1rem 1.25rem !important;
+        font-size: 0.8rem !important;
+        font-weight: 600 !important;
+        color: white !important;
+        outline: none !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        width: 100% !important;
+    }
+    
+    .modal-content select:hover, 
+    .modal-content input:hover {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border-color: rgba(255, 255, 255, 0.15) !important;
+    }
+
+    .modal-content select:focus, 
+    .modal-content input:focus {
+        border-color: var(--blue-primary) !important;
+        background: rgba(59, 130, 246, 0.05) !important;
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.1) !important;
+    }
+
+    .modal-content option {
+        background: #0a0a0a;
+        color: white;
+        padding: 1rem;
+    }
+
+    .animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+</style>

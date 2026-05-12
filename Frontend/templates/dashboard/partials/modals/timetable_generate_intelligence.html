@@ -1,0 +1,59 @@
+<div class="modal-content glass-panel p-10" style="max-width: 700px; width: 90%; border-radius: 28px; background: linear-gradient(135deg, rgba(20, 20, 20, 0.95), rgba(30, 30, 30, 0.95));">
+    <div class="flex flex-col items-center text-center mb-10">
+        <div class="w-16 h-16 rounded-2xl bg-blue-600/20 flex items-center justify-center text-blue-500 text-3xl mb-6 shadow-[0_0_30px_rgba(59,130,246,0.3)]">
+            <i class="fas fa-brain"></i>
+        </div>
+        <h2 class="text-3xl font-black text-white tracking-tight">Smart Timetable Generator</h2>
+        <p class="text-[11px] font-bold text-muted uppercase tracking-widest mt-2">Create schedules automatically without conflicts</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <div class="p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-blue-500/50 transition-all cursor-pointer group">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-white uppercase tracking-wider">Quick Setup</span>
+                    <span class="text-[9px] text-muted">Create a basic timetable instantly</span>
+                </div>
+            </div>
+            <p class="text-[10px] text-muted leading-relaxed">Automatically populate slots based on subject requirements and faculty availability without complex constraints.</p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-blue-600/10 border border-blue-500/30 hover:border-blue-500 transition-all cursor-pointer group relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-2">
+                <span class="bg-blue-600 text-[8px] font-black text-white px-2 py-0.5 rounded shadow-lg">RECOMMENDED</span>
+            </div>
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400">
+                    <i class="fas fa-magic"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-white uppercase tracking-wider">Smart Generator</span>
+                    <span class="text-[9px] text-blue-400/70">Automatically avoids room and faculty clashes</span>
+                </div>
+            </div>
+            <p class="text-[10px] text-muted leading-relaxed">Automatically assigns rooms, faculty, and class timings without clashes.</p>
+        </div>
+    </div>
+
+    <div class="space-y-6 mb-10">
+        <div class="flex flex-col gap-3">
+            <div class="flex justify-between items-center px-1">
+                <span class="text-[10px] font-black text-muted uppercase tracking-widest">Timetable Status</span>
+                <span class="text-[10px] font-black text-blue-400">98% READY</span>
+            </div>
+            <div class="w-full h-1.5 rounded-full bg-white/5 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-blue-600 to-cyan-400 animate-pulse" style="width: 98%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-center gap-4">
+        <button class="btn-pil secondary px-8 py-3 text-[11px]" onclick="closeModal()">Cancel</button>
+        <button class="btn-pil primary px-10 py-3 text-[12px] bg-blue-600 hover:bg-blue-500 shadow-blue-600/20" onclick="closeModal(); alert('Smart Generation Initialized: Building Conflict-Free Schedule...')">
+            Generate Timetable
+        </button>
+    </div>
+</div>

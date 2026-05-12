@@ -1,0 +1,45 @@
+<!-- ========================================== -->
+<!-- DYNAMIC ACTION BUTTON (OOB SWAP) -->
+<!-- ========================================== -->
+<div id="academics-actions" hx-swap-oob="true">
+    <button class="btn btn-primary" 
+            hx-get="{% url 'admin_course_create' %}" 
+            hx-target="#modal-container"
+            hx-swap="innerHTML">
+        <span style="font-size: 1.2rem; margin-right: 0.5rem;">+</span> Add Course
+    </button>
+</div>
+
+<!-- ========================================== -->
+<!-- COURSES DATA TABLE -->
+<!-- ========================================== -->
+<div class="data-table-wrapper animate-fade-in">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Course Name</th>
+                <th>Parent Program</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in courses %}
+            <tr>
+                <td style="font-weight: 500; color: var(--text-primary);">{{ course.name }}</td>
+                <td><span class="badge badge-outline">{{ course.program.name }}</span></td>
+                <td>
+                    <button class="action-btn edit" title="Edit">✏️</button>
+                    <button class="action-btn delete" title="Delete">🗑️</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="empty-state">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📘</div>
+                    No courses have been added yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

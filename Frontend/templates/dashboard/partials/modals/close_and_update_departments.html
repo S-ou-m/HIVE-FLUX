@@ -1,0 +1,15 @@
+<!-- ========================================== -->
+<!-- HTMX OUT-OF-BAND SWAP -->
+<!-- ========================================== -->
+<!-- 
+    This block updates the #academics-content container in the background 
+    with the newly updated table.
+-->
+<div id="academics-content" hx-swap-oob="true">
+    {% include 'dashboard/views/academics/departments_table.html' %}
+</div>
+
+<!-- 
+    Because this file is targeted at #modal-container, rendering this empty 
+    string effectively closes/removes the modal from the DOM.
+-->

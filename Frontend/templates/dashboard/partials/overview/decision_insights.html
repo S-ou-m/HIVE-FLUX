@@ -1,0 +1,74 @@
+{% load static %}
+<div class="col-span-6 glass-card p-8">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h3 class="text-sm font-black text-white uppercase tracking-[0.2em]">Institutional Success Spectrum</h3>
+            <p class="text-[10px] text-white/40 mt-1 font-bold">Aggregated signals from students</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-[10px] font-black text-white/30 uppercase tracking-widest">Total: {{ success.total }}</span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-8">
+        <!-- Distribution Chart (Simulated with Bars) -->
+        <div class="space-y-6">
+            {% for sig in success.distribution %}
+            <div class="space-y-2">
+                <div class="flex justify-between text-[10px] font-black uppercase tracking-tighter">
+                    <span class="text-white/60">{{ sig.signal_type }}</span>
+                    <span class="text-white">{{ sig.count }}</span>
+                </div>
+                <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full bg-blue-500/50" style="width: {% widthratio sig.count success.total 100 %}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Severity Snapshot -->
+        <div class="bg-white/5 rounded-2xl p-6 flex flex-col justify-center gap-4 border border-white/5">
+            {% for sev in success.severity %}
+            <div class="flex items-center gap-4">
+                <div class="w-2 h-2 rounded-full {% if sev.weight == 'POSITIVE' %}bg-emerald-500{% elif sev.weight == 'CRITICAL' %}bg-red-500{% elif sev.weight == 'WARNING' %}bg-orange-500{% else %}bg-blue-500{% endif %}"></div>
+                <div class="flex-1">
+                    <div class="text-[10px] font-black text-white/40 uppercase">{{ sev.weight }}</div>
+                    <div class="text-sm font-bold text-white">{{ sev.count }} <span class="text-[10px] text-white/20">Nodes</span></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="col-span-6 glass-card p-8">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h3 class="text-sm font-black text-white uppercase tracking-[0.2em]">Competency Heatmap</h3>
+            <p class="text-[10px] text-white/40 mt-1 font-bold">Top Institutional Skill Benchmarks</p>
+        </div>
+    </div>
+
+    <div class="space-y-8">
+        {% for skill in skills %}
+        <div class="relative">
+            <div class="flex justify-between items-end mb-3">
+                <div class="flex flex-col">
+                    <span class="text-xs font-black text-white">{{ skill.skill__name }}</span>
+                    <span class="text-[9px] text-white/20 uppercase font-black tracking-widest">Mastery Alpha</span>
+                </div>
+                <span class="text-lg font-black text-blue-400 tabular-nums">{{ skill.avg_mastery|floatformat:1 }}%</span>
+            </div>
+            <div class="h-3 w-full bg-white/5 rounded-lg p-0.5 border border-white/5">
+                <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-400 rounded-md shadow-[0_0_15px_rgba(59,130,246,0.3)]" 
+                     style="width: {{ skill.avg_mastery }}%"></div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="flex flex-col items-center justify-center h-48 opacity-20">
+            <i class="fa-solid fa-microchip text-4xl mb-4"></i>
+            <span class="text-[10px] font-black uppercase tracking-widest">Waiting for data telemetry...</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>

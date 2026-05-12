@@ -1,0 +1,276 @@
+<!-- ========================================== -->
+<!-- STUDENT ONBOARDING MULTI-STEP MODAL -->
+<!-- ========================================== -->
+<div class="modal-backdrop" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation();" style="max-width: 650px; padding: 0;">
+        
+        <div class="modal-header" style="padding: 1.5rem 1.5rem 1rem;">
+            <h3>{% if edit %}Edit Student Profile{% else %}Enroll New Student{% endif %}</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        
+        <!-- PROGRESS TRACKER -->
+        <div class="stepper" style="display: flex; gap: 0.5rem; padding: 0.5rem 1.5rem; background: var(--bg-surface-hover); border-bottom: 1px solid var(--border-color);">
+            <div class="step active" id="step-nav-1">1. Personal</div>
+            <div class="step" id="step-nav-2">2. Academic</div>
+            <div class="step" id="step-nav-3">3. Guardian</div>
+            <div class="step" id="step-nav-4">4. Address</div>
+            <div class="step" id="step-nav-5">5. Review</div>
+        </div>
+
+        <form id="student-onboarding-form" 
+              hx-post="{% if edit %}{% url 'admin_student_edit' student.id %}{% else %}{% url 'admin_student_create' %}{% endif %}" 
+              hx-target="#modal-container" 
+              hx-indicator="#submit-spinner">
+            {% csrf_token %}
+            <div class="modal-body" style="padding: 1.5rem;">
+                
+                {% if error_message %}
+                <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 1.25rem;">⚠️</span>
+                    <div>{{ error_message }}</div>
+                </div>
+                {% endif %}
+
+                <!-- STEP 1: PERSONAL INFO -->
+                <div class="form-step" id="step-1">
+                    <h4 class="section-title">Personal Details</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>First Name</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            {{ form.last_name }}
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Email Address</label>
+                            {{ form.email }}
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Phone No</label>
+                            {{ form.phone_no }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: ACADEMIC INFO -->
+                <div class="form-step" id="step-2" style="display: none;">
+                    <h4 class="section-title">Academic Details</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Enrollment No {% if not edit %}(Auto-Generated){% endif %}</label>
+                            {{ form.enrollment_no }}
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Admission Year</label>
+                            {{ form.admission_year }}
+                        </div>
+                        <div class="form-group">
+                            <label>Department</label>
+                            {{ form.department }}
+                        </div>
+                        <div class="form-group">
+                            <label>Current Semester</label>
+                            {{ form.current_semester }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: GUARDIAN INFO -->
+                <div class="form-step" id="step-3" style="display: none;">
+                    <h4 class="section-title">Guardian Details</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Guardian Name</label>
+                            {{ form.guardian_name }}
+                        </div>
+                        <div class="form-group">
+                            <label>Relation (e.g. Father/Mother)</label>
+                            {{ form.guardian_relation }}
+                        </div>
+                        <div class="form-group">
+                            <label>Contact Phone</label>
+                            {{ form.guardian_phone }}
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Email Address (Optional)</label>
+                            {{ form.guardian_email }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 4: ADDRESS -->
+                <div class="form-step" id="step-4" style="display: none;">
+                    <h4 class="section-title">Permanent Address</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Street Address</label>
+                            {{ form.address_line1 }}
+                        </div>
+                        <div class="form-group">
+                            <label>City</label>
+                            {{ form.city }}
+                        </div>
+                        <div class="form-group">
+                            <label>State</label>
+                            {{ form.state }}
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>PIN Code</label>
+                            {{ form.pincode }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 5: REVIEW -->
+                <div class="form-step" id="step-5" style="display: none;">
+                    <h4 class="section-title">Review & Submit</h4>
+                    <div style="background: rgba(250, 204, 21, 0.1); border: 1px solid rgba(250, 204, 21, 0.3); color: var(--color-yellow); padding: 1.5rem; border-radius: var(--radius-sm); font-size: 0.9rem; margin-bottom: 1rem;">
+                        <strong>Account Creation Notice</strong><br><br>
+                        A user account will be generated automatically for this student.<br>
+                        <ul style="margin-top: 1rem; margin-left: 1.5rem; line-height: 1.8;">
+                            <li><strong>Username:</strong> <span id="preview-username" style="color:white; font-family:monospace; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">STU-YYYY-000</span></li>
+                            <li><strong>Password:</strong> <span style="color:white; font-family:monospace; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">Changeme123!</span></li>
+                        </ul>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Please ensure all details are correct before enrolling the student.</p>
+                </div>
+            </div>
+            
+            <div class="modal-footer" style="display: flex; justify-content: space-between; padding: 1.5rem; border-top: 1px solid var(--border-color); background: var(--bg-surface-hover);">
+                <button type="button" class="btn btn-secondary" id="btn-prev" style="display: none; background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);" onclick="changeStep(-1)">Back</button>
+                <button type="button" class="btn btn-secondary" id="btn-cancel" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);" onclick="closeModal()">Cancel</button>
+                
+                <div style="display: flex; gap: 0.5rem; margin-left: auto;">
+                    <button type="button" class="btn btn-primary" id="btn-next" onclick="changeStep(1)">Next Step</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit" style="display: none; box-shadow: 0 8px 20px rgba(249,115,22,0.3); align-items: center;">
+                        <span id="submit-text">{% if edit %}Save Changes{% else %}Enroll Student{% endif %}</span>
+                        <span id="submit-spinner" class="htmx-indicator">⏳</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    if (typeof currentStep === 'undefined') {
+        var currentStep = 1;
+    } else {
+        currentStep = 1;
+    }
+    
+    if (typeof totalSteps === 'undefined') {
+        var totalSteps = 5;
+    }
+
+    function closeModal() {
+        document.getElementById('modal-container').innerHTML = '';
+        currentStep = 1;
+    }
+
+    function changeStep(direction) {
+        // Validation on Next
+        if (direction === 1) {
+            const stepDiv = document.getElementById(`step-${currentStep}`);
+            const inputs = stepDiv.querySelectorAll('input:not([readonly]), select');
+            let isValid = true;
+            inputs.forEach(input => {
+                if (!input.checkValidity()) {
+                    input.reportValidity();
+                    isValid = false;
+                }
+            });
+            if (!isValid) return;
+        }
+
+        // Hide current
+        document.getElementById(`step-${currentStep}`).style.display = 'none';
+        document.getElementById(`step-nav-${currentStep}`).classList.remove('active');
+        
+        currentStep += direction;
+        
+        // Show new
+        document.getElementById(`step-${currentStep}`).style.display = 'block';
+        document.getElementById(`step-nav-${currentStep}`).classList.add('active');
+        
+        // Update Buttons
+        document.getElementById('btn-prev').style.display = currentStep > 1 ? 'block' : 'none';
+        document.getElementById('btn-cancel').style.display = currentStep === 1 ? 'block' : 'none';
+        
+        if (currentStep === totalSteps) {
+            document.getElementById('btn-next').style.display = 'none';
+            document.getElementById('btn-submit').style.display = 'flex';
+            // Update Preview
+            const enrollVal = document.getElementById('id_enrollment_no').value;
+            document.getElementById('preview-username').innerText = enrollVal;
+        } else {
+            document.getElementById('btn-next').style.display = 'block';
+            document.getElementById('btn-submit').style.display = 'none';
+        }
+    }
+</script>
+
+<style>
+    .stepper {
+        display: flex;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        overflow-x: auto;
+    }
+    .step {
+        padding: 0.5rem 0.75rem;
+        border-radius: var(--radius-sm);
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+    .step.active {
+        background: rgba(249, 115, 22, 0.1);
+        color: var(--color-orange);
+        font-weight: 500;
+    }
+    .section-title {
+        font-size: 12px;
+        letter-spacing: 1px;
+        color: var(--color-orange);
+        text-transform: uppercase;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+    /* Spinner for htmx request */
+    .htmx-indicator {
+        display: none;
+        margin-left: 0.5rem;
+        font-size: 1rem;
+    }
+    .htmx-request .htmx-indicator {
+        display: inline-block;
+        animation: spin 2s linear infinite;
+    }
+    .htmx-request #submit-text {
+        opacity: 0.7;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    
+    /* Input Glow Focus */
+    .form-control:focus {
+        border-color: var(--color-orange);
+        box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+        outline: none;
+    }
+
+    /* Fix for white-on-white dropdown options in some browsers */
+    select option {
+        background-color: var(--bg-surface);
+        color: var(--text-primary);
+    }
+    
+    select option:hover,
+    select option:focus,
+    select option:active {
+        background-color: var(--color-orange) !important;
+        color: white !important;
+    }
+</style>

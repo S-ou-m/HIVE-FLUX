@@ -1,0 +1,184 @@
+{% load humanize %}
+<div class="support-hub-workspace animate-in fade-in duration-700 space-y-10">
+    
+    <!-- 🏗️ RELATIONSHIP HEADER -->
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-6">
+            <div class="w-14 h-14 rounded-3xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 text-2xl shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+                <i class="fa-solid fa-network-wired"></i>
+            </div>
+            <div>
+                <h2 class="text-3xl font-black text-white tracking-tighter leading-none">Relationship Management</h2>
+                <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] mt-2">Living Institutional Support Intelligence</p>
+            </div>
+        </div>
+        <div class="flex gap-4">
+            <div class="px-4 py-2 rounded-2xl bg-white/5 border border-white/10 flex flex-col items-end">
+                <span class="text-[8px] font-black text-white/20 uppercase tracking-widest">Network Health</span>
+                <span class="text-xs font-black text-emerald-400 uppercase tracking-widest">{{ network_stats.average_trust }}</span>
+            </div>
+            <div class="px-4 py-2 rounded-2xl bg-white/5 border border-white/10 flex flex-col items-end">
+                <span class="text-[8px] font-black text-white/20 uppercase tracking-widest">Active Nodes</span>
+                <span class="text-xs font-black text-white">{{ network_stats.active_nodes }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-12 gap-8">
+        
+        <!-- 📐 LEFT COLUMN: GRAPH & CASES -->
+        <div class="col-span-8 space-y-10">
+            
+            <!-- 🌐 SUPPORT GRAPH SURFACE -->
+            <div class="relative p-10 bg-black/40 border border-white/5 rounded-[48px] overflow-hidden group min-h-[400px] flex items-center justify-center">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_70%)]"></div>
+                
+                <!-- Graph Nodes Simulation -->
+                <div class="relative w-full h-full flex items-center justify-center">
+                    <!-- Central Node: Student -->
+                    <div class="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl font-black shadow-[0_0_40px_rgba(37,99,235,0.4)] z-20 relative border-4 border-black">
+                        {{ user.first_name|first|upper }}
+                    </div>
+
+                    <!-- Relationship Nodes -->
+                    {% for node in network %}
+                    <div class="absolute group/node" 
+                         style="--rotation: {{ forloop.counter0|add:1 }}; transform: rotate(calc(var(--rotation) * 120deg)) translate(140px) rotate(calc(var(--rotation) * -120deg));">
+                        <div class="relative">
+                            <!-- Connection Line -->
+                            <div class="absolute top-1/2 left-1/2 w-32 h-px bg-gradient-to-r from-blue-500/40 to-transparent origin-left -translate-x-full -z-10 animate-pulse"></div>
+                            
+                            <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white font-black text-lg hover:border-blue-500 hover:bg-blue-500/10 transition-all cursor-pointer shadow-xl">
+                                {{ node.staff.user.first_name|first }}
+                            </div>
+                            
+                            <!-- Node Telemetry Popover -->
+                            <div class="absolute -top-16 left-1/2 -translate-x-1/2 opacity-0 group-hover/node:opacity-100 transition-all duration-300 pointer-events-none z-30">
+                                <div class="bg-black/90 border border-white/10 p-3 rounded-xl shadow-2xl backdrop-blur-md whitespace-nowrap">
+                                    <div class="text-[8px] font-black text-blue-400 uppercase tracking-widest">{{ node.get_relation_type_display }}</div>
+                                    <div class="text-[10px] font-bold text-white">{{ node.staff.user.get_full_name }}</div>
+                                    <div class="mt-2 flex gap-2">
+                                        <div class="text-[8px] font-bold text-emerald-400">{{ node.responsiveness_score }}% RESP</div>
+                                        <div class="text-[8px] font-bold text-blue-400">{{ node.trust_level }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="absolute bottom-8 left-10">
+                    <p class="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Institutional Support Graph: Online</p>
+                </div>
+            </div>
+
+            <!-- 📁 ACTIVE INTERVENTION CASES -->
+            <div class="space-y-6">
+                <div class="flex items-center justify-between px-2">
+                    <h3 class="text-[10px] font-black text-white/40 uppercase tracking-widest">Active Intervention Cases</h3>
+                    <span class="text-[8px] font-black text-blue-500 uppercase tracking-widest">{{ active_cases.count }} Cases Pending</span>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-4">
+                    {% for case in active_cases %}
+                    <div class="p-6 bg-white/5 border border-white/10 rounded-3xl hover:border-blue-500/30 transition-all group">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-4">
+                                <div class="px-3 py-1 bg-red-500/20 border border-red-500/40 text-[9px] font-black text-red-400 rounded-lg uppercase tracking-widest">{{ case.priority }}</div>
+                                <h4 class="text-sm font-black text-white group-hover:text-blue-400 transition-colors">{{ case.title }}</h4>
+                            </div>
+                            <div class="text-[10px] font-bold text-white/30 uppercase tracking-widest">#{{ case.id|slice:":6" }}</div>
+                        </div>
+                        <p class="text-xs text-white/50 leading-relaxed mb-6">{{ case.description }}</p>
+                        <div class="flex items-center justify-between py-4 border-t border-white/5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-black text-white">
+                                    {{ case.assigned_staff.user.first_name|first }}
+                                </div>
+                                <div>
+                                    <div class="text-[8px] font-black text-white/20 uppercase tracking-widest">Assigned Specialist</div>
+                                    <div class="text-[10px] font-bold text-white">{{ case.assigned_staff.user.get_full_name }}</div>
+                                </div>
+                            </div>
+                            <button class="px-4 py-2 bg-white/5 hover:bg-blue-500 text-[10px] font-black text-white uppercase tracking-widest rounded-xl transition-all">
+                                Review Workflow
+                            </button>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="py-12 text-center border border-dashed border-white/5 rounded-3xl">
+                        <div class="text-[10px] font-black text-white/10 uppercase tracking-widest">No Active Interventions</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 📐 RIGHT COLUMN: TIMELINE & REACH -->
+        <div class="col-span-4 space-y-10">
+            
+            <!-- 🕒 SUPPORT TIMELINE -->
+            <div class="space-y-6">
+                <h3 class="text-[10px] font-black text-white/40 uppercase tracking-widest">Relationship Timeline</h3>
+                <div class="relative space-y-8 pl-6 border-l border-white/5 ml-2">
+                    {% for event in timeline %}
+                    <div class="relative group">
+                        <div class="absolute -left-[29px] top-0 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] group-hover:scale-150 transition-transform"></div>
+                        <div class="text-[8px] font-black text-blue-500 uppercase tracking-widest mb-1">{{ event.get_event_type_display }}</div>
+                        <p class="text-[11px] text-white/70 leading-relaxed">{{ event.description }}</p>
+                        <div class="text-[9px] font-bold text-white/20 mt-2 italic">{{ event.timestamp|naturaltime }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="text-[10px] font-bold text-white/20 italic">No historical support events recorded.</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 🚀 INSTITUTIONAL REACH HUB -->
+            <div class="space-y-6">
+                <h3 class="text-[10px] font-black text-white/40 uppercase tracking-widest">Institutional Reach Hub</h3>
+                <div class="grid grid-cols-1 gap-3">
+                    <div hx-get="{% url 'student_service_portal_partial' service_slug='registrar' %}"
+                         hx-target="#workspace-core"
+                         class="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between group hover:border-emerald-500/30 cursor-pointer transition-all">
+                        <div class="flex items-center gap-4">
+                            <i class="fa-solid fa-university text-white/20 text-sm group-hover:text-emerald-400 transition-colors"></i>
+                            <div>
+                                <div class="text-[10px] font-black text-white uppercase tracking-widest">Registrar Office</div>
+                                <div class="text-[8px] font-bold text-emerald-400 uppercase tracking-widest">Online | SLA 4h</div>
+                            </div>
+                        </div>
+                        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                    </div>
+
+                    <div hx-get="{% url 'student_service_portal_partial' service_slug='wellness' %}"
+                         hx-target="#workspace-core"
+                         class="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between group hover:border-orange-500/30 cursor-pointer transition-all">
+                        <div class="flex items-center gap-4">
+                            <i class="fa-solid fa-heart-pulse text-white/20 text-sm group-hover:text-orange-400 transition-colors"></i>
+                            <div>
+                                <div class="text-[10px] font-black text-white uppercase tracking-widest">Wellness Cell</div>
+                                <div class="text-[8px] font-bold text-orange-400 uppercase tracking-widest">High Load | Queue 20m</div>
+                            </div>
+                        </div>
+                        <div class="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
+                    </div>
+
+                    <div hx-get="{% url 'student_service_portal_partial' service_slug='career' %}"
+                         hx-target="#workspace-core"
+                         class="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between group hover:border-blue-500/30 cursor-pointer transition-all">
+                        <div class="flex items-center gap-4">
+                            <i class="fa-solid fa-briefcase text-white/20 text-sm group-hover:text-blue-400 transition-colors"></i>
+                            <div>
+                                <div class="text-[10px] font-black text-white uppercase tracking-widest">Career Hub</div>
+                                <div class="text-[8px] font-bold text-blue-400 uppercase tracking-widest">Available for Sessions</div>
+                            </div>
+                        </div>
+                        <div class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

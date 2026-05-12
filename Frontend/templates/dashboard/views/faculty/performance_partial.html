@@ -1,0 +1,487 @@
+<!-- Load Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% load custom_math %}
+
+<style>
+/* Global Layout Foundation */
+.main-container { padding: 24px; max-width: 1400px; margin: 0 auto; }
+.section { margin-bottom: 32px; }
+
+/* Dashboard Header Options */
+.btn-glass {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+.btn-glass:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); }
+.btn-glass-active { background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.3); color: #3b82f6; }
+
+/* KPI STRIP */
+.performance-kpi {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.perf-kpi-card {
+  padding: 18px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+.perf-kpi-card:hover { transform: translateY(-2px); }
+.perf-kpi-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, rgba(59,130,246,0) 0%, var(--border-glow, rgba(59,130,246,0.8)) 50%, rgba(59,130,246,0) 100%);
+  opacity: 0; transition: opacity 0.3s ease;
+}
+.perf-kpi-card:hover::before { opacity: 1; }
+
+/* MAIN GRID */
+.performance-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+.trend-card {
+  height: 320px;
+  padding: 20px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+}
+.donut-card {
+  padding: 20px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* LOWER GRID */
+.performance-lower {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+.engine-timeline-card {
+  padding: 20px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 16px;
+}
+.insights-engine-card {
+  padding: 20px;
+  background: rgba(30,58,138,0.1);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* INSIGHT CARDS */
+.insight-card {
+  padding: 18px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  border-left-width: 3px;
+  transition: all 0.2s ease;
+}
+.insight-card:hover {
+  transform: translateX(4px);
+}
+.insight-high {
+  background: rgba(239,68,68,0.08);
+  border-color: rgba(239,68,68,0.2);
+  border-left-color: #ef4444;
+}
+.insight-info {
+  background: rgba(34,197,94,0.08);
+  border-color: rgba(34,197,94,0.2);
+  border-left-color: #22c55e;
+}
+
+/* Collapsible Details */
+details.insight-details summary {
+  list-style: none;
+  cursor: pointer;
+  outline: none;
+}
+details.insight-details summary::-webkit-details-marker {
+  display: none;
+}
+
+/* --- SIGNAL TIMELINE OVERRIDES --- */
+.engine-timeline-card { padding: 24px; }
+
+.btn-primary-glow {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: 1px solid rgba(59, 130, 246, 0.5);
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    cursor: pointer;
+    width: 100%;
+    margin-top: auto;
+}
+.btn-primary-glow:hover { box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5); transform: translateY(-2px); }
+
+#attendanceLineChart {
+  filter: drop-shadow(0 0 6px rgba(59,130,246,0.6));
+}
+</style>
+
+<div class="main-container animate-fade-in pb-20">
+    
+    <!-- 1. HEADER STRIP -->
+    <div class="flex justify-between items-end mb-6 pb-4 border-b border-white/10">
+        <div>
+            <h2 class="text-3xl font-black text-white tracking-tight mb-2">Performance Analytics</h2>
+            <div class="flex items-center gap-2">
+                <div class="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#10b981] animate-pulse"></div>
+                <span class="text-green-500 text-[10px] font-black uppercase tracking-widest">Live Sync • Updated 2m ago</span>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button class="btn-glass">7D</button>
+            <button class="btn-glass btn-glass-active">30D</button>
+            <button class="btn-glass">Semester</button>
+        </div>
+    </div>
+
+    <!-- 2. KPI ROW (4 CARDS) -->
+    <div class="performance-kpi">
+        <div class="perf-kpi-card glass-card cursor-pointer group" 
+             style="--border-glow: #3b82f6;"
+             hx-get="{% url 'faculty_performance_kpi_detail' 'engagement' %}"
+             hx-target="#modal-container">
+            <span class="text-[10px] text-muted font-black block mb-3 uppercase tracking-widest group-hover:text-blue-400 transition-colors">📈 Engagement Index</span>
+            <div class="flex items-baseline gap-2 mb-1">
+                <div class="text-3xl font-black text-white">{{ kpi.engagement }}%</div>
+                <span class="text-[10px] text-green-500 font-bold tracking-widest"><i class="fas fa-arrow-up"></i> +4.2% vs last month</span>
+            </div>
+            <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden mt-4">
+                <div class="bg-blue-500 h-full shadow-[0_0_10px_#3b82f6]" style="width: {{ kpi.engagement }}%"></div>
+            </div>
+        </div>
+        
+        <div class="perf-kpi-card glass-card cursor-pointer group" 
+             style="--border-glow: #10b981;"
+             hx-get="{% url 'faculty_performance_kpi_detail' 'syllabus' %}"
+             hx-target="#modal-container">
+            <span class="text-[10px] text-muted font-black block mb-3 uppercase tracking-widest group-hover:text-green-400 transition-colors">📚 Syllabus Progress</span>
+            <div class="flex items-baseline gap-2 mb-1">
+                <div class="text-3xl font-black text-white">{{ kpi.syllabus }}%</div>
+                <span class="text-[10px] text-white/50 font-bold tracking-widest"><i class="fas fa-minus"></i> On Track</span>
+            </div>
+            <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden mt-4">
+                <div class="bg-green-500 h-full shadow-[0_0_10px_#10b981]" style="width: {{ kpi.syllabus }}%"></div>
+            </div>
+        </div>
+
+        <div class="perf-kpi-card glass-card cursor-pointer group" 
+             style="--border-glow: #f97316;"
+             hx-get="{% url 'faculty_performance_kpi_detail' 'execution' %}"
+             hx-target="#modal-container">
+            <span class="text-[10px] text-muted font-black block mb-3 uppercase tracking-widest group-hover:text-orange-400 transition-colors">⚡ Execution Rating</span>
+            <div class="flex items-baseline gap-2 mb-1">
+                <div class="text-3xl font-black text-orange-400 drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]">{{ kpi.execution }}/5</div>
+                <span class="text-[10px] text-orange-400 font-bold tracking-widest"><i class="fas fa-star text-[8px]"></i> Top 5% in Dept</span>
+            </div>
+            <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden mt-4">
+                <div class="bg-orange-500 h-full shadow-[0_0_10px_#f97316]" style="width: {{ kpi.execution|mul:20 }}%"></div>
+            </div>
+        </div>
+
+        <div class="perf-kpi-card glass-card cursor-pointer group" 
+             style="--border-glow: #a855f7;"
+             hx-get="{% url 'faculty_performance_kpi_detail' 'attendance' %}"
+             hx-target="#modal-container">
+            <span class="text-[10px] text-muted font-black block mb-3 uppercase tracking-widest group-hover:text-purple-400 transition-colors">👥 Avg Attendance</span>
+            <div class="flex items-baseline gap-2 mb-1">
+                <div class="text-3xl font-black text-white">{{ kpi.attendance }}%</div>
+                <span class="text-[10px] text-red-500 font-bold tracking-widest"><i class="fas fa-arrow-down"></i> -1.5% this week</span>
+            </div>
+            <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden mt-4">
+                <div class="bg-purple-500 h-full shadow-[0_0_10px_#a855f7]" style="width: {{ kpi.attendance }}%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MAIN ANALYTICS ROW -->
+    <div class="performance-grid">
+        <div class="trend-card glass-card">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xs font-black text-white uppercase tracking-widest">Attendance Trend</h3>
+                <div class="flex gap-2">
+                    <span class="text-[9px] font-black text-muted bg-white/5 border border-white/10 px-2 py-1 rounded">AVG: 88.5%</span>
+                    <span class="text-[9px] font-black text-green-500 bg-green-500/10 border border-green-500/20 px-2 py-1 rounded">PEAK: 94%</span>
+                    <span class="text-[9px] font-black text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-1 rounded">DROP: -5%</span>
+                </div>
+            </div>
+            <div class="flex-1 relative w-full h-full">
+                <canvas id="attendanceLineChart"></canvas>
+            </div>
+        </div>
+
+        <div class="donut-card glass-card">
+            <h3 class="text-xs font-black text-white uppercase tracking-widest mb-6">Subject Distribution</h3>
+            <div class="flex-1 flex items-center gap-4 h-full">
+                <div class="relative w-[50%] h-full flex items-center justify-center">
+                    <canvas id="subjectDonutChart"></canvas>
+                </div>
+                <div class="w-[50%] space-y-3 border-l border-white/10 pl-4 py-2">
+                    {% for stat in subject_stats %}
+                    <div class="flex items-center gap-2 group cursor-default">
+                        <div class="w-2 h-2 rounded-full shadow-[0_0_8px_currentColor] group-hover:scale-125 transition-transform" style="background-color: {% cycle '#3b82f6' '#8b5cf6' '#10b981' '#f59e0b' '#ef4444' %}; color: {% cycle '#3b82f6' '#8b5cf6' '#10b981' '#f59e0b' '#ef4444' %};"></div>
+                        <span class="text-[10px] font-bold text-white/80 flex-1 truncate group-hover:text-white transition-colors">{{ stat.subject_snapshot_name }}</span>
+                        <span class="text-[10px] text-muted font-black">{{ stat.session_count }}</span>
+                    </div>
+                    {% empty %}
+                    <div class="text-[10px] text-muted font-bold">No sessions yet</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. LOWER ROW (INSIGHTS + LOGS) -->
+    <div class="performance-lower">
+        <div class="engine-timeline-card glass-card">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-xs font-black text-white uppercase tracking-widest">Execution Timeline</h3>
+                <span class="text-[9px] font-black text-muted uppercase tracking-widest bg-white/5 px-2 py-1 rounded border border-white/10">Archive Mode</span>
+            </div>
+            
+            <div class="signal-timeline">
+                {% for log in worklogs|slice:":5" %}
+                <div class="signal-event {% if not forloop.first %}dimmed{% endif %}">
+                    <!-- Node -->
+                    <div class="signal-node {% if log.completed_sessions == log.total_sessions %}success{% elif log.missed_sessions > 0 %}danger{% else %}warning{% endif %} {% if forloop.first %}active{% endif %}">
+                        <i class="fas {% if log.completed_sessions == log.total_sessions %}fa-check{% elif log.missed_sessions > 0 %}fa-exclamation-triangle{% else %}fa-bolt{% endif %}"></i>
+                    </div>
+
+                    <!-- Event Card -->
+                    <div class="signal-card">
+                        <div class="flex-1">
+                            <div class="signal-title">
+                                {% if log.completed_sessions == log.total_sessions %}
+                                    Session Integrity Verified
+                                {% elif log.missed_sessions > 0 %}
+                                    Execution Breach Detected
+                                {% else %}
+                                    Operational Variance Analysis
+                                {% endif %}
+                            </div>
+                            <div class="signal-meta">
+                                <span>{{ log.completed_sessions }} / {{ log.total_sessions }} Active Nodes</span>
+                                <span class="opacity-20">|</span>
+                                <span>SaaS Precision Sync</span>
+                            </div>
+                        </div>
+                        <div class="signal-time">{{ log.date|date:"M d, Y" }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-[10px] text-muted font-bold uppercase tracking-widest py-8 text-center border border-dashed border-white/10 rounded-xl">
+                    <i class="fas fa-terminal mb-2 block opacity-30 text-xl"></i>
+                    No operational signals detected
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="insights-engine-card glass-card bg-transparent">
+            <div class="flex items-center gap-2 mb-6">
+                <i class="fas fa-brain text-accent-blue text-lg"></i>
+                <h3 class="text-xs font-black text-accent-blue uppercase tracking-widest">Insights Engine</h3>
+            </div>
+            
+            <details class="insight-details group" open>
+                <summary class="insight-card insight-high flex gap-3 relative overflow-hidden group">
+                    <i class="fas fa-exclamation-triangle text-red-500 mt-0.5 relative z-10 transition-transform group-hover:scale-110"></i>
+                    <div class="relative z-10 w-full">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[9px] font-black tracking-widest text-red-500 uppercase px-1.5 py-0.5 bg-red-500/10 rounded border border-red-500/20">⚠ HIGH</span>
+                            <span class="text-[9px] text-muted font-bold uppercase flex items-center gap-2">
+                                Just now 
+                                <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"></i>
+                            </span>
+                        </div>
+                        <div class="text-[11px] font-bold text-white mb-1">Attendance Drop Detected</div>
+                    </div>
+                </summary>
+                <div class="pl-10 pr-4 pb-4 -mt-2">
+                    <div class="text-[10px] text-white/70">Data Structures has seen a 5% drop in the last 3 sessions.</div>
+                    <div class="text-[9px] font-black text-accent-blue mt-2 cursor-pointer hover:underline uppercase tracking-widest flex items-center gap-1">
+                        💡 Suggest revision class <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+            </details>
+
+            <details class="insight-details group">
+                <summary class="insight-card insight-info flex gap-3 relative overflow-hidden group">
+                    <i class="fas fa-info-circle text-green-500 mt-0.5 relative z-10 transition-transform group-hover:scale-110"></i>
+                    <div class="relative z-10 w-full">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[9px] font-black tracking-widest text-green-500 uppercase px-1.5 py-0.5 bg-green-500/10 rounded border border-green-500/20">💡 INFO</span>
+                            <span class="text-[9px] text-muted font-bold uppercase flex items-center gap-2">
+                                2h ago 
+                                <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"></i>
+                            </span>
+                        </div>
+                        <div class="text-[11px] font-bold text-white mb-1">Syllabus Ahead of Schedule</div>
+                    </div>
+                </summary>
+                <div class="pl-10 pr-4 pb-4 -mt-2">
+                    <div class="text-[10px] text-white/70">You are 2 lectures ahead of the standard lesson plan for DB Management. Keep it up!</div>
+                </div>
+            </details>
+            
+            <button class="btn-primary-glow">
+                View All Insights
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function initCharts() {
+        const chartDates = JSON.parse('{{ chart_dates_json|escapejs|default:"[]" }}');
+        const chartAttendance = JSON.parse('{{ chart_attendance_json|escapejs|default:"[]" }}');
+        const donutLabels = JSON.parse('{{ donut_labels_json|escapejs|default:"[]" }}');
+        const donutData = JSON.parse('{{ donut_data_json|escapejs|default:"[]" }}');
+
+        const ctxLine = document.getElementById('attendanceLineChart');
+        if (ctxLine) {
+            const gradient = ctxLine.getContext('2d').createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
+            new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: chartDates.length ? chartDates : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                    datasets: [{
+                        label: 'Avg Attendance %',
+                        data: chartAttendance.length ? chartAttendance : [82, 85, 84, 88, 92],
+                        borderColor: '#3b82f6',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#0f172a',
+                        pointBorderColor: '#3b82f6',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleColor: '#fff',
+                            bodyColor: '#3b82f6',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) { return context.parsed.y + '%'; }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 50,
+                            max: 100,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10, weight: 'bold' } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        const ctxDonut = document.getElementById('subjectDonutChart');
+        if (ctxDonut) {
+            const centerTextPlugin = {
+                id: 'centerText',
+                beforeDraw: function(chart) {
+                    if (chart.config.type !== 'doughnut') return;
+                    const width = chart.width, height = chart.height, ctx = chart.ctx;
+                    ctx.restore();
+                    
+                    const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                    
+                    ctx.font = "bold 9px sans-serif";
+                    ctx.textBaseline = "middle";
+                    ctx.textAlign = "center";
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+                    ctx.fillText("SESSIONS", width / 2, height / 2 - 10);
+                    
+                    ctx.font = "900 20px sans-serif";
+                    ctx.fillStyle = "#fff";
+                    ctx.fillText(total, width / 2, height / 2 + 8);
+                    
+                    ctx.save();
+                }
+            };
+
+            new Chart(ctxDonut, {
+                type: 'doughnut',
+                data: {
+                    labels: donutLabels.length ? donutLabels : ['Data Structures', 'OS', 'DBMS'],
+                    datasets: [{
+                        data: donutData.length ? donutData : [60, 25, 15],
+                        backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            bodyColor: '#fff',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            padding: 12
+                        }
+                    }
+                },
+                plugins: [centerTextPlugin]
+            });
+        }
+    })();
+</script>

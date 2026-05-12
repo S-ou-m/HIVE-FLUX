@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign In - Unified College Intelligence{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div id="login-root">
+    <div class="login-experience-shell">
+        
+        <!-- 🌌 ENVIRONMENT LAYERS -->
+        <div class="plasma-glow"></div>
+        <div class="plasma-glow plasma-glow-2"></div>
+        <div class="login-grid-overlay"></div>
+
+        <!-- 🟣 LEFT: AUTH ZONE -->
+        <div class="auth-panel">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="status-strip stagger-1" style="animation-delay: 0.6s;">
+                        <div class="status-dot"></div>
+                        <span>System Operational</span>
+                    </div>
+                    
+                    <div class="stagger-2" style="animation-delay: 0.7s;">
+                        <div class="logo-icon">🎓</div>
+                        <h2>Access Dashboard</h2>
+                        <p>Secure login to ERP workspace</p>
+                    </div>
+                </div>
+
+                <form method="POST" action="" class="login-form" id="login-form">
+                    {% csrf_token %}
+                    
+                    {% if error %}
+                    <div class="login-error-msg" style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; padding: 0.75rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: center; font-size: 0.85rem;">
+                        {{ error }}
+                    </div>
+                    {% endif %}
+
+                    <!-- 🎭 IDENTITY SELECTION -->
+                    <div class="stagger-3" style="animation-delay: 0.8s;">
+                        <span class="role-group-label">Identify As</span>
+                        <div class="role-selector">
+                            <label class="role-option" title="Access courses & attendance">
+                                <input type="radio" name="role" value="student" id="role-student">
+                                <span class="role-card">
+                                    <span class="role-icon">👨‍🎓</span>
+                                    <span class="role-text">Student</span>
+                                </span>
+                            </label>
+                            <label class="role-option" title="Manage classes & sessions">
+                                <input type="radio" name="role" value="faculty" id="role-faculty">
+                                <span class="role-card">
+                                    <span class="role-icon">👨‍🏫</span>
+                                    <span class="role-text">Faculty</span>
+                                </span>
+                            </label>
+                            <label class="role-option" title="Full system control">
+                                <input type="radio" name="role" value="admin" id="role-admin">
+                                <span class="role-card">
+                                    <span class="role-icon">🛡️</span>
+                                    <span class="role-text">Admin</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 🧱 AUTH FIELDS -->
+                    <div class="stagger-4" style="animation-delay: 0.9s;">
+                        <div class="form-group">
+                            <label for="college">Institution</label>
+                            <div class="input-wrapper">
+                                <select name="college" id="college" required>
+                                    <option value="" disabled selected>-- Select institution --</option>
+                                    {% for college in colleges %}
+                                        <option value="{{ college.id }}">{{ college.name }} ({{ college.code }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="username">Identifier</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="username" name="username" placeholder="Username / Email" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Key</label>
+                            <div class="input-wrapper">
+                                <input type="password" id="password" name="password" placeholder="••••••••" required>
+                                <i class="fa-solid fa-eye toggle-password" id="toggle-password"></i>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-login" id="login-btn">
+                            <span>Access Platform</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="security-label stagger-4" style="animation-delay: 1.1s;">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Isolated Enterprise Session • TLS 1.3</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔵 RIGHT: INTELLIGENCE ZONE -->
+        <div class="intelligence-panel">
+            <div class="intelligence-content">
+                <span class="hub-label">Intelligence Hub</span>
+                <h1>Unified College<br><span class="accent-text">Information System</span></h1>
+                <p class="hub-description">Analyze campus performance, manage academic cycles, and coordinate institutional resources in one high-performance environment.</p>
+
+                <!-- LIVE METRICS -->
+                <div class="metrics-grid">
+                    <div class="metric-card" style="animation-delay: 0.2s;">
+                        <span class="label">Total Enrollment</span>
+                        <div class="value">1,240 <span class="trend">+4%</span></div>
+                    </div>
+                    <div class="metric-card" style="animation-delay: 0.3s;">
+                        <span class="label">Active Sessions</span>
+                        <div class="value">86 <div class="status-dot" style="position: static; transform: none; width: 8px; height: 8px;"></div></div>
+                    </div>
+                    <div class="metric-card" style="animation-delay: 0.4s;">
+                        <span class="label">Avg Attendance</span>
+                        <div class="value">91.2%</div>
+                    </div>
+                </div>
+
+                <!-- ANALYTICS VIZ -->
+                <div class="intelligence-viz" style="animation: stagger-in 0.8s ease forwards; animation-delay: 0.5s;">
+                    <svg viewBox="0 0 400 100" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+                        <path class="viz-path" d="M0,80 Q50,70 100,50 T200,30 T300,60 T400,20" />
+                    </svg>
+                    <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); opacity: 0.5; text-transform: uppercase;">
+                        <span>Academic Cycle Start</span>
+                        <span>Mid-Term Analysis</span>
+                        <span>Current Phase</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--border-color); display: flex; gap: 40px; opacity: 0.5;">
+                    <div style="font-size: 0.75rem; font-weight: 700;">
+                        <div style="margin-bottom: 4px;">SYSTEM CORE</div>
+                        <div style="color: white;">v4.2.0-STABLE</div>
+                    </div>
+                    <div style="font-size: 0.75rem; font-weight: 700;">
+                        <div style="margin-bottom: 4px;">CLOUD ARCHITECTURE</div>
+                        <div style="color: white;">HYBRID INSTANCE</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('login-form');
+        const loginBtn = document.getElementById('login-btn');
+        const togglePass = document.getElementById('toggle-password');
+        const passwordInput = document.getElementById('password');
+        const collegeSelect = document.getElementById('college');
+        const roleInputs = document.querySelectorAll('input[name="role"]');
+
+        // 1. Persistence
+        const savedRole = localStorage.getItem('last_role');
+        const savedCollege = localStorage.getItem('last_college');
+
+        if (savedRole) {
+            const roleEl = document.getElementById(`role-${savedRole}`);
+            if (roleEl) roleEl.checked = true;
+        } else {
+            roleInputs[0].checked = true;
+        }
+
+        if (savedCollege) {
+            collegeSelect.value = savedCollege;
+        }
+
+        // 2. Interaction
+        togglePass.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            togglePass.classList.toggle('fa-eye');
+            togglePass.classList.toggle('fa-eye-slash');
+        });
+
+        // 3. State Management
+        form.addEventListener('submit', (e) => {
+            const selectedRole = document.querySelector('input[name="role"]:checked').value;
+            localStorage.setItem('last_role', selectedRole);
+            localStorage.setItem('last_college', collegeSelect.value);
+
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Synchronizing...</span>';
+        });
+
+        // 4. Power User Features
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                form.submit();
+            }
+        });
+
+        // 5. Auto-focus
+        const usernameInput = document.getElementById('username');
+        if (!usernameInput.value) {
+            usernameInput.focus();
+        } else if (!passwordInput.value) {
+            passwordInput.focus();
+        }
+    });
+</script>
+{% endblock content %}

@@ -1,0 +1,92 @@
+<div class="execution-intelligence-container animate-fade-in">
+    <div class="intelligence-header">
+        <h2 class="section-title">Execution Intelligence</h2>
+        <div class="engine-status-tag">
+            <span class="status-dot"></span>
+            Anomaly Engine Active
+        </div>
+    </div>
+
+    <div class="insights-matrix">
+        {% for insight in insights %}
+        <div class="insight-tile {{ insight.type }}">
+            <div class="insight-icon-box">
+                <i class="fa-solid fa-{{ insight.icon }}"></i>
+            </div>
+            <div class="insight-content">
+                <p class="insight-text">{{ insight.text }}</p>
+                <div class="insight-footer">
+                    <span class="timestamp">Detected at {% now "H:i:s" %}</span>
+                    <span class="severity-badge">{{ insight.type|upper }}</span>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="intelligence-optimal-state">
+            <div class="shield-orb">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h3>System Integrity Optimal</h3>
+            <p>The anomaly engine has detected zero operational risks in the current execution cycle.</p>
+            <div class="security-metrics">
+                <div class="s-metric"><span>Uptime</span><strong>99.9%</strong></div>
+                <div class="s-metric"><span>Success Rate</span><strong>{{ stats.success_rate }}</strong></div>
+                <div class="s-metric"><span>Total Scans</span><strong>{{ stats.total_scans }}</strong></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .intelligence-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .engine-status-tag { 
+        display: flex; align-items: center; gap: 10px; background: rgba(16, 185, 129, 0.1); 
+        color: #10B981; padding: 6px 14px; border-radius: 100px; font-size: 11px; font-weight: 800;
+        border: 1px solid rgba(16, 185, 129, 0.2); text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    
+    .insights-matrix { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 1.5rem; }
+
+    .insight-tile { 
+        background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px; 
+        padding: 1.5rem; display: flex; gap: 1.5rem; transition: all 0.2s;
+    }
+    .insight-tile:hover { transform: translateY(-3px); border-color: var(--border-hover); }
+
+    .insight-icon-box { 
+        width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+        font-size: 20px; flex-shrink: 0; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05);
+    }
+    .insight-tile.critical .insight-icon-box { color: #EF4444; border-color: rgba(239, 68, 68, 0.2); }
+    .insight-tile.warning .insight-icon-box { color: #F59E0B; border-color: rgba(245, 158, 11, 0.2); }
+
+    .insight-content { flex: 1; }
+    .insight-text { font-size: 15px; font-weight: 700; color: #fff; line-height: 1.4; margin-bottom: 12px; }
+    
+    .insight-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px; }
+    .insight-footer .timestamp { font-size: 10px; color: var(--text-secondary); font-weight: 600; }
+    .severity-badge { font-size: 9px; font-weight: 900; letter-spacing: 0.1em; padding: 2px 8px; border-radius: 4px; }
+    .critical .severity-badge { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
+    .warning .severity-badge { background: rgba(245, 158, 11, 0.1); color: #F59E0B; }
+
+    /* OPTIMAL STATE */
+    .intelligence-optimal-state { 
+        grid-column: 1 / -1; text-align: center; padding: 6rem 0; 
+        background: radial-gradient(circle at center, rgba(16, 185, 129, 0.05) 0%, transparent 70%);
+        border: 2px dashed var(--border-color); border-radius: 40px;
+    }
+    .shield-orb { 
+        width: 80px; height: 80px; background: rgba(16, 185, 129, 0.1); border-radius: 50%;
+        display: flex; align-items: center; justify-content: center; font-size: 32px; color: #10B981;
+        margin: 0 auto 1.5rem; border: 1px solid rgba(16, 185, 129, 0.2);
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.1);
+    }
+    .intelligence-optimal-state h3 { font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 12px; }
+    .intelligence-optimal-state p { font-size: 15px; color: var(--text-secondary); max-width: 500px; margin: 0 auto 2.5rem; line-height: 1.6; }
+
+    .security-metrics { display: flex; justify-content: center; gap: 3rem; }
+    .s-metric { display: flex; flex-direction: column; gap: 4px; }
+    .s-metric span { font-size: 10px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+    .s-metric strong { font-size: 18px; font-weight: 900; color: #fff; }
+</style>

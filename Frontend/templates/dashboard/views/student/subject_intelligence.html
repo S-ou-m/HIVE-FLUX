@@ -1,0 +1,91 @@
+<div class="subject-intelligence-workspace animate-fade-in space-y-8">
+    
+    <!-- 🏗️ TOP LAYER: ACADEMIC TELEMETRY HEADER -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h2 class="text-2xl font-black text-white">Subject Intelligence</h2>
+            <p class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mt-1">Predictive Learning Telemetry</p>
+        </div>
+        <div class="px-4 py-2 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+            <div class="text-[9px] font-black text-white/40 uppercase tracking-widest">Freshness: {{ orchestration.freshness.state }}</div>
+        </div>
+    </div>
+
+    <!-- 🏗️ INTELLIGENCE GRID -->
+    <div class="bg-white/[0.02] border border-white/5 rounded-[32px] overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="border-b border-white/5 bg-white/[0.01]">
+                    <th class="p-6 text-[10px] font-black text-white/20 uppercase tracking-widest">Subject</th>
+                    <th class="p-6 text-[10px] font-black text-white/20 uppercase tracking-widest">Risk Level</th>
+                    <th class="p-6 text-[10px] font-black text-white/20 uppercase tracking-widest">Momentum</th>
+                    <th class="p-6 text-[10px] font-black text-white/20 uppercase tracking-widest">Attendance</th>
+                    <th class="p-6 text-[10px] font-black text-white/20 uppercase tracking-widest">Performance</th>
+                    <th class="p-6 text-[10px] font-black text-white/20 uppercase tracking-widest text-right">Recovery</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                {% for intel in orchestration.subject_intelligence %}
+                <tr class="hover:bg-white/[0.02] transition-colors group">
+                    <td class="p-6">
+                        <div class="text-sm font-black text-white">{{ intel.subject }}</div>
+                        <div class="text-[9px] font-bold text-white/20 uppercase mt-1">Semester 4 • CSE-A</div>
+                    </td>
+                    <td class="p-6">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1.5 h-1.5 rounded-full bg-{{ intel.tone }}-500"></div>
+                            <div class="text-[10px] font-black text-{{ intel.tone }}-500 uppercase tracking-widest">{{ intel.risk }}</div>
+                        </div>
+                    </td>
+                    <td class="p-6">
+                        <div class="flex items-center gap-2 text-[10px] font-black text-white/60 uppercase tracking-widest">
+                            {% if intel.momentum == 'RISING' %}
+                            <i class="fas fa-arrow-trend-up text-emerald-500"></i>
+                            {% elif intel.momentum == 'FALLING' %}
+                            <i class="fas fa-arrow-trend-down text-orange-500"></i>
+                            {% else %}
+                            <i class="fas fa-minus text-blue-500"></i>
+                            {% endif %}
+                            {{ intel.momentum }}
+                        </div>
+                    </td>
+                    <td class="p-6">
+                        <div class="text-xs font-black text-white">{{ intel.attendance }}%</div>
+                        <div class="rail-bar-bg h-1 w-16 mt-2">
+                            <div class="rail-bar-fill bg-{{ intel.tone }}-500" style="width: {{ intel.attendance }}%;"></div>
+                        </div>
+                    </td>
+                    <td class="p-6">
+                        <div class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-black text-white">
+                            {{ intel.performance }}
+                        </div>
+                    </td>
+                    <td class="p-6 text-right">
+                        <div class="text-[9px] font-black {% if intel.recovery == 'Optimal' %}text-emerald-500{% else %}text-orange-400{% endif %} uppercase tracking-widest">
+                            {{ intel.recovery }}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 🏗️ RECOVERY PREDICTION RADAR -->
+    <div class="ops-section p-8 border border-dashed border-white/10 rounded-[32px] text-center">
+        <div class="max-w-md mx-auto">
+            <div class="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 mx-auto mb-6">
+                <i class="fas fa-calculator text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-black text-white mb-2 uppercase">Recovery Logic Activated</h3>
+            <p class="text-xs text-white/40 leading-relaxed font-bold">
+                The intelligence engine predicts you can achieve 'Eligibility Recovery' in 14 days by prioritizing Operating Systems sessions.
+            </p>
+            <button class="mt-8 px-8 py-3 rounded-2xl bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all">
+                Simulate Success Path
+            </button>
+        </div>
+    </div>
+
+</div>

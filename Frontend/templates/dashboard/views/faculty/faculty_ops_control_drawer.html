@@ -1,0 +1,324 @@
+{% load static %}
+<!-- d:\ERP_cms\Frontend\templates\dashboard\views\faculty\faculty_ops_control_drawer.html -->
+
+<div class="ops-control-environment animate-fade-in" id="ops-control-hub">
+    
+    <!-- 🏗️ ZONE 1: NAVIGATION STRIP (SaaS Adaptive Dock) -->
+    <div class="ops-nav-dock">
+        <button class="nav-btn active" id="btn-controls" onclick="OpsHub.switchTab('controls')">
+            <i class="fas fa-sliders-h"></i> <span>Operational Controls</span>
+        </button>
+        <button class="nav-btn" id="btn-identity" onclick="OpsHub.switchTab('identity')">
+            <i class="fas fa-fingerprint"></i> <span>Identity Workspace</span>
+        </button>
+        <div class="nav-indicator"></div>
+    </div>
+
+    <!-- 🏗️ ZONE 2: CONTENT ARCHITECTURE (Tabbed) -->
+    <div class="ops-viewport">
+
+        <!-- 🏁 TAB: OPERATIONAL CONTROLS -->
+        <div class="hub-tab active" id="tab-controls">
+            <div class="ops-body custom-scrollbar">
+                
+                <div class="ops-section">
+                    <div class="section-label">Institutional Modes</div>
+                    <div class="modes-grid">
+                        <div class="mode-item {% if op_state == 'FOCUS MODE' %}active{% endif %}" onclick="DashboardOrchestrator.toggleFocusMode()">
+                            <div class="mode-icon"><i class="fas fa-bolt"></i></div>
+                            <div class="mode-meta">
+                                <div class="title">Focus Mode</div>
+                                <div class="desc">Immersive workspace</div>
+                            </div>
+                        </div>
+                        <div class="mode-item {% if op_state == 'IN SESSION' %}active{% endif %}">
+                            <div class="mode-icon"><i class="fas fa-video"></i></div>
+                            <div class="mode-meta">
+                                <div class="title">Live Session</div>
+                                <div class="desc">Scanner optimized</div>
+                            </div>
+                        </div>
+                        <div class="mode-item">
+                            <div class="mode-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="mode-meta">
+                                <div class="title">Night Ops</div>
+                                <div class="desc">High contrast UI</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ops-section">
+                    <div class="section-label">Workspace Personalization</div>
+                    <div class="control-list">
+                        <div class="control-row">
+                            <div class="label">UI Density</div>
+                            <div class="segmented-control">
+                                <button class="seg-btn" onclick="DashboardOrchestrator.setUIDensity('relaxed')">Relaxed</button>
+                                <button class="seg-btn active" onclick="DashboardOrchestrator.setUIDensity('default')">Default</button>
+                                <button class="seg-btn" onclick="DashboardOrchestrator.setUIDensity('compact')">Compact</button>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="label">Atmosphere Pulse</div>
+                            <div class="toggle-switch pulse-toggle active" onclick="DashboardOrchestrator.toggleAtmosphere()"></div>
+                        </div>
+                        <div class="control-row">
+                            <div class="label">Motion Reduction</div>
+                            <div class="toggle-switch motion-toggle" onclick="DashboardOrchestrator.toggleMotion()"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ops-section">
+                    <div class="section-label">Security & Access</div>
+                    <div class="control-list">
+                        <div class="control-row">
+                            <div class="flex flex-col">
+                                <span class="label">Primary Access Key</span>
+                                <span class="text-[9px] text-muted font-bold uppercase mt-1">Last rotated: 12 days ago</span>
+                            </div>
+                            <button class="command-edit-trigger" onclick="DashboardOrchestrator.updateAccessKey()">
+                                <i class="fas fa-key mr-2"></i> UPDATE KEY
+                            </button>
+                        </div>
+                        <div class="control-row">
+                            <span class="label">Two-Factor Authentication</span>
+                            <div class="toggle-switch active"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ops-section">
+                    <div class="section-label">System Telemetry</div>
+                    <div class="health-grid">
+                        <div class="health-card">
+                            <div class="h-label">Websocket</div>
+                            <div class="h-val text-green-500">STABLE</div>
+                        </div>
+                        <div class="health-card">
+                            <div class="h-label">Latency</div>
+                            <div class="h-val">{{ health.latency_ms }}ms</div>
+                        </div>
+                        <div class="health-card">
+                            <div class="h-label">Throughput</div>
+                            <div class="h-val">{{ health.event_throughput }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🛡️ TAB: IDENTITY & PRESENCE WORKSPACE -->
+        <div class="hub-tab" id="tab-identity">
+            
+            <div class="ops-body custom-scrollbar">
+                
+                <!-- 1. Institutional Identity Card (SaaS Premium) -->
+                <div class="identity-glass-card mb-8">
+                    <div class="flex justify-between items-start mb-8">
+                        <div class="avatar-capsule">
+                            <div class="avatar-ring pulse-active">
+                                <div class="avatar-inner">
+                                    {{ faculty.user.get_full_name|first|default:faculty.user.username|first|upper }}
+                                </div>
+                            </div>
+                            <div class="ml-5">
+                                <h3 class="text-xl font-black text-white leading-tight">
+                                    {{ faculty.user.get_full_name|default:faculty.user.username }}
+                                </h3>
+                                <div class="flex items-center gap-2 mt-1.5">
+                                    <div class="status-dot {% if op_state == 'ACTIVE' %}bg-green-500{% elif op_state == 'IN SESSION' %}bg-orange-500{% else %}bg-blue-500{% endif %}"></div>
+                                    <span class="text-[9px] font-black text-white/60 uppercase tracking-widest">{{ op_state }}</span>
+                                    <span class="text-white/10 mx-1">|</span>
+                                    <span class="text-[9px] font-black text-blue-500 uppercase tracking-widest">{{ faculty.designation|default:"Senior Faculty" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="trust-badge-pill">
+                            <i class="fas fa-shield-alt mr-2"></i>
+                            <span>{{ reputation.trust_level }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="reputation-intelligence-grid">
+                        <div class="rep-card">
+                            <div class="r-label">Presence</div>
+                            <div class="r-val">{{ reputation.presence_consistency }}</div>
+                            <div class="r-trend text-green-500"><i class="fas fa-caret-up mr-1"></i> Stable</div>
+                        </div>
+                        <div class="rep-card">
+                            <div class="r-label">Punctuality</div>
+                            <div class="r-val">{{ reputation.punctuality_score }}</div>
+                            <div class="r-trend text-blue-500">EXCELLENT</div>
+                        </div>
+                        <div class="rep-card">
+                            <div class="r-label">Completion</div>
+                            <div class="r-val">{{ reputation.completion_rate }}</div>
+                            <div class="r-trend text-white/20">AUDITED</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Presence & Access Governance -->
+                <div class="ops-section">
+                    <div class="section-label">Device & Access Governance</div>
+                    <div class="device-console">
+                        <div class="device-item active">
+                            <div class="flex items-center gap-4">
+                                <div class="device-icon-box">
+                                    <i class="fas fa-mobile-alt text-blue-400"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-bold text-white">iPhone 15 Pro Max</div>
+                                    <div class="text-[9px] text-muted font-black uppercase tracking-widest mt-0.5">Primary Trusted Terminal</div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="action-btn-mini secondary" onclick="DashboardOrchestrator.reverifyDevice('iPhone 15 Pro Max')">RE-VERIFY</button>
+                                <button class="action-btn-mini danger" onclick="DashboardOrchestrator.revokeDevice('iPhone 15 Pro Max', this)">REVOKE</button>
+                            </div>
+                        </div>
+                        <div class="device-item opacity-50">
+                            <div class="flex items-center gap-4">
+                                <div class="device-icon-box">
+                                    <i class="fas fa-desktop"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-bold text-white">MacBook Pro M3</div>
+                                    <div class="text-[9px] text-muted font-black uppercase tracking-widest mt-0.5">Last active 2h ago</div>
+                                </div>
+                            </div>
+                            <button class="action-btn-mini" onclick="DashboardOrchestrator.reverifyDevice('MacBook Pro M3')">LOCK</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Professional Identity (Notion-style Command Edit) -->
+                <div class="ops-section">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="section-label m-0">Professional Identity</div>
+                        <button class="command-edit-trigger" onclick="OpsHub.toggleEditMode()">
+                            <i class="fas fa-pen-nib mr-2"></i> <span>Enter Edit Mode</span>
+                        </button>
+                    </div>
+                    
+                    <div class="identity-intel-surface" id="profile-display">
+                        <div class="intel-group">
+                            <div class="i-label">Academic Specialization</div>
+                            <div class="i-val text-white/90">{{ faculty.specialization|default:"Computer Science & Engineering" }}</div>
+                        </div>
+                        <div class="intel-group">
+                            <div class="i-label">Expertise Tags</div>
+                            <div class="flex gap-2 flex-wrap mt-2">
+                                <span class="tag-pill">Distributed Systems</span>
+                                <span class="tag-pill">Cyber Security</span>
+                                <span class="tag-pill">Academic Ops</span>
+                            </div>
+                        </div>
+                        <div class="intel-group">
+                            <div class="i-label">Institutional Bio</div>
+                            <div class="text-xs text-white/60 leading-relaxed font-medium">
+                                {{ faculty.bio|default:"No institutional bio provided. Enter edit mode to update your professional profile." }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="identity-edit-surface hidden" id="profile-editor">
+                        <div class="field-box">
+                            <label>Specialization</label>
+                            <input type="text" class="ops-field" value="{{ faculty.specialization }}" placeholder="e.g. Distributed Systems">
+                        </div>
+                        <div class="field-box mt-4">
+                            <label>Institutional Bio</label>
+                            <textarea class="ops-area" placeholder="Write your professional bio...">{{ faculty.bio }}</textarea>
+                        </div>
+                        <button class="ops-commit-btn mt-6">
+                            <i class="fas fa-check-circle mr-2"></i> COMMIT IDENTITY CHANGES
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4. Identity Timeline (Institutional Audit Feed) -->
+                <div class="ops-section">
+                    <div class="section-label">Identity Timeline</div>
+                    <div class="institutional-audit-feed">
+                        {% for event in identity_events %}
+                        <div class="audit-entry">
+                            <div class="audit-marker">
+                                <i class="fas fa-circle text-[6px] text-blue-500 shadow-[0_0_8px_#3b82f6]"></i>
+                            </div>
+                            <div class="audit-meta">
+                                <div class="audit-title">{{ event.get_event_type_display }}</div>
+                                <div class="audit-desc">{{ event.timestamp|time:"H:i" }} • Verified via {{ event.terminal.name }}</div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="empty-state text-[10px] text-muted font-black text-center py-6 border border-dashed border-white/10 rounded-2xl">
+                            NO RECENT IDENTITY SIGNALS
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏗️ ZONE 3: CONTROL FOOTER -->
+    <div class="ops-footer">
+        <div class="flex gap-4">
+            <button class="footer-action-btn secondary" onclick="closeSideDrawer()">
+                <i class="fas fa-chevron-left mr-2"></i> BACK
+            </button>
+            <button class="footer-action-btn primary flex-1" onclick="closeSideDrawer()">
+                <i class="fas fa-sign-out-alt mr-2"></i> RETURN TO WORKSPACE
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const OpsHub = {
+        activeTab: 'controls',
+
+        switchTab(tabId) {
+            this.activeTab = tabId;
+            
+            // Toggle Content
+            document.querySelectorAll('.hub-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            
+            // Toggle Nav
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`btn-${tabId}`).classList.add('active');
+            
+            // Move Indicator
+            const btn = document.getElementById(`btn-${tabId}`);
+            const indicator = document.querySelector('.nav-indicator');
+            if (indicator && btn) {
+                indicator.style.width = `${btn.offsetWidth}px`;
+                indicator.style.left = `${btn.offsetLeft}px`;
+            }
+        },
+
+        toggleEditMode() {
+            const display = document.getElementById('profile-display');
+            const editor = document.getElementById('profile-editor');
+            const btnText = document.querySelector('.command-edit-trigger span');
+            
+            if (editor.classList.contains('hidden')) {
+                editor.classList.remove('hidden');
+                display.classList.add('hidden');
+                btnText.textContent = 'Cancel Edit';
+            } else {
+                editor.classList.add('hidden');
+                display.classList.remove('hidden');
+                btnText.textContent = 'Enter Edit Mode';
+            }
+        }
+    };
+
+    // Initial positioning
+    setTimeout(() => OpsHub.switchTab('controls'), 150);
+</script>

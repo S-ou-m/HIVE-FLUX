@@ -1,0 +1,223 @@
+{% load static %}
+<div class="command-center-layout animate-fade-in">
+    
+    <!-- ROW 0: INTELLIGENCE BANNER -->
+    <section class="intelligence-strip">
+        <div class="live-status">
+            <div class="pulse-dot"></div>
+            <span id="live-clock">--:--:--</span>
+            <span class="separator">|</span>
+            <span id="live-date">---, -- ---</span>
+        </div>
+        <div class="signals-container">
+            {% for signal in signals %}
+            <div class="signal-pill {{ signal.type }} clickable" onclick="navigateTo('{{ signal.action_url }}')">
+                <span class="signal-icon">
+                    {% if signal.type == 'critical' %}⚠️{% elif signal.type == 'growth' %}📈{% else %}🟢{% endif %}
+                </span>
+                <span class="signal-label">{{ signal.label }}</span>
+            </div>
+            {% empty %}
+            <div class="system-health-mini">
+                <div class="health-bar-container">
+                    <div class="health-bar" {% if True %}style="width: {{ health_score }}%"{% endif %}></div>
+                </div>
+                <span class="score">{{ health_score }}% System Health</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- ROW 1: CORE KPI STRIP (Hierarchy 5-3-2-2) -->
+    <section class="grid-row hero-row" 
+             hx-get="{% url 'admin_overview_hero_partial' %}" 
+             hx-trigger="load" 
+             hx-swap="innerHTML">
+        <div class="col-span-5 skeleton-card hero"></div>
+        <div class="col-span-3 skeleton-card small"></div>
+        <div class="col-span-2 skeleton-card small"></div>
+        <div class="col-span-2 skeleton-card small"></div>
+    </section>
+
+    <!-- ROW 2: CORE ANALYTICS (Trends & Snapshot) -->
+    <section class="grid-row analytics-row"
+             hx-get="{% url 'admin_overview_analytics_partial' %}"
+             hx-trigger="load delay:300ms"
+             hx-swap="innerHTML">
+        <div class="col-span-8 skeleton-card tall"></div>
+        <div class="col-span-4 skeleton-card tall"></div>
+    </section>
+
+    <!-- ROW 3: DISTRIBUTION (Dept / Sem) -->
+    <section class="grid-row distribution-row"
+             hx-get="{% url 'admin_overview_distribution_partial' %}"
+             hx-trigger="load delay:500ms"
+             hx-swap="innerHTML">
+        <div class="col-span-6 skeleton-card"></div>
+        <div class="col-span-6 skeleton-card"></div>
+    </section>
+
+    <!-- ROW 4: OPERATIONS ZONE (Timeline + Calendar) -->
+    <section class="grid-row operations-row"
+             hx-get="{% url 'admin_overview_intelligence_partial' %}"
+             hx-trigger="load delay:700ms"
+             hx-swap="innerHTML">
+        <div class="col-span-6 skeleton-card tall"></div>
+        <div class="col-span-6 skeleton-card tall"></div>
+    </section>
+
+    <!-- ROW 5: DECISION LAYER (Actionable Insights) -->
+    <section class="grid-row insights-row"
+             hx-get="{% url 'admin_overview_insights_partial' %}"
+             hx-trigger="load delay:900ms"
+             hx-swap="innerHTML">
+        <div class="col-span-12 skeleton-card tall"></div>
+    </section>
+
+    <!-- ACTION DOCK (Enterprise Floating Control) -->
+    <div class="command-dock">
+        <div class="dock-inner">
+            <button class="dock-btn" title="Add Student" hx-get="{% url 'admin_student_create' %}" hx-target="#modal-container">
+                <i class="fas fa-user-plus"></i>
+                <span>Student</span>
+            </button>
+            <div class="dock-divider"></div>
+            <button class="dock-btn" title="Record Payment" hx-get="{% url 'admin_payment_global_modal' %}" hx-target="#modal-container">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Payment</span>
+            </button>
+            <div class="dock-divider"></div>
+            <button class="dock-btn" title="Add Faculty" hx-get="{% url 'admin_faculty_create' %}" hx-target="#modal-container">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>Faculty</span>
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .command-center-layout { display: flex; flex-direction: column; gap: 24px; padding: 8px; }
+    
+    /* INTELLIGENCE BANNER */
+    .intelligence-strip { 
+        display: flex; align-items: center; gap: 20px; 
+        background: rgba(15, 23, 42, 0.6); 
+        padding: 12px 20px; border-radius: 12px; 
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    .live-status { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+    .pulse-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); animation: pulse 2s infinite; }
+    .live-label { font-size: 0.75rem; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em; }
+    
+    .signals-container { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; }
+    .signal-pill { display: flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 100px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; border: 1px solid transparent; }
+    .signal-pill.critical { background: rgba(239, 68, 68, 0.1); color: #f87171; border-color: rgba(239, 68, 68, 0.2); }
+    .signal-pill.growth { background: rgba(34, 197, 94, 0.1); color: #4ade80; border-color: rgba(34, 197, 94, 0.2); }
+    .signal-pill.info { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-color: rgba(59, 130, 246, 0.2); }
+
+    /* GRID SYSTEM */
+    .grid-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; }
+    .col-span-12 { grid-column: span 12; }
+    .col-span-8 { grid-column: span 8; }
+    .col-span-5 { grid-column: span 5; }
+    .col-span-6 { grid-column: span 6; }
+    .col-span-4 { grid-column: span 4; }
+    .col-span-3 { grid-column: span 3; }
+    .col-span-2 { grid-column: span 2; }
+
+    /* CARD HOVER MICRO-INTERACTIONS */
+    .grid-row > div:not(.skeleton-card), 
+    .signals-track div, 
+    .kpi-compact-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: default; }
+    .grid-row > div:hover { transform: translateY(-4px); }
+    /* COMMAND DOCK */
+    .command-dock { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 1000; }
+    .dock-inner { 
+        display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+        background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.1); border-radius: 100px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .dock-btn { 
+        display: flex; align-items: center; gap: 10px; padding: 8px 16px;
+        background: transparent; border: none; color: #94a3b8; cursor: pointer;
+        transition: all 0.2s; border-radius: 50px;
+    }
+    .dock-btn i { font-size: 16px; }
+    .dock-btn span { font-size: 13px; font-weight: 600; }
+    .dock-btn:hover { background: rgba(255,255,255,0.05); color: #fff; }
+    .dock-divider { width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 4px; }
+    
+    .skeleton-card { background: rgba(255,255,255,0.02); border-radius: 16px; height: 180px; border: 1px solid rgba(255,255,255,0.05); }
+    .skeleton-card.hero { height: 140px; }
+    .skeleton-card.small { height: 110px; }
+    .skeleton-card.tall { height: 260px; }
+    
+    .live-status { display: flex; align-items: center; gap: 12px; font-family: 'JetBrains Mono', monospace; color: #10b981; font-weight: 600; font-size: 13px; }
+    .live-status .separator { color: rgba(255,255,255,0.1); }
+    .last-sync { font-size: 10px; color: #475569; margin-left: 4px; }
+
+    @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+    @keyframes shimmer { 0% { opacity: 0.5; } 50% { opacity: 0.8; } 100% { opacity: 0.5; } }
+
+    /* RESPONSIVENESS */
+    @media (max-width: 1024px) {
+        .col-span-8, .col-span-4, .col-span-6, .col-span-3 { grid-column: span 12; }
+    }
+</style>
+
+<script>
+    function updateClock() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const dateStr = now.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' });
+        
+        const clockEl = document.getElementById('live-clock');
+        const dateEl = document.getElementById('live-date');
+        if (clockEl) clockEl.textContent = timeStr;
+        if (dateEl) dateEl.textContent = dateStr;
+
+        // Last Sync Logic (Mocking for demo, in real it would track htmx:afterRequest)
+        const lastSyncEl = document.getElementById('last-sync-time');
+        if (lastSyncEl) {
+            let seconds = parseInt(lastSyncEl.getAttribute('data-seconds') || '0');
+            seconds++;
+            lastSyncEl.setAttribute('data-seconds', seconds);
+            lastSyncEl.textContent = `• Last sync ${seconds}s ago`;
+        }
+    }
+    
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function navigateTo(url) {
+        if (!url) return;
+        // Use HTMX to swap the main dashboard container or window location
+        if (url.startsWith('/dashboard/admin/partial/')) {
+            htmx.ajax('GET', url, {target: '#dashboard-content', swap: 'innerHTML'});
+        } else {
+            window.location.href = url;
+        }
+    }
+
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        if (evt.detail.target.id === 'command-center-container') {
+            const lastSyncEl = document.getElementById('last-sync-time');
+            if (lastSyncEl) {
+                lastSyncEl.setAttribute('data-seconds', '0');
+                lastSyncEl.textContent = '• Last sync 0s ago';
+            }
+        }
+    });
+
+    function showDayIntelligence(day, month) {
+        // Trigger HTMX request to load day intelligence into the global drawer
+        const url = `{% url 'admin_day_intelligence_partial' %}?day=${day}&month=${encodeURIComponent(month)}`;
+        htmx.ajax('GET', url, {
+            target: '#global-drawer-content',
+            swap: 'innerHTML'
+        });
+        openSideDrawer();
+    }
+</script>

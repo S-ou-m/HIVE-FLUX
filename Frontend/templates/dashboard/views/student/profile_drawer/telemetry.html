@@ -1,0 +1,25 @@
+{% load humanize %}
+<div class="space-y-4 opacity-70 hover:opacity-100 transition-opacity">
+    <div class="flex items-center justify-between mb-2 px-1">
+        <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40">Operational Telemetry</h3>
+        <span class="text-[9px] font-bold text-white/20">Last Sync: {{ state.telemetry.last_updated|naturaltime }}</span>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+        <!-- Presence Pulse -->
+        <div class="p-4 bg-white/5 border border-white/10 rounded-2xl">
+            <div class="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Presence OS</div>
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div class="text-sm font-black text-white">{{ state.telemetry.presence }}</div>
+            </div>
+        </div>
+
+        <!-- Trust Tier -->
+        <div class="p-4 bg-white/5 border border-white/10 rounded-2xl">
+            <div class="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Trust Surface</div>
+            <div class="text-sm font-black text-white">Institutional</div>
+            <div class="text-[9px] text-[#FF6B00] font-black uppercase mt-1">Trusted Node</div>
+        </div>
+    </div>
+</div>

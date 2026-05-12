@@ -1,0 +1,54 @@
+<!-- ========================================== -->
+<!-- DEPARTMENT HEALTH AUDIT MODAL -->
+<!-- ========================================== -->
+<div class="modal-backdrop" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation();" style="max-width: 550px; padding: 0;">
+        
+        <div class="modal-header" style="padding: 1.5rem; background: rgba(16, 185, 129, 0.05); border-bottom: 1px solid rgba(16, 185, 129, 0.1);">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="width: 36px; height: 36px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 1.1rem; color: #10b981;">Operational Health Audit</h3>
+            </div>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        
+        <div class="modal-body" style="padding: 1.5rem;">
+            <div style="margin-bottom: 2rem; text-align: center;">
+                <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">Overall Compliance</div>
+                <div style="font-size: 2.5rem; font-weight: 800; color: #fff;">87<span style="font-size: 1.2rem; opacity: 0.5;">/100</span></div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for signal in signals %}
+                <div style="padding: 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <i class="fa-solid {{ signal.icon }}" style="color: var(--text-secondary); font-size: 0.9rem;"></i>
+                            <span style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">{{ signal.title }}</span>
+                        </div>
+                        <span class="health-pill {{ signal.status|lower }}" style="padding: 2px 8px; font-size: 9px;">{{ signal.status }}</span>
+                    </div>
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden;">
+                        <div style="width: {{ signal.score }}%; height: 100%; background: var(--primary-color); border-radius: 10px;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div style="margin-top: 2rem; padding: 1rem; background: rgba(249, 115, 22, 0.05); border: 1px solid rgba(249, 115, 22, 0.1); border-radius: 10px;">
+                <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                    <i class="fa-solid fa-circle-info" style="color: var(--primary-color); margin-top: 3px;"></i>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+                        <strong>AI Insight:</strong> Infrastructure compliance is below threshold due to pending facility maintenance logs for the {{ department.name }} labs.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer" style="padding: 1.25rem 1.5rem; background: var(--bg-surface-hover); border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end;">
+            <button class="btn btn-primary" onclick="closeModal()">Dismiss Report</button>
+        </div>
+    </div>
+</div>

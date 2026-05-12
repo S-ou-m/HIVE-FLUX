@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+    body { background: #020617; color: white; font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .onboarding-card { 
+        max-width: 500px; padding: 64px; text-align: center; 
+        background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); 
+        border-radius: 40px; backdrop-filter: blur(40px);
+    }
+    .status-icon { 
+        width: 80px; height: 80px; background: rgba(16, 185, 129, 0.1); 
+        border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 24px; 
+        display: flex; align-items: center; justify-content: center; 
+        margin: 0 auto 32px; font-size: 32px; color: #10b981;
+    }
+    h1 { font-size: 28px; font-weight: 900; letter-spacing: -1px; margin-bottom: 12px; }
+    p { font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.6; margin-bottom: 40px; }
+    .action-btn { 
+        background: #10b981; color: #020617; font-weight: 900; 
+        padding: 16px 32px; border-radius: 16px; border: none; 
+        cursor: pointer; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="onboarding-card">
+    <div class="status-icon">
+        <i class="fas fa-fingerprint"></i>
+    </div>
+    <h1>Identity Not Found</h1>
+    <p>
+        Welcome, <strong>{{ user.username }}</strong>. <br>
+        Your institutional identity as a 'Student' has not been provisioned yet. Please contact the administrator or complete the onboarding registration.
+    </p>
+    
+    <div class="space-y-4">
+        <button class="action-btn w-full" onclick="window.location.href='/logout/'">Switch Account</button>
+        <div class="mt-8 text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Institutional Operating System</div>
+    </div>
+</div>
+{% endblock %}

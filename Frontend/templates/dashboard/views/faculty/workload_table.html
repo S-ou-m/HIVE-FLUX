@@ -1,0 +1,380 @@
+<style>
+    /* 🌈 COLOR SYSTEM PRESERVATION */
+    :root {
+        --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        --primary-glow: 0 0 15px rgba(99, 102, 241, 0.15);
+    }
+
+    /* 🔍 INTELLIGENCE FILTER BAR */
+    .filter-engine-bar {
+        background: rgba(30, 32, 47, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 14px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .filter-input-group {
+        position: relative;
+        flex: 1;
+    }
+    .filter-input-group i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+    .filter-control {
+        width: 100%;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem 0.5rem 2.2rem;
+        color: #fff;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .filter-control:focus {
+        outline: none;
+        border-color: #6366f1;
+        background: rgba(99, 102, 241, 0.05);
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+    }
+    .select-filter {
+        min-width: 160px;
+        appearance: none;
+        cursor: pointer;
+    }
+
+    /* 🎭 COMPACT ACCORDION ARCHITECTURE */
+    .faculty-workload-card {
+        background: rgba(30, 32, 47, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .faculty-workload-card.hidden { display: none; }
+    
+    .faculty-workload-card:hover {
+        border-color: rgba(99, 102, 241, 0.3);
+        background: rgba(35, 38, 56, 0.6);
+    }
+    .faculty-workload-card.open {
+        background: rgba(20, 22, 35, 0.9);
+        border-color: rgba(99, 102, 241, 0.4);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .faculty-row-trigger {
+        padding: 0.75rem 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+    }
+    
+    .fac-identity {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+    }
+    .fac-avatar {
+        width: 36px;
+        height: 36px;
+        background: var(--accent-gradient);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        color: white;
+        font-size: 0.85rem;
+        box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+    }
+
+    .fac-meta h4 { margin: 0; font-size: 0.9rem; font-weight: 800; color: #fff; }
+    .fac-meta p { margin: 0; font-size: 0.65rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
+
+    .fac-stats {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+    }
+    .stat-pill {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+        background: rgba(255,255,255,0.02);
+        padding: 4px 12px;
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    .stat-pill .label { font-size: 0.55rem; font-weight: 800; color: #475569; text-transform: uppercase; }
+    .stat-pill .value { font-size: 0.8rem; font-weight: 800; color: #fff; }
+
+    .chevron-icon {
+        color: #475569;
+        transition: transform 0.3s;
+        font-size: 0.7rem;
+    }
+    .faculty-workload-card.open .chevron-icon { transform: rotate(180deg); color: #818cf8; }
+
+    /* 📊 DATA DENSITY TABLE */
+    .workload-dropdown {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease-out;
+    }
+    .faculty-workload-card.open .workload-dropdown { max-height: 1000px; }
+    
+    .nested-table-container { padding: 0 1rem 1rem 1rem; }
+    .nested-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 4px;
+    }
+    .nested-table th {
+        padding: 0.5rem 1rem;
+        font-size: 0.6rem;
+        font-weight: 900;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: left;
+    }
+    .nested-table td {
+        padding: 0.65rem 1rem;
+        background: rgba(255, 255, 255, 0.02);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.01);
+    }
+
+    .subject-pill .name { font-size: 0.8rem; font-weight: 700; color: #fff; }
+    .subject-pill .code { font-size: 0.6rem; color: #6366f1; font-weight: 800; }
+
+    .day-badge {
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.6rem;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+    .day-Monday { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); }
+    .day-Tuesday { background: rgba(168, 85, 247, 0.1); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.2); }
+    .day-Wednesday { background: rgba(236, 72, 153, 0.1); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.2); }
+    .day-Thursday { background: rgba(249, 115, 22, 0.1); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.2); }
+    .day-Friday { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
+
+    .compact-action-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+</style>
+
+<div class="main-container animate-fade-in" id="workload-table-card">
+    <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h3 class="text-xl font-black text-white">Faculty Workload</h3>
+            <p class="text-[10px] font-bold text-muted uppercase tracking-wider">Institutional Capacity Orchestration</p>
+        </div>
+        <div class="px-3 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-black uppercase tracking-widest">
+            <span id="active-faculty-count">{{ workload_data|length }}</span> Active Profiles
+        </div>
+    </div>
+
+    <!-- 🔍 SEARCH & FILTRATION ENGINE -->
+    <div class="filter-engine-bar">
+        <div class="filter-input-group">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="faculty-search" class="filter-control" placeholder="Search Faculty Name or Subject..." onkeyup="executeWorkloadIntelligence()">
+        </div>
+        
+        <div class="filter-input-group" style="max-width: 200px;">
+            <i class="fa-solid fa-building-user"></i>
+            <select id="dept-filter" class="filter-control select-filter" onchange="executeWorkloadIntelligence()">
+                <option value="all">All Departments</option>
+                {% regroup workload_data by faculty.department.name as dept_list %}
+                {% for dept in dept_list %}
+                <option value="{{ dept.grouper|lower }}">{{ dept.grouper }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-input-group" style="max-width: 180px;">
+            <i class="fa-solid fa-calendar-day"></i>
+            <select id="day-filter" class="filter-control select-filter" onchange="executeWorkloadIntelligence()">
+                <option value="all">Any Day</option>
+                <option value="mon">Monday</option>
+                <option value="tue">Tuesday</option>
+                <option value="wed">Wednesday</option>
+                <option value="thu">Thursday</option>
+                <option value="fri">Friday</option>
+                <option value="sat">Saturday</option>
+            </select>
+        </div>
+
+        <button class="compact-action-btn" onclick="resetWorkloadFilters()" title="Reset Intelligence Filters">
+            <i class="fa-solid fa-rotate-right"></i>
+        </button>
+    </div>
+
+    <div id="workload-accordion">
+        {% for data in workload_data %}
+        <div class="faculty-workload-card" 
+             id="fac-card-{{ data.faculty.id }}"
+             data-name="{{ data.faculty.user.get_full_name|lower }}"
+             data-dept="{{ data.faculty.department.name|lower }}"
+             data-subjects="{% for slot in data.slots %}{{ slot.assignment.subject.name|lower }} {% endfor %}"
+             data-days="{% for slot in data.slots %}{{ slot.get_day_of_week_display|slice:':3'|lower }} {% endfor %}">
+            
+            <div class="faculty-row-trigger" onclick="toggleWorkloadAccordion('{{ data.faculty.id }}')">
+                <div class="fac-identity">
+                    <div class="fac-avatar">{{ data.faculty.user.first_name|first }}{{ data.faculty.user.last_name|first }}</div>
+                    <div class="fac-meta">
+                        <h4>{{ data.faculty.user.get_full_name }}</h4>
+                        <p>{{ data.faculty.designation }} | {{ data.faculty.department.name }}</p>
+                    </div>
+                </div>
+                
+                <div class="fac-stats">
+                    <div class="stat-pill">
+                        <span class="label">Weekly</span>
+                        <span class="value">{{ data.weekly_hours }}</span>
+                    </div>
+                    <div class="stat-pill">
+                        <span class="label">Units</span>
+                        <span class="value" style="color: #a855f7;">{{ data.slot_count }}</span>
+                    </div>
+                    <div class="chevron-icon">
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="workload-dropdown">
+                <div class="nested-table-container">
+                    <table class="nested-table">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Slot</th>
+                                <th>Timeline</th>
+                                <th>Spatial</th>
+                                <th style="text-align: right;">Controls</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for slot in data.slots %}
+                            <tr class="group session-row" data-day="{{ slot.get_day_of_week_display|slice:':3'|lower }}">
+                                <td>
+                                    <div class="subject-pill">
+                                        <span class="name">{{ slot.assignment.subject.name }}</span>
+                                        <span class="code">{{ slot.assignment.subject.code }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="day-badge day-{{ slot.get_day_of_week_display }}">
+                                        {{ slot.get_day_of_week_display|slice:":3" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span style="font-size: 0.7rem; color: #cbd5e1;">{{ slot.start_time|time:"H:i" }}—{{ slot.end_time|time:"H:i" }}</span>
+                                </td>
+                                <td>
+                                    <span style="font-size: 0.7rem; color: #94a3b8;">{{ slot.room.name|default:"TBD" }}</span>
+                                </td>
+                                <td>
+                                    <div class="flex justify-end gap-2 opacity-30 group-hover:opacity-100 transition-all">
+                                        <button class="compact-action-btn" hx-get="{% url 'faculty_workload_detail_partial' slot.id %}" hx-target="#modal-container">
+                                            <i class="fa-solid fa-eye text-[10px]"></i>
+                                        </button>
+                                        <button class="compact-action-btn" hx-get="{% url 'admin_workload_edit' slot.id %}" hx-target="#modal-container">
+                                            <i class="fa-solid fa-pen text-[10px]"></i>
+                                        </button>
+                                        <button class="compact-action-btn" style="color: #f87171;" hx-post="{% url 'admin_workload_delete' slot.id %}" hx-confirm="Confirm workload purge?" hx-target="#dashboard-content">
+                                            <i class="fa-solid fa-trash text-[10px]"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function toggleWorkloadAccordion(facultyId) {
+        const card = document.getElementById('fac-card-' + facultyId);
+        const isOpen = card.classList.contains('open');
+        document.querySelectorAll('.faculty-workload-card').forEach(c => c.classList.remove('open'));
+        if (!isOpen) card.classList.add('open');
+    }
+
+    function executeWorkloadIntelligence() {
+        const query = document.getElementById('faculty-search').value.toLowerCase();
+        const dept = document.getElementById('dept-filter').value;
+        const day = document.getElementById('day-filter').value;
+        
+        let visibleCount = 0;
+        const cards = document.querySelectorAll('.faculty-workload-card');
+        
+        cards.forEach(card => {
+            const name = card.getAttribute('data-name');
+            const cardDept = card.getAttribute('data-dept');
+            const subjects = card.getAttribute('data-subjects');
+            const days = card.getAttribute('data-days');
+            
+            const matchesQuery = name.includes(query) || subjects.includes(query);
+            const matchesDept = (dept === 'all' || cardDept === dept);
+            const matchesDay = (day === 'all' || days.includes(day));
+            
+            if (matchesQuery && matchesDept && matchesDay) {
+                card.classList.remove('hidden');
+                visibleCount++;
+                
+                // Also filter internal sessions if day filter is active
+                const sessionRows = card.querySelectorAll('.session-row');
+                sessionRows.forEach(row => {
+                    const sessionDay = row.getAttribute('data-day');
+                    if (day !== 'all' && sessionDay !== day) {
+                        row.style.display = 'none';
+                    } else {
+                        row.style.display = 'table-row';
+                    }
+                });
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+        
+        document.getElementById('active-faculty-count').innerText = visibleCount;
+    }
+
+    function resetWorkloadFilters() {
+        document.getElementById('faculty-search').value = '';
+        document.getElementById('dept-filter').value = 'all';
+        document.getElementById('day-filter').value = 'all';
+        executeWorkloadIntelligence();
+    }
+</script>

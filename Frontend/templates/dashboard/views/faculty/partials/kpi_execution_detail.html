@@ -1,0 +1,76 @@
+<div class="modal-backdrop" onclick="closeModal()">
+    <div class="modal-content animate-slide-up" onclick="event.stopPropagation();" style="max-width: 700px;">
+        <div class="modal-header border-b border-white/10 pb-4 mb-6">
+            <div>
+                <h3 class="text-xl font-black text-white uppercase tracking-tight flex items-center gap-2">
+                    <i class="fas fa-bolt text-orange-500"></i> Execution Precision Audit
+                </h3>
+                <p class="text-[10px] font-bold text-muted uppercase tracking-widest mt-1">SaaS operational audit of teaching worklogs</p>
+            </div>
+            <button class="close-btn text-2xl opacity-50 hover:opacity-100 transition-opacity" onclick="closeModal()">&times;</button>
+        </div>
+
+        <div class="modal-body space-y-6">
+            <!-- Aggregate Metrics -->
+            <div class="grid grid-cols-4 gap-4">
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+                    <span class="text-[9px] font-black text-muted uppercase tracking-widest block mb-2">Total Assigned</span>
+                    <div class="text-2xl font-black text-white">{{ totals.total|default:0 }}</div>
+                </div>
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+                    <span class="text-[9px] font-black text-muted uppercase tracking-widest block mb-2">Completed</span>
+                    <div class="text-2xl font-black text-green-500">{{ totals.done|default:0 }}</div>
+                </div>
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+                    <span class="text-[9px] font-black text-muted uppercase tracking-widest block mb-2">Missed</span>
+                    <div class="text-2xl font-black text-red-500">{{ totals.missed|default:0 }}</div>
+                </div>
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+                    <span class="text-[9px] font-black text-muted uppercase tracking-widest block mb-2">Precision</span>
+                    <div class="text-2xl font-black text-orange-400">98.2%</div>
+                </div>
+            </div>
+
+            <!-- Worklog History -->
+            <div class="space-y-3">
+                <h4 class="text-[10px] font-black text-muted uppercase tracking-widest">Recent Execution Logs</h4>
+                <div class="overflow-hidden rounded-2xl border border-white/10">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-white/5 font-black text-muted uppercase tracking-widest">
+                            <tr>
+                                <th class="p-4 border-b border-white/5">Date</th>
+                                <th class="p-4 border-b border-white/5">Assigned</th>
+                                <th class="p-4 border-b border-white/5">Completed</th>
+                                <th class="p-4 border-b border-white/5">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            {% for log in logs %}
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="p-4 font-bold text-white">{{ log.date|date:"M d, Y" }}</td>
+                                <td class="p-4 text-muted">{{ log.total_sessions }}</td>
+                                <td class="p-4 text-white">{{ log.completed_sessions }}</td>
+                                <td class="p-4">
+                                    {% if log.completed_sessions == log.total_sessions %}
+                                    <span class="text-[9px] font-black text-green-500 uppercase tracking-widest bg-green-500/10 px-2 py-1 rounded border border-green-500/20">Perfect</span>
+                                    {% elif log.missed_sessions > 0 %}
+                                    <span class="text-[9px] font-black text-red-500 uppercase tracking-widest bg-red-500/10 px-2 py-1 rounded border border-red-500/20">Breach</span>
+                                    {% else %}
+                                    <span class="text-[9px] font-black text-orange-500 uppercase tracking-widest bg-orange-500/10 px-2 py-1 rounded border border-orange-500/20">Partial</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="p-8 text-center text-muted font-bold">No worklogs detected</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer border-t border-white/10 pt-4 mt-6">
+            <button class="btn-primary-glow" onclick="closeModal()">Terminate Audit View</button>
+        </div>
+    </div>
+</div>

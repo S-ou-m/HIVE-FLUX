@@ -1,0 +1,21 @@
+{% if notices %}
+    {% for notice in notices %}
+        {% include 'dashboard/partials/communication/notice_card.html' with notice=notice is_read=notice.is_read %}
+    {% endfor %}
+{% else %}
+    <div class="notice-empty-state animate-fade-in">
+        <div class="w-24 h-24 rounded-[32px] bg-blue-500/5 flex items-center justify-center mb-8 border border-blue-500/10">
+            <i class="fa-solid fa-satellite-dish text-4xl text-blue-500 opacity-40"></i>
+        </div>
+        <h3 class="text-xl font-black text-white mb-2">No Intelligence Detected</h3>
+        <p class="text-sm text-white/40 max-w-xs leading-relaxed">Your institutional feed is currently clear. No active broadcasts match your current filter parameters.</p>
+        
+        <button 
+            class="mt-8 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white/60 hover:text-white hover:bg-white/10 transition-all" 
+            hx-get="{% url 'notice_list_partial' %}" 
+            hx-target="#notice-feed"
+        >
+            Reset Signal Search
+        </button>
+    </div>
+{% endif %}

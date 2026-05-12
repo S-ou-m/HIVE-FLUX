@@ -1,0 +1,228 @@
+<div class="saas-panel-wrapper animate-slide-left">
+    <div class="panel-header">
+        <div class="header-main">
+            <i class="fa-solid fa-building-columns"></i>
+            <div>
+                <h2>Workspace Manager</h2>
+                <p>Switch between campus tenants or create a new workspace</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="tenant-search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Search workspaces..." class="search-input" onkeyup="filterTenants(this.value)">
+    </div>
+
+    <div class="tenant-list" id="tenant-list">
+        <label class="section-label">Available Workspaces</label>
+        
+        {% for tenant in tenants %}
+        <div class="tenant-card {% if tenant.current %}active{% endif %}" onclick="selectTenant('{{ tenant.id }}')">
+            <div class="tenant-icon">
+                <i class="fa-solid fa-school"></i>
+                {% if tenant.current %}<div class="current-indicator"></div>{% endif %}
+            </div>
+            <div class="tenant-details">
+                <div class="name-row">
+                    <span class="tenant-name">{{ tenant.name }}</span>
+                    {% if tenant.current %}<span class="current-pill">Current</span>{% endif %}
+                </div>
+                <div class="tenant-meta">
+                    <span class="role"><i class="fa-solid fa-user-shield"></i> Admin</span>
+                    <span class="divider">•</span>
+                    <span class="status">ID: {{ tenant.id }}</span>
+                </div>
+            </div>
+            <div class="select-indicator">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Create New Action -->
+        <a href="#" class="tenant-card create-new">
+            <div class="tenant-icon">
+                <i class="fa-solid fa-plus"></i>
+            </div>
+            <div class="tenant-details">
+                <span class="tenant-name">Create New Tenant</span>
+                <span class="tenant-meta">Provision a new campus workspace</span>
+            </div>
+            <i class="fa-solid fa-chevron-right arrow"></i>
+        </a>
+    </div>
+
+    <div class="panel-footer">
+        <p class="footer-hint"><i class="fa-solid fa-circle-info"></i> Switching workspace will refresh your active session with new context.</p>
+        <div class="footer-actions">
+            <button class="btn-ghost" onclick="closeSidePanel()">Cancel</button>
+            <button class="btn-primary" id="switch-btn" disabled onclick="handleTenantSwitch()">
+                Switch Workspace
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedTenantId = null;
+
+    function selectTenant(id) {
+        // Deselect others
+        document.querySelectorAll('.tenant-card').forEach(card => card.classList.remove('selected'));
+        
+        // Select this one
+        const card = event.currentTarget;
+        if (card.classList.contains('active')) return; // Already current
+
+        card.classList.add('selected');
+        selectedTenantId = id;
+        document.getElementById('switch-btn').disabled = false;
+    }
+
+    function handleTenantSwitch() {
+        const btn = document.getElementById('switch-btn');
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Switching...';
+        
+        // Simulate switch delay
+        setTimeout(() => {
+            showToast("Workspace switched successfully", "success");
+            location.reload(); // Real SaaS would reload with new context
+        }, 800);
+    }
+
+    function filterTenants(query) {
+        const cards = document.querySelectorAll('.tenant-card:not(.create-new)');
+        cards.forEach(card => {
+            const name = card.querySelector('.tenant-name').innerText.toLowerCase();
+            card.style.display = name.includes(query.toLowerCase()) ? 'flex' : 'none';
+        });
+    }
+</script>
+
+<style>
+    .tenant-search-box {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .tenant-search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 1rem 1rem 1rem 3rem;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+    .tenant-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .tenant-card {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        padding: 1.25rem;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    .tenant-card:hover {
+        border-color: var(--primary-color);
+        background: rgba(249, 115, 22, 0.05);
+        transform: translateX(5px);
+    }
+
+    .tenant-card.active {
+        background: rgba(249, 115, 22, 0.05);
+        border-color: rgba(249, 115, 22, 0.3);
+        cursor: default;
+    }
+
+    .tenant-card.selected {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px var(--primary-glow);
+        background: rgba(249, 115, 22, 0.1);
+    }
+
+    .tenant-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--bg-elevated);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        position: relative;
+    }
+
+    .tenant-card.active .tenant-icon { color: var(--primary-color); background: var(--primary-glow); }
+
+    .current-indicator {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 12px;
+        height: 12px;
+        background: var(--primary-color);
+        border: 2px solid var(--bg-surface);
+        border-radius: 50%;
+        box-shadow: 0 0 8px var(--primary-color);
+    }
+
+    .tenant-details { flex-grow: 1; }
+
+    .name-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem; }
+    .tenant-name { font-weight: 600; color: var(--text-primary); font-size: 1rem; }
+    
+    .current-pill {
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        font-weight: 800;
+        background: var(--primary-color);
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    .tenant-meta { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--text-secondary); }
+    .divider { opacity: 0.3; }
+
+    .select-indicator {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .tenant-card.selected .select-indicator { opacity: 1; }
+
+    .tenant-card.create-new {
+        border-style: dashed;
+        background: transparent;
+        margin-top: 1rem;
+    }
+
+    .tenant-card.create-new .tenant-icon { background: rgba(255, 255, 255, 0.05); }
+    .tenant-card.create-new .arrow { margin-left: auto; color: var(--text-secondary); font-size: 0.9rem; }
+
+    .footer-hint { font-size: 0.75rem; color: var(--text-secondary); max-width: 300px; }
+</style>

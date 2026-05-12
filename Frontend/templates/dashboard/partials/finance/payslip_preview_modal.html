@@ -1,0 +1,261 @@
+<div class="payslip-drawer-content animate-slide-left">
+    <!-- Top Action Bar inside Drawer -->
+    <div class="drawer-action-header">
+        <div class="doc-status-info">
+            <i class="fa-solid fa-file-pdf"></i>
+            <div>
+                <h3>{{ pr.month }}/{{ pr.year }} Payslip</h3>
+                <p>{{ pr.faculty.user.get_full_name }}</p>
+            </div>
+        </div>
+        <div class="header-btns">
+            <button class="btn btn-ghost btn-sm"
+                    hx-get="{% url 'admin_payroll_payslip_email' pr.id %}"
+                    hx-swap="none">
+                <i class="fa-solid fa-envelope"></i> Email
+            </button>
+            <a href="{% url 'admin_payroll_payslip_download' pr.id %}" 
+               class="btn btn-primary btn-sm"
+               download>
+                <i class="fa-solid fa-download"></i> PDF
+            </a>
+        </div>
+    </div>
+
+    <div class="drawer-document-viewer">
+        <!-- The actual Payslip Document Mockup -->
+        <div class="payslip-document">
+            <div class="doc-header">
+                <div class="company-logo">
+                    <i class="fa-solid fa-university"></i>
+                    <span>{{ pr.college.name|upper }}</span>
+                </div>
+                <div class="doc-title">
+                    <h4>PAYSLIP</h4>
+                    <span>Confidential</span>
+                </div>
+            </div>
+... (rest of the document content) ...
+
+            <div class="doc-meta">
+                <div class="meta-col">
+                    <label>Employee Name</label>
+                    <div>{{ pr.faculty.user.get_full_name }}</div>
+                    <label>Designation</label>
+                    <div>{{ pr.faculty.designation }}</div>
+                </div>
+                <div class="meta-col">
+                    <label>Month/Year</label>
+                    <div>{{ pr.month }}/{{ pr.year }}</div>
+                    <label>Employee ID</label>
+                    <div>FAC-{{ pr.faculty.id|stringformat:".8s" }}</div>
+                </div>
+            </div>
+
+            <div class="doc-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>EARNINGS</th>
+                            <th>AMOUNT</th>
+                            <th>DEDUCTIONS</th>
+                            <th>AMOUNT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Basic Salary</td>
+                            <td>₹{{ breakdown.base|floatformat:2 }}</td>
+                            <td>Provident Fund</td>
+                            <td>₹{{ breakdown.deductions.PF|default:"0.00" }}</td>
+                        </tr>
+                        <tr>
+                            <td>HRA</td>
+                            <td>₹{{ breakdown.hra|floatformat:2 }}</td>
+                            <td>Income Tax</td>
+                            <td>₹{{ breakdown.deductions.Tax|default:"0.00" }}</td>
+                        </tr>
+                        {% for name, amt in breakdown.allowances.items %}
+                        <tr>
+                            <td>{{ name }}</td>
+                            <td>₹{{ amt|floatformat:2 }}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td><strong>Total Earnings</strong></td>
+                            <td><strong>₹{{ pr.gross_salary|floatformat:2 }}</strong></td>
+                            <td><strong>Total Deductions</strong></td>
+                            <td><strong>₹{{ pr.deductions|floatformat:2 }}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="doc-summary">
+                <div class="net-pay-block">
+                    <label>NET SALARY PAYABLE</label>
+                    <div class="amount">₹{{ pr.net_salary|floatformat:2 }}</div>
+                    <div class="words">Rupees {{ pr.net_salary|floatformat:0 }} only</div>
+                </div>
+            </div>
+
+            <div class="doc-footer">
+                <div class="signature">
+                    <div class="sig-box">
+                        <img src="https://signaturely.com/wp-content/uploads/2020/04/e-signature-example-1.png" style="height: 40px; opacity: 0.7; filter: grayscale(1);">
+                    </div>
+                    <p>Authorized Signatory</p>
+                </div>
+                <div class="verification-seal">
+                    <i class="fa-solid fa-shield-check"></i>
+                    <span>Digitally Verified by ERP System</span>
+                </div>
+            </div>
+
+            {% if pr.status != 'PAID' %}
+            <div class="watermark">DRAFT</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .payslip-drawer-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        background: var(--bg-main);
+        overflow: hidden;
+    }
+    
+    .drawer-action-header {
+        padding: 1rem 1.5rem;
+        background: var(--bg-secondary);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        flex-shrink: 0;
+    }
+    
+    .doc-status-info { display: flex; gap: 0.75rem; align-items: center; }
+    .doc-status-info i { font-size: 1.2rem; color: #ef4444; }
+    .doc-status-info h3 { margin: 0; font-size: 1rem; color: var(--text-primary); }
+    .doc-status-info p { margin: 0; font-size: 0.75rem; color: var(--text-secondary); }
+    
+    .header-btns { display: flex; gap: 0.5rem; }
+
+    .drawer-document-viewer {
+        padding: 2rem 1rem;
+        background: #0f172a;
+        flex-grow: 1;
+        overflow: auto; /* Handles both X and Y overflow */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .payslip-document {
+        background: white;
+        color: #1e293b;
+        width: 100%;
+        max-width: 800px;
+        min-width: 600px; /* Preserve document structure */
+        padding: 4rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        position: relative;
+        border-radius: 4px;
+        box-sizing: border-box;
+        margin-bottom: 2rem;
+    }
+
+    /* Responsive Adjustments for Small Drawers */
+    @media (max-width: 800px) {
+        .payslip-document {
+            padding: 2rem;
+            min-width: 500px;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .payslip-document {
+            padding: 1.5rem;
+            min-width: 400px;
+        }
+        .doc-title h4 { font-size: 1.25rem; }
+        .net-pay-block .amount { font-size: 1.75rem; }
+    }
+
+    .doc-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2.5rem;
+        border-bottom: 2px solid #1e293b;
+        padding-bottom: 1rem;
+    }
+    .company-logo { display: flex; align-items: center; gap: 0.5rem; font-weight: 800; font-size: 1.2rem; color: #0f172a; }
+    .doc-title { text-align: right; }
+    .doc-title h4 { margin: 0; font-size: 1.5rem; letter-spacing: 0.2em; font-weight: 900; }
+    .doc-title span { font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 600; }
+
+    .doc-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2.5rem;
+    }
+    .meta-col label { display: block; font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 0.2rem; font-weight: 700; }
+    .meta-col div { font-weight: 600; font-size: 0.9rem; color: #1e293b; }
+
+    .doc-table-container {
+        width: 100%;
+        overflow-x: auto;
+        margin-bottom: 2.5rem;
+    }
+    .doc-table table { width: 100%; border-collapse: collapse; min-width: 500px; }
+    .doc-table th { background: #f8fafc; text-align: left; padding: 0.6rem 0.8rem; font-size: 0.75rem; border: 1px solid #e2e8f0; color: #475569; font-weight: 800; }
+    .doc-table td { padding: 0.6rem 0.8rem; font-size: 0.85rem; border: 1px solid #e2e8f0; }
+    .doc-table tfoot td { background: #f1f5f9; font-weight: 800; }
+
+    .doc-summary {
+        background: #f8fafc;
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+    }
+    .net-pay-block label { font-size: 0.75rem; color: #64748b; letter-spacing: 0.1em; font-weight: 700; }
+    .net-pay-block .amount { font-size: 2.25rem; font-weight: 900; color: #0f172a; margin: 0.5rem 0; }
+    .net-pay-block .words { font-size: 0.8rem; font-style: italic; color: #475569; }
+
+    .doc-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-top: 1.5rem;
+    }
+    .sig-box { border-bottom: 2px solid #1e293b; width: 150px; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; }
+    .signature p { margin: 0; font-size: 0.75rem; font-weight: 700; color: #1e293b; text-align: center; width: 150px; }
+    .verification-seal { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: #10b981; font-weight: 700; }
+
+    .watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        font-size: 8rem;
+        font-weight: 950;
+        color: rgba(0,0,0,0.02);
+        pointer-events: none;
+        z-index: 0;
+        letter-spacing: 0.4em;
+    }
+</style>

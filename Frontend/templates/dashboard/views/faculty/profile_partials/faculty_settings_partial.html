@@ -1,0 +1,70 @@
+<!-- d:\ERP_cms\Frontend\templates\dashboard\views\faculty\profile_partials\faculty_settings_partial.html -->
+<div class="glass-panel p-6">
+    <div class="flex gap-8 border-b border-white/10 mb-6">
+        <button class="text-xs font-black uppercase tracking-widest text-blue-500 border-b-2 border-blue-500 pb-4">Profile Info</button>
+        <button class="text-xs font-bold uppercase tracking-widest text-muted hover:text-white transition-colors pb-4">Preferences</button>
+        <button class="text-xs font-bold uppercase tracking-widest text-muted hover:text-white transition-colors pb-4">Security</button>
+        <button class="text-xs font-bold uppercase tracking-widest text-muted hover:text-white transition-colors pb-4">Notifications</button>
+    </div>
+
+    <div class="grid grid-cols-2 gap-8">
+        <!-- Info Column -->
+        <div class="space-y-4">
+            <div>
+                <label class="text-[10px] text-muted font-black uppercase tracking-widest block mb-2">Full Name</label>
+                <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white">{{ hub.identity.name }}</div>
+            </div>
+            <div>
+                <label class="text-[10px] text-muted font-black uppercase tracking-widest block mb-2">Primary Department</label>
+                <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white">{{ hub.identity.department }}</div>
+            </div>
+            <div>
+                <label class="text-[10px] text-muted font-black uppercase tracking-widest block mb-2">Assigned Subjects</label>
+                <div class="flex flex-wrap gap-2">
+                    <span class="bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold px-3 py-1.5 rounded-lg">Data Structures</span>
+                    <span class="bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold px-3 py-1.5 rounded-lg">Operating Systems</span>
+                    <span class="bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1.5 rounded-lg">DBMS</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Settings Column -->
+        <div class="space-y-6">
+            <div>
+                <label class="text-[10px] text-muted font-black uppercase tracking-widest block mb-4">Device Sessions</label>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center bg-white/5 border border-white/10 p-3 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fab fa-chrome text-white/50 text-xl w-6 text-center"></i>
+                            <div>
+                                <div class="text-xs font-bold text-white">Chrome on macOS</div>
+                                <div class="text-[10px] text-muted font-bold">Bhubaneswar • <span class="text-green-500">Current Session</span></div>
+                            </div>
+                        </div>
+                        <button class="bg-white/5 border border-white/10 text-white/50 hover:text-red-500 hover:border-red-500/30 hover:bg-red-500/10 transition-all w-8 h-8 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 border border-white/10 p-3 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fab fa-apple text-white/50 text-xl w-6 text-center"></i>
+                            <div>
+                                <div class="text-xs font-bold text-white">Safari on iOS</div>
+                                <div class="text-[10px] text-muted font-bold">New Delhi • 2 days ago</div>
+                            </div>
+                        </div>
+                        <button class="bg-white/5 border border-white/10 text-white/50 hover:text-red-500 hover:border-red-500/30 hover:bg-red-500/10 transition-all w-8 h-8 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-white/10 pt-6">
+                <button class="text-xs font-black text-red-500 hover:text-red-400 flex items-center gap-2">
+                    <i class="fas fa-sign-out-alt"></i> Revoke all other sessions
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

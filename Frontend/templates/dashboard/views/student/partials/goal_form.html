@@ -1,0 +1,39 @@
+<div class="p-8 bg-white/[0.03] border border-white/5 rounded-[40px] animate-in slide-in-from-top-4 duration-700">
+    <div class="flex items-center justify-between mb-8">
+        <h3 class="text-lg font-black text-white">Institutional Goal Configuration</h3>
+        <button class="text-[10px] font-black text-white/20 uppercase hover:text-white" onclick="this.closest('#goal-configuration-surface').innerHTML = ''">Cancel</button>
+    </div>
+    
+    <form hx-post="{% url 'student_save_goal' %}" hx-target="#goal-configuration-surface" class="space-y-6">
+        {% csrf_token %}
+        <div class="grid grid-cols-2 gap-6">
+            <div class="space-y-2">
+                <label class="text-[9px] font-black text-white/30 uppercase tracking-widest">Goal Taxonomy</label>
+                <select name="type" class="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:border-emerald-500 outline-none">
+                    <option value="ACADEMIC">Academic Excellence</option>
+                    <option value="SKILL">Skill Acquisition</option>
+                    <option value="CAREER">Career Placement</option>
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label class="text-[9px] font-black text-white/30 uppercase tracking-widest">Goal Title</label>
+                <input type="text" name="title" placeholder="e.g. Master React Engine" class="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:border-emerald-500 outline-none">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+            <div class="space-y-2">
+                <label class="text-[9px] font-black text-white/30 uppercase tracking-widest">Target Value</label>
+                <input type="number" name="target" placeholder="100" class="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:border-emerald-500 outline-none">
+            </div>
+            <div class="space-y-2">
+                <label class="text-[9px] font-black text-white/30 uppercase tracking-widest">Institutional Deadline</label>
+                <input type="date" name="deadline" class="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:border-emerald-500 outline-none">
+            </div>
+        </div>
+
+        <button class="w-full py-4 bg-emerald-500 text-white text-[10px] font-black rounded-2xl uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+            Initiate Goal Protocol
+        </button>
+    </form>
+</div>

@@ -1,0 +1,127 @@
+<style>
+    .preview-container {
+        padding: 2.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        color: var(--text-primary);
+    }
+    .preview-label {
+        font-size: 0.6rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .main-projection {
+        margin-bottom: 2.5rem;
+    }
+    .amount-large {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #fff;
+    }
+    .amount-sub {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+    
+    .preview-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        flex: 1;
+    }
+    .preview-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+    }
+    .item-label { color: var(--text-secondary); }
+    .item-val-plus { color: #10b981; font-weight: 700; }
+    .item-val-minus { color: #ef4444; font-weight: 700; }
+    
+    .ctc-box {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+    }
+    .ctc-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+    .ctc-bar-bg {
+        width: 100%;
+        height: 6px;
+        background: var(--bg-surface);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .ctc-bar-fill {
+        height: 100%;
+        background: var(--primary-color);
+        border-radius: 10px;
+        transition: width 0.4s ease;
+    }
+</style>
+
+<div class="preview-container animate-fade-in">
+    <div class="main-projection">
+        <span class="preview-label">Monthly Projection</span>
+        <div class="amount-large">₹{{ net|floatformat:0 }}</div>
+        <span class="amount-sub">Estimated Take-Home</span>
+    </div>
+
+    <div class="preview-list">
+        <div class="preview-item">
+            <span class="item-label">Basic Salary</span>
+            <span style="color: #fff; font-weight: 600;">₹{{ base|floatformat:0 }}</span>
+        </div>
+        <div class="preview-item">
+            <span class="item-label">Total Allowances</span>
+            <span class="item-val-plus">+₹{{ allowances|floatformat:0 }}</span>
+        </div>
+        <div class="preview-item">
+            <span class="item-label">Total Deductions</span>
+            <span class="item-val-minus">-₹{{ deductions|floatformat:0 }}</span>
+        </div>
+        <div class="preview-item">
+            <span class="item-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                Tax Projection (TDS)
+                {% if regime_id %}
+                <i class="fa-solid fa-circle-info" 
+                   style="font-size: 0.65rem; cursor: pointer; color: var(--primary-color);" 
+                   title="View Slab Rules"
+                   hx-get="{% url 'admin_tax_regime_details' regime_id %}"
+                   hx-target="#modal-container"></i>
+                {% endif %}
+            </span>
+            <span class="item-val-minus">-₹{{ tds|floatformat:0 }}</span>
+        </div>
+
+        {% if tax_info.rebated %}
+        <div style="font-size: 0.6rem; color: #10b981; margin-top: 0.5rem; background: rgba(16,185,129,0.05); padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(16,185,129,0.1); line-height: 1.4;">
+            <i class="fa-solid fa-shield-halved" style="margin-right: 0.4rem;"></i>
+            <strong>Zero Tax Liability:</strong> Projected annual income is below the rebate limit for {{ tax_info.regime_name }}.
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="ctc-box">
+        <div class="ctc-header">
+            <span class="preview-label" style="margin: 0;">Monthly CTC</span>
+            <span style="font-weight: 800; color: #fff;">₹{{ ctc|floatformat:0 }}</span>
+        </div>
+        <div class="ctc-bar-bg" style="--ratio: {% if ctc > 0 %}{% widthratio net ctc 100 %}{% else %}0{% endif %}%;">
+            <div class="ctc-bar-fill" style="width: var(--ratio);"></div>
+        </div>
+        <p style="font-size: 0.6rem; color: var(--text-secondary); margin-top: 0.75rem; font-style: italic;">
+            *Projection includes employer contributions and system-tax slabs.
+        </p>
+    </div>
+</div>

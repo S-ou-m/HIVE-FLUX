@@ -1,0 +1,132 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/communication.css' %}">
+
+<div class="notice-center animate-fade-in">
+    <!-- 🏺 Intelligence Hub (Left) -->
+    <aside class="notice-sidebar">
+        <div class="glass-card" style="padding: 20px;">
+            <div class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-6">Discovery Engine</div>
+            <div class="intelligence-filters">
+                <a href="javascript:void(0)" class="filter-item active" hx-get="{% url 'notice_list_partial' %}" hx-target="#notice-feed" onclick="updateActive(this)">
+                    <i class="fa-solid fa-layer-group"></i> <span>All Broadcasts</span>
+                </a>
+                <a href="javascript:void(0)" class="filter-item" hx-get="{% url 'notice_list_partial' %}?unread=true" hx-target="#notice-feed" onclick="updateActive(this)">
+                    <i class="fa-solid fa-envelope-open-text"></i> <span>Unread</span>
+                </a>
+                <a href="javascript:void(0)" class="filter-item" hx-get="{% url 'notice_list_partial' %}?priority=critical" hx-target="#notice-feed" onclick="updateActive(this)">
+                    <i class="fa-solid fa-triangle-exclamation"></i> <span>Critical Alerts</span>
+                </a>
+            </div>
+
+            <div class="filter-divider" style="height: 1px; background: rgba(255,255,255,0.05); margin: 24px 0;"></div>
+            
+            <div class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-6">Target Groups</div>
+            <div class="intelligence-filters">
+                <a href="javascript:void(0)" class="filter-item" hx-get="{% url 'notice_list_partial' %}?type=academic" hx-target="#notice-feed" onclick="updateActive(this)">
+                    <i class="fa-solid fa-graduation-cap"></i> <span>Academic</span>
+                </a>
+                <a href="javascript:void(0)" class="filter-item" hx-get="{% url 'notice_list_partial' %}?type=system" hx-target="#notice-feed" onclick="updateActive(this)">
+                    <i class="fa-solid fa-server"></i> <span>System</span>
+                </a>
+                <a href="javascript:void(0)" class="filter-item" hx-get="{% url 'notice_list_partial' %}?type=general" hx-target="#notice-feed" onclick="updateActive(this)">
+                    <i class="fa-solid fa-bullhorn"></i> <span>General</span>
+                </a>
+            </div>
+        </div>
+
+        {% if user_role == 'Administrator' %}
+        <div class="glass-card" style="padding: 20px; background: rgba(59, 130, 246, 0.05); border-color: rgba(59, 130, 246, 0.1);">
+            <div class="text-xs font-bold text-white mb-2">Institutional Broadcast</div>
+            <p class="text-[10px] text-white/40 leading-relaxed mb-4">Target specific departments or roles with precision intelligence.</p>
+            <button class="btn-com-action w-full" hx-get="{% url 'create_notice' %}" hx-target="#modal-container">
+                <i class="fa-solid fa-plus"></i> Draft Notice
+            </button>
+        </div>
+        {% endif %}
+    </aside>
+
+    <!-- 📑 Operational Feed (Center) -->
+    <div class="notice-feed-container relative">
+        <header class="feed-header-glass mb-6">
+            <div class="flex items-center gap-4">
+                <h1 class="text-lg font-black text-white tracking-tight">Active Intelligence</h1>
+                <div class="h-4 w-px bg-white/10"></div>
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span class="text-[10px] font-black text-white/40 uppercase tracking-widest">Syncing Live</span>
+                </div>
+            </div>
+
+            <div class="notice-search">
+                <i class="fa-solid fa-magnifying-glass text-white/20"></i>
+                <input type="text" placeholder="Search broadcasts..." hx-get="{% url 'notice_list_partial' %}" hx-trigger="keyup changed delay:500ms" hx-target="#notice-feed" name="search">
+            </div>
+        </header>
+
+        <!-- Persistent Loader -->
+        <div class="notice-feed-loader htmx-indicator absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-10 flex items-center justify-center rounded-2xl">
+            <div class="flex flex-col items-center gap-4">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+                <span class="text-sm text-secondary animate-pulse font-black uppercase tracking-widest text-[10px]">Syncing...</span>
+            </div>
+        </div>
+
+        <main class="notice-feed h-full flex flex-col gap-6" id="notice-feed" hx-get="{% url 'notice_list_partial' %}" hx-trigger="load">
+            <!-- Initial content loading... -->
+        </main>
+    </div>
+
+    <!-- 🛰️ Active Intelligence (Right Context) -->
+    <aside class="intelligence-context">
+        <div class="glass-card" style="padding: 24px; min-height: 400px;">
+            <div class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-8">System Telemetry</div>
+            
+            <div class="telemetry-grid space-y-6">
+                <div class="telemetry-item">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[11px] font-bold text-white/60">Broadcast Reach</span>
+                        <span class="text-[11px] font-black text-emerald-400">92%</span>
+                    </div>
+                    <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div class="h-full bg-emerald-500" style="width: 92%"></div>
+                    </div>
+                </div>
+
+                <div class="telemetry-item">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[11px] font-bold text-white/60">Response Rate</span>
+                        <span class="text-[11px] font-black text-blue-400">64%</span>
+                    </div>
+                    <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div class="h-full bg-blue-500" style="width: 64%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 48px;">
+                <div class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-6">Recent Contributors</div>
+                <div class="flex -space-x-3 overflow-hidden">
+                    <div class="inline-block h-8 w-8 rounded-full ring-2 ring-slate-900 bg-blue-600 flex items-center justify-center font-black text-[10px]">A</div>
+                    <div class="inline-block h-8 w-8 rounded-full ring-2 ring-slate-900 bg-emerald-600 flex items-center justify-center font-black text-[10px]">D</div>
+                    <div class="inline-block h-8 w-8 rounded-full ring-2 ring-slate-900 bg-orange-600 flex items-center justify-center font-black text-[10px]">S</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+{% if user_role == 'Administrator' %}
+<button class="btn-create-notice-fab" hx-get="{% url 'create_notice' %}" hx-target="#modal-container" title="Create New Broadcast">
+    <i class="fa-solid fa-plus"></i>
+</button>
+{% endif %}
+
+<script>
+    if (typeof updateActive !== 'function') {
+        function updateActive(el) {
+            document.querySelectorAll('.notice-sidebar .filter-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+        }
+    }
+</script>

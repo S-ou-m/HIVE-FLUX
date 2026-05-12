@@ -1,0 +1,228 @@
+<div class="saas-panel-wrapper animate-slide-left">
+    <div class="panel-header">
+        <div class="header-main">
+            <i class="fa-solid fa-tower-broadcast"></i>
+            <div>
+                <h2>Session Intelligence</h2>
+                <p>Monitor and manage active devices accessing your account</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="security-score-card">
+        <div class="score-main">
+            <div class="score-circle">
+                <svg viewBox="0 0 36 36">
+                    <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path class="circle" stroke-dasharray="85, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <div class="percentage">85%</div>
+            </div>
+            <div class="score-text">
+                <h3>Account Security</h3>
+                <p>Excellent protection enabled</p>
+            </div>
+        </div>
+        <div class="score-actions">
+            <button class="btn-outline sm">Review Risk</button>
+        </div>
+    </div>
+
+    <div class="session-container">
+        <div class="container-header">
+            <label class="section-label">Active Sessions</label>
+            <button class="btn-ghost danger sm" onclick="logoutOtherSessions()">Log out all others</button>
+        </div>
+
+        <div class="session-list">
+            {% for session in sessions %}
+            <div class="session-tile {% if session.current %}current{% endif %}">
+                <div class="device-icon">
+                    {% if "Windows" in session.device %}<i class="fa-brands fa-windows"></i>
+                    {% elif "Android" in session.device %}<i class="fa-brands fa-android"></i>
+                    {% else %}<i class="fa-solid fa-mobile-screen"></i>{% endif %}
+                </div>
+                <div class="session-info">
+                    <div class="device-name">
+                        {{ session.device }}
+                        {% if session.current %}<span class="current-tag">This Device</span>{% endif %}
+                    </div>
+                    <div class="session-meta">
+                        <span class="ip"><i class="fa-solid fa-globe"></i> {{ session.ip }}</span>
+                        <span class="dot">•</span>
+                        <span class="loc">{{ session.loc }}</span>
+                        <span class="dot">•</span>
+                        <span class="time">{{ session.time }}</span>
+                    </div>
+                </div>
+                <div class="tile-actions">
+                    {% if not session.current %}
+                    <button class="icon-btn danger" title="Terminate Session" onclick="terminateSession(this)">
+                        <i class="fa-solid fa-power-off"></i>
+                    </button>
+                    {% else %}
+                    <div class="active-pulse"></div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="risk-indicators">
+        <label class="section-label">Security Signals</label>
+        <div class="risk-grid">
+            <div class="risk-item success">
+                <i class="fa-solid fa-shield-check"></i>
+                <div class="risk-info">
+                    <label>Encrypted Session</label>
+                    <span>TLS 1.3 Active</span>
+                </div>
+            </div>
+            <div class="risk-item warning">
+                <i class="fa-solid fa-user-shield"></i>
+                <div class="risk-info">
+                    <label>2FA Recovery</label>
+                    <span>Not configured</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-footer">
+        <div class="footer-actions">
+            <button class="btn-ghost" onclick="closeSidePanel()">Close Panel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function logoutOtherSessions() {
+        if(confirm("Are you sure you want to log out from all other devices?")) {
+            showToast("Logged out from other sessions", "success");
+            // Reload list here
+        }
+    }
+
+    function terminateSession(btn) {
+        const tile = btn.closest('.session-tile');
+        tile.style.opacity = '0.5';
+        tile.style.pointerEvents = 'none';
+        
+        setTimeout(() => {
+            tile.remove();
+            showToast("Session terminated", "info");
+        }, 500);
+    }
+</script>
+
+<style>
+    .security-score-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        margin-bottom: 2.5rem;
+    }
+
+    .score-main { display: flex; align-items: center; gap: 1.5rem; }
+
+    .score-circle {
+        position: relative;
+        width: 60px;
+        height: 60px;
+    }
+
+    .score-circle svg { transform: rotate(-90deg); }
+    .circle-bg { fill: none; stroke: var(--bg-elevated); stroke-width: 3.8; }
+    .circle { fill: none; stroke: #22c55e; stroke-width: 3.8; stroke-linecap: round; }
+    .percentage {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: #22c55e;
+    }
+
+    .score-text h3 { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0; }
+    .score-text p { font-size: 0.85rem; color: var(--text-secondary); margin: 0.2rem 0 0; }
+
+    .container-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .session-list { display: flex; flex-direction: column; gap: 1rem; }
+
+    .session-tile {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        padding: 1.25rem;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        transition: all 0.2s;
+    }
+
+    .session-tile:hover { background: rgba(255, 255, 255, 0.02); }
+    .session-tile.current { border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.02); }
+
+    .device-icon {
+        width: 44px;
+        height: 44px;
+        background: var(--bg-elevated);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+    }
+
+    .session-tile.current .device-icon { color: #22c55e; background: rgba(34, 197, 94, 0.1); }
+
+    .session-info { flex-grow: 1; }
+    .device-name { font-weight: 600; color: var(--text-primary); font-size: 0.95rem; display: flex; align-items: center; gap: 0.75rem; }
+
+    .current-tag {
+        font-size: 0.65rem;
+        color: #22c55e;
+        background: rgba(34, 197, 94, 0.1);
+        padding: 0.1rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 700;
+    }
+
+    .session-meta { display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.3rem; }
+    .session-meta i { font-size: 0.7rem; }
+
+    .active-pulse {
+        width: 10px;
+        height: 10px;
+        background: #22c55e;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #22c55e;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.5); opacity: 0.5; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .risk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; }
+    .risk-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color); }
+    .risk-item.success i { color: #22c55e; }
+    .risk-item.warning i { color: #eab308; }
+    .risk-info label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-primary); }
+    .risk-info span { font-size: 0.75rem; color: var(--text-secondary); }
+</style>

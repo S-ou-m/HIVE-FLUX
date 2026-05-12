@@ -1,0 +1,32 @@
+<!-- ========================================== -->
+<!-- PROGRAM CREATION MODAL -->
+<!-- ========================================== -->
+<div class="modal-backdrop" onclick="document.getElementById('modal-container').innerHTML = '';">
+    <div class="modal-content" onclick="event.stopPropagation();">
+        
+        <div class="modal-header">
+            <h3>Add New Program</h3>
+            <button class="close-btn" onclick="document.getElementById('modal-container').innerHTML = '';">&times;</button>
+        </div>
+        
+        <form hx-post="{% url 'admin_program_create' %}" hx-target="#modal-container">
+            {% csrf_token %}
+            <div class="modal-body">
+                {% for field in form %}
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div style="color: #ef4444; font-size: 0.8rem; margin-top: 0.25rem;">{{ field.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); width: auto;" onclick="document.getElementById('modal-container').innerHTML = '';">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="width: auto;">Save Program</button>
+            </div>
+        </form>
+    </div>
+</div>

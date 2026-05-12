@@ -1,0 +1,17 @@
+<!-- Close Modal -->
+<div id="modal-container" hx-swap-oob="true"></div>
+
+<!-- Update Workload Table -->
+<div hx-swap-oob="outerHTML:#workload-table-card">
+    {% include 'dashboard/views/faculty/workload_table.html' %}
+</div>
+
+<!-- Success Toast -->
+<div id="toast-container" hx-swap-oob="afterbegin">
+    <div class="toast success animate-slide-in">
+        <span class="icon">✅</span>
+        <div class="toast-content">
+            <p>Updation of the workload succesfull ✅</p>
+        </div>
+    </div>
+</div>

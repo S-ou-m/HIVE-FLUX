@@ -1,0 +1,427 @@
+<div class="payroll-container animate-fade-in">
+    
+    <!-- 1. Payroll Control Bar (Month/Year Selection) -->
+    <div class="payroll-control-bar">
+        <div class="control-group">
+            <select name="month" class="form-control" 
+                    hx-get="{% url 'admin_payroll_partial' %}" 
+                    hx-target="#finance-content"
+                    hx-include="[name='year']"
+                    style="width: 140px;">
+                {% for m_num, m_name in months %}
+                <option value="{{ m_num }}" {% if m_num == selected_month %}selected{% endif %}>{{ m_name }}</option>
+                {% endfor %}
+            </select>
+            <select name="year" class="form-control" 
+                    hx-get="{% url 'admin_payroll_partial' %}" 
+                    hx-target="#finance-content"
+                    hx-include="[name='month']"
+                    style="width: 100px;">
+                {% for y in years %}
+                <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="action-group">
+            <div id="bulk-actions-bar" class="bulk-actions-bar animate-slide-up" style="display: none;">
+                <span class="selected-count">0 Selected</span>
+                <button class="btn btn-secondary btn-sm" 
+                        hx-post="{% url 'admin_payroll_bulk_action' %}"
+                        hx-include="[name='payroll_ids']"
+                        hx-vals='{"action": "approve"}'
+                        hx-target="#finance-content">Bulk Approve</button>
+                <button class="btn btn-primary btn-sm"
+                        hx-post="{% url 'admin_payroll_bulk_action' %}"
+                        hx-include="[name='payroll_ids']"
+                        hx-vals='{"action": "pay"}'
+                        hx-target="#finance-content">Bulk Mark Paid</button>
+            </div>
+            
+            <button class="btn btn-outline btn-icon-only" 
+                    title="TDS Liability Summary"
+                    hx-get="/dashboard/admin/partial/finance/payroll/tds/summary/?month={{ selected_month }}&year={{ selected_year }}" 
+                    hx-target="#global-drawer-content"
+                    onclick="openSideDrawer()">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+            </button>
+
+            <a href="{% url 'admin_payroll_export_neft' selected_month selected_year %}" 
+               class="btn btn-secondary" 
+               style="width: auto; text-decoration: none;">
+                <i class="fa-solid fa-file-export"></i> Export NEFT
+            </a>
+
+            <button class="btn btn-primary" 
+                    hx-get="{% url 'admin_payroll_run_modal' %}?month={{ selected_month }}&year={{ selected_year }}"
+                    hx-target="#modal-container"
+                    style="width: auto;">
+                <i class="fa-solid fa-play-circle"></i> Run Payroll
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. Data Grid -->
+    <div class="data-table-wrapper">
+        <form id="payroll-bulk-form">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 40px;"><input type="checkbox" id="select-all-payroll" onclick="toggleAllPayroll(this)"></th>
+                    <th>FACULTY</th>
+                    <th>GROSS</th>
+                    <th>DEDUCTION</th>
+                    <th>NET PAY</th>
+                    <th>STATUS</th>
+                    <th style="text-align: right;">ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pr in payrolls %}
+                <tr class="hover-row">
+                    <td><input type="checkbox" name="payroll_ids" value="{{ pr.id }}" class="payroll-checkbox" onclick="updateBulkBar()"></td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div class="faculty-avatar">{{ pr.faculty.user.first_name|first }}</div>
+                            <div>
+                                <div style="font-weight: 600; color: var(--text-primary);">{{ pr.faculty.user.get_full_name }}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ pr.faculty.designation }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>₹{{ pr.gross_salary|floatformat:2 }}</td>
+                    <td><span style="color: #ef4444;">-₹{{ pr.deductions|floatformat:2 }}</span></td>
+                    <td>
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="color: #22c55e; font-weight: 700;">₹{{ pr.net_salary|floatformat:2 }}</span>
+                            {% if pr.trend != 0 %}
+                             <span class="micro-trend {% if pr.trend > 0 %}up{% else %}down{% endif %}">
+                                {% if pr.trend > 0 %}↑{% else %}↓{% endif %} {{ pr.trend_abs|floatformat:1 }}%
+                            </span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="status-badge status-{{ pr.status|lower }}">
+                            {% if pr.status == 'GENERATED' %}🟡 Draft{% elif pr.status == 'PAID' %}🟢 Paid{% elif pr.status == 'APPROVED' %}🔵 Approved{% else %}{{ pr.status }}{% endif %}
+                        </span>
+                    </td>
+                    <td style="text-align: right;">
+                        <div class="action-dropdown">
+                            <button type="button" class="btn-more" onclick="toggleRowMenu('menu-{{ pr.id }}')">⋮</button>
+                            <div id="menu-{{ pr.id }}" class="dropdown-menu">
+                                <a href="javascript:void(0)" 
+                                   hx-get="{% url 'admin_payroll_breakdown' pr.id %}" 
+                                   hx-target="#global-drawer-content"
+                                   onclick="openSideDrawer()">
+                                   <i class="fa-solid fa-chart-line"></i> View Intelligence
+                                </a>
+                                
+                                <a href="javascript:void(0)" 
+                                   hx-get="{% url 'admin_payroll_payslip_preview' pr.id %}"
+                                   hx-target="#global-drawer-content"
+                                   onclick="openSideDrawer()">
+                                   <i class="fa-solid fa-file-invoice"></i> Preview Payslip
+                                </a>
+
+                                <div class="menu-divider"></div>
+
+                                {% if pr.status == 'GENERATED' %}
+                                    <a href="javascript:void(0)" 
+                                       hx-post="{% url 'admin_payroll_update_status' pr.id 'approved' %}"
+                                       hx-target="#finance-content">
+                                       <i class="fa-solid fa-check-circle" style="color: var(--accent-primary);"></i> Approve Payroll
+                                    </a>
+                                {% elif pr.status == 'APPROVED' %}
+                                    <a href="javascript:void(0)" 
+                                       hx-post="{% url 'admin_payroll_update_status' pr.id 'paid' %}"
+                                       hx-target="#finance-content">
+                                       <i class="fa-solid fa-money-bill-transfer" style="color: #22c55e;"></i> Mark as Paid
+                                    </a>
+                                {% elif pr.status == 'PAID' %}
+                                    <a href="javascript:void(0)" class="text-success">
+                                       <i class="fa-solid fa-envelope"></i> Email Payslip
+                                    </a>
+                                {% endif %}
+                                
+                                <div class="menu-divider"></div>
+                                <a href="javascript:void(0)" class="text-danger">
+                                   <i class="fa-solid fa-clock-rotate-left"></i> View History
+                                </a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="empty-state-container">
+                        <div class="payroll-empty-state animate-fade-in" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 20px; padding: 4rem 2rem; margin-top: 2rem;">
+                            <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.03); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; border: 1px solid var(--border-color);">
+                                <i class="fa-solid fa-vault" style="font-size: 2.5rem; color: var(--text-secondary); opacity: 0.5;"></i>
+                            </div>
+                            <h4 style="font-size: 1.25rem; font-weight: 800; color: white;">No Payroll Synchronized</h4>
+                            <p style="color: var(--text-secondary); max-width: 400px; margin: 0.75rem auto 2rem; line-height: 1.6;">
+                                The financial records for <strong>{{ selected_month_name }} {{ selected_year }}</strong> haven't been generated yet. Initialize the engine to synchronize faculty workloads and salary components.
+                            </p>
+                            <button class="btn btn-primary" style="width: auto; min-width: 220px; background: var(--primary-color); box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);"
+                                    hx-get="{% url 'admin_payroll_run_modal' %}?month={{ selected_month }}&year={{ selected_year }}"
+                                    hx-target="#modal-container">
+                                <i class="fa-solid fa-power-off" style="margin-right: 0.75rem;"></i> Initialize {{ selected_month_name }} Payroll
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleRowMenu(menuId) {
+        const menu = document.getElementById(menuId);
+        const row = menu.closest('tr');
+        
+        // Close all other menus first
+        document.querySelectorAll('.dropdown-menu').forEach(m => {
+            if (m.id !== menuId) {
+                m.classList.remove('show', 'drop-up');
+                m.closest('tr').style.zIndex = '';
+            }
+        });
+        
+        const isShowing = menu.classList.toggle('show');
+        if (isShowing) {
+            // Intelligent Positioning: Check if menu will go off-screen
+            const rect = menu.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.top;
+            const menuHeight = 250; // Expected max height
+            
+            if (spaceBelow < menuHeight) {
+                menu.classList.add('drop-up');
+            } else {
+                menu.classList.remove('drop-up');
+            }
+
+            row.style.zIndex = '1000';
+            row.style.position = 'relative';
+        } else {
+            row.style.zIndex = '';
+            row.style.position = '';
+        }
+    }
+
+    // Close menus on click outside
+    window.onclick = function(event) {
+        if (!event.target.matches('.btn-more')) {
+            document.querySelectorAll('.dropdown-menu').forEach(m => {
+                m.classList.remove('show', 'drop-up');
+                const row = m.closest('tr');
+                if (row) {
+                    row.style.zIndex = '';
+                    row.style.position = '';
+                }
+            });
+        }
+    }
+
+    // Keyboard support: ESC to close
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.dropdown-menu').forEach(m => {
+                m.classList.remove('show', 'drop-up');
+                const row = m.closest('tr');
+                if (row) {
+                    row.style.zIndex = '';
+                    row.style.position = '';
+                }
+            });
+        }
+    });
+
+    function toggleAllPayroll(source) {
+        const checkboxes = document.getElementsByClassName('payroll-checkbox');
+        for(let i=0; i<checkboxes.length; i++) {
+            checkboxes[i].checked = source.checked;
+        }
+        updateBulkBar();
+    }
+
+    function updateBulkBar() {
+        const selected = document.querySelectorAll('.payroll-checkbox:checked').length;
+        const bar = document.getElementById('bulk-actions-bar');
+        const countSpan = bar.querySelector('.selected-count');
+        
+        if (selected > 0) {
+            bar.style.display = 'flex';
+            countSpan.innerText = `${selected} Selected`;
+        } else {
+            bar.style.display = 'none';
+        }
+    }
+</script>
+
+<style>
+    .bulk-actions-bar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: var(--bg-primary);
+        padding: 0.25rem 1rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--accent-primary);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .selected-count {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--accent-primary);
+    }
+    .btn-sm { padding: 0.25rem 0.75rem; font-size: 0.75rem; }
+
+    .faculty-avatar {
+        width: 32px;
+        height: 32px;
+        background: var(--bg-tertiary);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .micro-trend {
+        font-size: 0.65rem;
+        font-weight: 700;
+        margin-top: 2px;
+    }
+    .micro-trend.up { color: #22c55e; }
+    .micro-trend.down { color: #ef4444; }
+
+    .action-dropdown { 
+        position: relative; 
+        display: inline-block;
+    }
+    .btn-more {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        line-height: 1;
+        display: block;
+    }
+    .btn-more:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+
+    .dropdown-menu {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 5px);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+        z-index: 9999; /* Max priority */
+        min-width: 200px;
+        display: none;
+        padding: 0.5rem 0;
+        animation: slideDown 0.2s ease-out;
+    }
+    .dropdown-menu.show { display: block; }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .dropdown-menu.drop-up {
+        top: auto;
+        bottom: calc(100% + 5px);
+        transform-origin: bottom right;
+        animation: slideUpTiny 0.2s ease-out;
+    }
+
+    @keyframes slideUpTiny {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dropdown-menu a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.6rem 1.25rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+    .dropdown-menu a:hover { 
+        background: var(--bg-secondary); 
+        color: var(--text-primary);
+        padding-left: 1.5rem; /* Micro-interaction: slide text on hover */
+    }
+    .dropdown-menu a i { 
+        width: 16px; 
+        font-size: 0.9rem; 
+        opacity: 0.7; 
+        transition: transform 0.2s;
+    }
+    .dropdown-menu a:hover i { transform: scale(1.1); opacity: 1; }
+    .dropdown-menu .menu-divider { height: 1px; background: var(--border-color); margin: 0.4rem 0; }
+    .dropdown-menu a.text-danger:hover { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    .dropdown-menu a.disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .payroll-control-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--bg-secondary);
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border-color);
+    }
+    .control-group, .action-group {
+        display: flex;
+        gap: 0.75rem;
+    }
+    .status-badge.status-generated { background: rgba(234, 179, 8, 0.1); color: #eab308; }
+    .status-badge.status-paid { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+    .status-badge.status-approved { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    
+    .hover-row:hover {
+        background: rgba(255,255,255,0.02);
+        transform: scale(1.005);
+        transition: all 0.2s;
+    }
+
+    .payroll-empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    .payroll-empty-state h4 {
+        margin: 0;
+        color: var(--text-primary);
+    }
+    .payroll-empty-state p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0.5rem 0 0;
+    }
+</style>
+
+<!-- Remove the old action button via OOB -->
+<div id="finance-actions" hx-swap-oob="innerHTML">
+    <!-- Action buttons are now inside the control bar for better context -->
+</div>

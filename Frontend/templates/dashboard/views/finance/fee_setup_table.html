@@ -1,0 +1,58 @@
+<div class="data-table-wrapper animate-fade-in">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>PROGRAM</th>
+                <th>SEMESTER</th>
+                <th>TOTAL AMOUNT</th>
+                <th>STATUS</th>
+                <th>EFFECTIVE FROM</th>
+                <th>ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fee in fees %}
+            <tr>
+                <td style="font-weight: 500;">{{ fee.program.name }}</td>
+                <td>Semester {{ fee.semester.number }}</td>
+                <td><span style="color: var(--color-orange); font-weight: 600;">₹{{ fee.amount|floatformat:2 }}</span></td>
+                <td>
+                    {% if fee.is_active %}
+                    <span class="status-badge" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">Active</span>
+                    {% else %}
+                    <span class="status-badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>{{ fee.effective_from|date:"d M Y"|default:"Immediate" }}</td>
+                <td>
+                    <button class="btn-icon" 
+                            title="Edit Structure" 
+                            hx-get="{% url 'admin_fee_edit' fee.id %}" 
+                            hx-target="#modal-container"
+                            style="color: var(--primary-color);">
+                        ✏️
+                    </button>
+                    <button class="btn-icon" 
+                            title="Remove Structure" 
+                            hx-post="{% url 'admin_fee_delete' fee.id %}" 
+                            hx-confirm="⚠️ Are you sure you want to delete this fee structure? This may affect student billing."
+                            hx-target="#finance-content"
+                            style="color: #ef4444;">
+                        🗑️
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="empty-state">No fee structures defined yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div hx-swap-oob="innerHTML:#finance-actions">
+        <button class="btn btn-primary" hx-get="{% url 'admin_fee_create' %}" hx-target="#modal-container">
+            <span class="icon">+</span> Define Fees
+        </button>
+    </div>
+</div>

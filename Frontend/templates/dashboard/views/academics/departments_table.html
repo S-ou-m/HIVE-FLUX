@@ -1,0 +1,142 @@
+<!-- OOB Swap for the Action Button -->
+<div id="academics-actions" hx-swap-oob="true">
+    <button class="btn btn-primary btn-saas" hx-get="{% url 'admin_department_create' %}" hx-target="#modal-container">
+        <i class="fas fa-plus mr-2"></i> Add Department
+    </button>
+</div>
+
+<!-- TOP TOOLBAR: Modern SaaS Alignment -->
+<div class="saas-toolbar mb-6">
+    <div class="toolbar-left">
+        <div class="premium-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search departments..." 
+                   hx-get="{% url 'admin_departments_partial' %}" 
+                   hx-trigger="keyup changed delay:300ms" 
+                   hx-target="#academics-content">
+        </div>
+        <div class="premium-filter">
+            <select hx-get="{% url 'admin_departments_partial' %}" hx-target="#academics-content" name="filter">
+                <option value="">All Departments</option>
+                <option value="active" {% if current_filter == 'active' %}selected{% endif %}>Active Only</option>
+                <option value="inactive" {% if current_filter == 'inactive' %}selected{% endif %}>Setup Required</option>
+            </select>
+        </div>
+    </div>
+    <div class="toolbar-right">
+        <button class="icon-action-btn" title="Export CSV"><i class="fa-solid fa-file-export"></i></button>
+        <button class="icon-action-btn" title="Table Settings"><i class="fa-solid fa-gears"></i></button>
+    </div>
+</div>
+
+<!-- DATA TABLE: Redesigned with Card-Like Hierarchy -->
+<div class="saas-table-container premium-shadow">
+    <table class="saas-data-table">
+        <thead>
+            <tr>
+                <th class="w-1/3">DEPARTMENT <i class="fas fa-sort-alpha-down ml-2 opacity-30 text-xs"></i></th>
+                <th class="text-center">CAPACITY STATS</th>
+                <th class="w-1/4">ENROLLMENT STRENGTH</th>
+                <th class="text-center">HEALTH</th>
+                <th class="text-right pr-6">ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in departments %}
+            <tr class="saas-row">
+                <!-- Anchor Column: Identity -->
+                <td>
+                    <div class="dept-identity">
+                        <div class="dept-avatar {{ item.health }}">
+                            {{ item.obj.code|slice:":2"|upper }}
+                        </div>
+                        <div class="dept-info">
+                            <span class="dept-name">{{ item.obj.name }}</span>
+                            <div class="dept-meta">
+                                <span class="meta-item"><i class="fa-solid fa-layer-group"></i> {{ item.p_count }} Programs</span>
+                                <span class="meta-divider">•</span>
+                                <span class="meta-item"><i class="fa-solid fa-user-graduate"></i> {{ item.s_count }} Students</span>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <!-- Stats Column: Compressed -->
+                <td class="text-center">
+                    <div class="compact-stats">
+                        <span class="stat-main">{{ item.p_count }}</span>
+                        <span class="stat-sub">Programs</span>
+                    </div>
+                </td>
+
+                <!-- Strength Column: Visual Decision Metric -->
+                <td>
+                    <div class="strength-group">
+                        <div class="strength-labels">
+                            <span class="count">{{ item.s_count }} Students</span>
+                            <span class="percentage">{{ item.strength|floatformat:0 }}%</span>
+                        </div>
+                        <div class="strength-track">
+                            <div class="strength-fill {{ item.health }}" style="--strength: {{ item.strength|default:0 }}%; width: var(--strength);"></div>
+                        </div>
+                    </div>
+                </td>
+
+                <!-- Health Column: Pill System -->
+                <td class="text-center">
+                    <div class="health-pill-container">
+                        <span class="health-pill {{ item.health }}">
+                            <span class="pulse-dot"></span>
+                            {{ item.health|title }}
+                        </span>
+                    </div>
+                </td>
+
+                <!-- Actions Column: Premium Affordance -->
+                <td class="text-right pr-6">
+                    <div class="saas-action-group">
+                        <button class="saas-btn edit" title="Edit Department" hx-get="{% url 'admin_department_edit' item.obj.id %}" hx-target="#modal-container">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button class="saas-btn delete" title="Delete Department" hx-get="{% url 'admin_department_delete' item.obj.id %}" hx-target="#modal-container">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                        <div class="saas-dropdown-wrapper">
+                            <button class="saas-btn more" title="More Options" onclick="toggleActionDropdown(this, event)">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <div class="saas-dropdown-menu">
+                                <div class="dropdown-action-item" hx-get="{% url 'admin_department_view' item.obj.id %}" hx-target="#modal-container">
+                                    <i class="fa-solid fa-eye"></i> View Details
+                                </div>
+                                <a href="{% url 'admin_department_export' item.obj.id %}" class="dropdown-action-item">
+                                    <i class="fa-solid fa-file-export"></i> Export Data
+                                </a>
+                                <div class="dropdown-action-item" hx-get="{% url 'admin_department_health_audit' item.obj.id %}" hx-target="#modal-container">
+                                    <i class="fa-solid fa-chart-line"></i> Health Audit
+                                </div>
+                                <div class="saas-divider" style="height: 1px; background: var(--border-color); margin: 0.4rem 0;"></div>
+                                <div class="dropdown-action-item danger" hx-get="{% url 'admin_department_delete' item.obj.id %}" hx-target="#modal-container">
+                                    <i class="fa-solid fa-trash-can"></i> Delete Record
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">
+                    <div class="saas-empty-state">
+                        <div class="empty-icon">📂</div>
+                        <p class="empty-text">No departments found in your institution.</p>
+                        <button class="btn btn-primary btn-sm mt-4" hx-get="{% url 'admin_department_create' %}" hx-target="#modal-container">Add New Department</button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+

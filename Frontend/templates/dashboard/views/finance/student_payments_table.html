@@ -1,0 +1,138 @@
+<div hx-swap-oob="innerHTML:#finance-actions">
+    <button class="btn btn-secondary" hx-get="{% url 'admin_payment_global_modal' %}" hx-target="#modal-container" style="width: auto; background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+        <span style="font-size: 1.1rem;">💰</span> Record Payment
+    </button>
+    <button class="btn btn-primary" hx-get="{% url 'admin_invoice_batch_modal' %}" hx-target="#modal-container" style="width: auto; display: flex; align-items: center; gap: 0.5rem;">
+        <span style="font-size: 1.1rem;">🧾</span> Batch Generate Invoices
+    </button>
+</div>
+
+<div class="intelligence-filter-bar animate-fade-in" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center; background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color);">
+    <!-- Full-Text Intelligence Search -->
+    <div style="flex: 1; position: relative;">
+        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 0.85rem;"></i>
+        <input type="text" 
+               id="finance-search"
+               name="q" 
+               placeholder="Search Identity or Enrollment..." 
+               value="{{ filters.q }}"
+               hx-get="{% url 'admin_student_payments_partial' %}"
+               hx-trigger="keyup changed delay:300ms"
+               hx-target="#dashboard-content"
+               hx-include=".intelligence-filter-bar input, .intelligence-filter-bar select"
+               style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; color: white; font-size: 0.85rem; outline: none;">
+    </div>
+
+    <!-- Department Selector -->
+    <select name="department" 
+            hx-get="{% url 'admin_student_payments_partial' %}"
+            hx-trigger="change"
+            hx-target="#dashboard-content"
+            hx-include=".intelligence-filter-bar input, .intelligence-filter-bar select"
+            style="padding: 0.75rem 1rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; color: white; font-size: 0.85rem; cursor: pointer; outline: none;">
+        <option value="">All Departments</option>
+        {% for dept in departments %}
+            <option value="{{ dept.id }}" {% if filters.dept == dept.id|stringformat:"s" %}selected{% endif %}>{{ dept.code }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- Semester Selector -->
+    <select name="semester" 
+            hx-get="{% url 'admin_student_payments_partial' %}"
+            hx-trigger="change"
+            hx-target="#dashboard-content"
+            hx-include=".intelligence-filter-bar input, .intelligence-filter-bar select"
+            style="padding: 0.75rem 1rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; color: white; font-size: 0.85rem; cursor: pointer; outline: none;">
+        <option value="">All Semesters</option>
+        {% for sem in semesters %}
+            <option value="{{ sem.id }}" {% if filters.sem == sem.id|stringformat:"s" %}selected{% endif %}>Sem {{ sem.number }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- Payment Status Selector -->
+    <select name="status" 
+            hx-get="{% url 'admin_student_payments_partial' %}"
+            hx-trigger="change"
+            hx-target="#dashboard-content"
+            hx-include=".intelligence-filter-bar input, .intelligence-filter-bar select"
+            style="padding: 0.75rem 1rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; color: white; font-size: 0.85rem; cursor: pointer; outline: none;">
+        <option value="ALL" {% if filters.status == 'ALL' %}selected{% endif %}>All Financial States</option>
+        <option value="SETTLED" {% if filters.status == 'SETTLED' %}selected{% endif %}>Settled (Clear)</option>
+        <option value="PENDING" {% if filters.status == 'PENDING' %}selected{% endif %}>Dues Pending</option>
+        <option value="ADVANCE" {% if filters.status == 'ADVANCE' %}selected{% endif %}>Advance Available</option>
+    </select>
+</div>
+
+<div class="data-table-wrapper animate-fade-in">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>STUDENT</th>
+                <th>COURSE / SEM</th>
+                <th>TOTAL BILLED</th>
+                <th>TOTAL PAID</th>
+                <th>CREDITS (ADV)</th>
+                <th>BALANCE</th>
+                <th>ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>
+                    <div style="font-weight: 500;">{{ student.user.get_full_name }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ student.enrollment_no }}</div>
+                </td>
+                <td>
+                    <div style="font-size: 0.85rem;">{{ student.department.code|default:"N/A" }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary);">Sem {{ student.current_semester.number|default:"-" }}</div>
+                </td>
+                <td>₹{{ student.total_billed|floatformat:2 }}</td>
+                <td>₹{{ student.total_paid|floatformat:2 }}</td>
+                <td>
+                    {% if student.credit_balance > 0 %}
+                    <span style="color: #eab308; font-weight: 600;">✨ ₹{{ student.credit_balance|floatformat:2 }}</span>
+                    {% else %}
+                    <span style="color: var(--text-muted);">₹0.00</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {# Calculation: Net Due = Billed - Paid - Credits #}
+                    {% with net_due=student.total_billed|add:"-student.total_paid" %}
+                    {# Actually doing it in the template is hard without custom filters for Decimal, so I'll show Status instead #}
+                    {% if student.total_billed > student.total_paid %}
+                        <span class="status-badge status-danger">🔴 Due ₹{{ student.total_billed|add:"-student.total_paid"|floatformat:2 }}</span>
+                    {% elif student.credit_balance > 0 %}
+                        <span class="status-badge status-warning">🟡 Advance Available</span>
+                    {% else %}
+                        <span class="status-badge status-success">🟢 Settled</span>
+                    {% endif %}
+                    {% endwith %}
+                </td>
+                <td>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-sm btn-primary" 
+                                style="padding: 0.25rem 0.75rem; font-size: 0.75rem;"
+                                hx-get="{% url 'admin_payment_global_modal' %}"
+                                hx-vals='{"student_id": "{{ student.id }}"}'
+                                hx-target="#modal-container">
+                            Record Payment
+                        </button>
+                        <button class="btn btn-sm btn-secondary" 
+                                style="padding: 0.25rem 0.75rem; font-size: 0.75rem; background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);"
+                                hx-get="{% url 'admin_get_student_ledger_partial' student.id %}"
+                                hx-target="#global-drawer-content"
+                                hx-on::after-request="openSideDrawer()">
+                            View Ledger
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="empty-state">No financial activity recorded yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

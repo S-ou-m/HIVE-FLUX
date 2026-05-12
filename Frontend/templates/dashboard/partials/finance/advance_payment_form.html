@@ -1,0 +1,36 @@
+<div class="animate-fade-in">
+    <div style="background: rgba(34, 197, 94, 0.05); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid rgba(34, 197, 94, 0.1);">
+        <h4 style="font-size: 0.85rem; color: #22c55e; margin-bottom: 0.25rem;">➕ Record Advance Payment</h4>
+        <p style="font-size: 0.75rem; color: var(--text-secondary);">This amount will be credited to {{ student.user.first_name }}'s account for future adjustments.</p>
+    </div>
+
+    <form hx-post="/dashboard/admin/partial/finance/payments/record-advance/{{ student.id }}/" hx-target="#modal-container">
+        {% csrf_token %}
+        
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Advance Amount</label>
+            <div style="position: relative; margin-top: 0.4rem;">
+                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);">₹</span>
+                <input type="number" name="amount" class="form-control" placeholder="0.00" style="padding-left: 2rem; background: var(--bg-elevated);" required>
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Payment Mode</label>
+            <select name="mode" class="form-control" style="background: var(--bg-elevated); margin-top: 0.4rem;">
+                <option value="CASH">Cash</option>
+                <option value="UPI">UPI</option>
+                <option value="BANK_TRANSFER">Bank Transfer</option>
+            </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 2rem;">
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Remarks (Optional)</label>
+            <textarea name="remarks" class="form-control" rows="2" placeholder="e.g. Early payment for next sem" style="background: var(--bg-elevated); margin-top: 0.4rem;"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.875rem;">
+            Record Advance Payment
+        </button>
+    </form>
+</div>

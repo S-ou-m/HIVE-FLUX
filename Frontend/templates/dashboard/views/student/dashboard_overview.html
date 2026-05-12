@@ -1,0 +1,219 @@
+<div class="dashboard-overview-workspace animate-fade-in space-y-10">
+    
+    <!-- 🏗️ TOP LAYER: ACTION ORCHESTRATION & TIMELINE -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- 🎯 EXECUTION PRIORITY STACK (Left Rail) -->
+        <div class="lg:col-span-4 space-y-6">
+            <div class="section-label flex justify-between items-center">
+                <span>Execution Priority</span>
+                <span class="text-[8px] px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20">Action Required</span>
+            </div>
+            
+            <div class="space-y-3">
+                {% for action in orchestration.priority_stack %}
+                <div class="p-4 rounded-2xl bg-{{ action.tone }}-subtle border border-{{ action.tone }}-glow hover:bg-{{ action.tone }}-hover transition-all cursor-pointer group">
+                    <div class="flex items-start gap-4">
+                        <div class="w-8 h-8 rounded-xl bg-{{ action.tone }}-glow flex items-center justify-center">
+                            <i class="fas fa-bolt-lightning text-{{ action.tone }}-500 text-xs group-hover:animate-bounce"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-[11px] font-black text-white mb-1 uppercase tracking-tight">{{ action.title }}</div>
+                            <div class="text-[10px] text-white/40 font-bold leading-tight">{{ action.subtitle }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-8 text-center border border-dashed border-white/10 rounded-2xl">
+                    <div class="text-[9px] font-black text-white/20 uppercase">All Systems Optimal</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 📅 DAILY EXECUTION TIMELINE (Center Surface) -->
+        <div class="lg:col-span-8 space-y-6">
+            <div class="section-label">Daily Execution Cadence</div>
+            <div class="bg-white/[0.02] border border-white/5 rounded-[32px] overflow-hidden">
+                <div class="grid grid-cols-1 divide-y divide-white/5">
+                    {% for session in sessions %}
+                    <div class="flex items-center justify-between p-6 hover:bg-white/[0.02] transition-colors relative overflow-hidden">
+                        {% if session.is_live %}
+                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 shadow-[0_0_15px_#3b82f6]"></div>
+                        {% endif %}
+                        
+                        <div class="flex items-center gap-6">
+                            <div class="text-[10px] font-black text-white/30 uppercase tracking-widest w-16">{{ session.time }}</div>
+                            <div>
+                                <div class="text-sm font-black text-white">{{ session.subject }}</div>
+                                <div class="text-[9px] font-black uppercase tracking-widest text-white/20 mt-1">Main Block • Room 402</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4">
+                            <div class="px-3 py-1.5 rounded-full bg-{{ session.tone }}/10 border border-{{ session.tone }}/20 text-[9px] font-black text-{{ session.tone }} uppercase tracking-widest">
+                                {{ session.status }}
+                            </div>
+                            <button class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 hover:text-white"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏗️ MID LAYER: KPI GRID (Operational Telemetry) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for kpi in academic_kpis %}
+        <div class="p-6 bg-white/[0.02] border border-white/5 rounded-[32px] hover:border-{{ kpi.tone }}-500/30 hover:bg-{{ kpi.tone }}-500/[0.02] transition-all group cursor-pointer relative overflow-hidden"
+             hx-get="{% url kpi.partial %}"
+             hx-target="#workspace-core"
+             hx-push-url="{{ kpi.url }}">
+            
+            <!-- Kinetic Accent -->
+            <div class="absolute top-0 right-0 w-24 h-24 bg-{{ kpi.tone }}-500/5 blur-[40px] -mr-12 -mt-12 group-hover:bg-{{ kpi.tone }}-500/10 transition-all"></div>
+
+            <div class="flex justify-between items-start mb-6 relative z-10">
+                <span class="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] group-hover:text-{{ kpi.tone }}-500/50 transition-colors">{{ kpi.label }}</span>
+                <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-{{ kpi.tone }}-500/10 border border-{{ kpi.tone }}-500/20 shadow-[0_0_15px_rgba(0,0,0,0.2)]">
+                    <i class="fas fa-{{ kpi.trend.icon }} text-[8px] text-{{ kpi.tone }}-400"></i>
+                    <span class="text-[8px] font-black text-{{ kpi.tone }}-400 uppercase tracking-tighter">{{ kpi.trend.label }}</span>
+                </div>
+            </div>
+            
+            <div class="text-4xl font-black text-white mb-2 tracking-tight group-hover:translate-x-1 transition-transform duration-500">{{ kpi.val }}</div>
+            <div class="flex items-center gap-2">
+                <div class="w-1 h-1 rounded-full bg-{{ kpi.tone }}-500 shadow-[0_0_8px_{{ kpi.tone }}]"></div>
+                <div class="text-[10px] font-bold text-white/30 uppercase tracking-tight">{{ kpi.sub }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- 🏗️ BOTTOM LAYER: PERFORMANCE TELEMETRY & PROGRESSION -->
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 pb-10">
+        
+        <!-- 📊 PERFORMANCE TELEMETRY (Left Column) -->
+        <div class="xl:col-span-8 space-y-6">
+            <div class="section-label flex justify-between items-center">
+                <span>Subject Intelligence</span>
+                <span class="text-[9px] text-white/20">Updated 2m ago</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {% for sub in orchestration.subject_intelligence %}
+                <div class="p-5 bg-white/[0.02] border border-white/5 rounded-3xl hover:bg-white/[0.04] transition-all">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-{{ sub.tone }}-subtle flex items-center justify-center">
+                            <i class="fas fa-microchip text-{{ sub.tone }}-500 text-sm"></i>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1">MOMENTUM</div>
+                            <div class="text-[10px] font-black text-{{ sub.tone }}-500 uppercase tracking-widest">{{ sub.momentum }}</div>
+                        </div>
+                    </div>
+                    
+                    <h4 class="text-sm font-black text-white mb-1">{{ sub.subject }}</h4>
+                    <div class="text-[10px] font-bold text-white/30 uppercase tracking-tight mb-6">Risk Level: {{ sub.risk }}</div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-end">
+                            <span class="text-[10px] font-black text-white/20 uppercase">Attendance</span>
+                            <span class="text-xs font-black text-white">{{ sub.attendance }}%</span>
+                        </div>
+                        <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div class="h-full bg-{{ sub.tone }}-500 rounded-full" style="width: {{ sub.attendance }}%"></div>
+                        </div>
+                        <div class="pt-2 flex justify-between items-center">
+                            <span class="text-[9px] font-black text-white/20 uppercase">Recovery</span>
+                            <span class="text-[10px] font-black text-white/60">{{ sub.recovery }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 🏗️ INSTITUTIONAL PROGRESSION (Right Column) -->
+        <div class="xl:col-span-4 space-y-6">
+            <div class="section-label">Institutional Milestones</div>
+            <div class="p-8 bg-white/[0.02] border border-white/5 rounded-[32px] space-y-8">
+                {% for rail in progression %}
+                <div class="space-y-4">
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <div class="text-[11px] font-black text-white tracking-tight">{{ rail.label }}</div>
+                            <div class="text-[9px] font-bold text-white/20 uppercase tracking-widest mt-1">{{ rail.sub }}</div>
+                        </div>
+                        <div class="text-xl font-black text-white">{{ rail.val }}{{ rail.unit }}</div>
+                    </div>
+                    <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div class="h-full bg-{{ rail.tone }}-500 rounded-full transition-all duration-1000" style="width: {{ rail.val }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <!-- Quick Access Nodes -->
+                <div class="pt-6 grid grid-cols-2 gap-4">
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/10 text-center group cursor-pointer hover:border-emerald-500/30 transition-all"
+                         hx-get="{% url 'student_finance_ledger_partial' %}"
+                         hx-target="#workspace-core"
+                         hx-push-url="/dashboard/student/finance/">
+                        <i class="fas fa-file-invoice-dollar text-white/20 group-hover:text-emerald-400 mb-2 transition-colors"></i>
+                        <div class="text-[9px] font-black text-white/30 uppercase tracking-widest group-hover:text-white transition-colors">Digital Ledger</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/10 text-center group cursor-pointer hover:border-blue-500/30 transition-all"
+                         hx-get="{% url 'student_career_radar_partial' %}"
+                         hx-target="#workspace-core"
+                         hx-push-url="/dashboard/student/career/">
+                        <i class="fas fa-map-marked-alt text-white/20 group-hover:text-blue-400 mb-2 transition-colors"></i>
+                        <div class="text-[9px] font-black text-white/30 uppercase tracking-widest group-hover:text-white transition-colors">Success Path</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .dashboard-overview-workspace .section-label {
+        font-size: 10px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.25em;
+        color: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Semantic Colors Refactored */
+    .bg-emerald-subtle { background-color: rgba(16, 185, 129, 0.05); }
+    .bg-emerald-glow { background-color: rgba(16, 185, 129, 0.1); }
+    .bg-emerald-hover { background-color: rgba(16, 185, 129, 0.15); }
+    .text-emerald-500 { color: #10b981; }
+    .border-emerald-glow { border-color: rgba(16, 185, 129, 0.2); }
+    
+    .bg-orange-subtle { background-color: rgba(249, 115, 22, 0.05); }
+    .bg-orange-glow { background-color: rgba(249, 115, 22, 0.1); }
+    .bg-orange-hover { background-color: rgba(249, 115, 22, 0.15); }
+    .text-orange-500 { color: #f97316; }
+    .border-orange-glow { border-color: rgba(249, 115, 22, 0.2); }
+    
+    .bg-blue-subtle { background-color: rgba(59, 130, 246, 0.05); }
+    .bg-blue-glow { background-color: rgba(59, 130, 246, 0.1); }
+    .bg-blue-hover { background-color: rgba(59, 130, 246, 0.15); }
+    .text-blue-500 { color: #3b82f6; }
+    .border-blue-glow { border-color: rgba(59, 130, 246, 0.2); }
+    
+    .bg-red-subtle { background-color: rgba(239, 68, 68, 0.05); }
+    .bg-red-glow { background-color: rgba(239, 68, 68, 0.1); }
+    .bg-red-hover { background-color: rgba(239, 68, 68, 0.15); }
+    .text-red-500 { color: #ef4444; }
+    .border-red-glow { border-color: rgba(239, 68, 68, 0.2); }
+
+    .bg-purple-subtle { background-color: rgba(168, 85, 247, 0.05); }
+    .bg-purple-glow { background-color: rgba(168, 85, 247, 0.1); }
+    .bg-purple-hover { background-color: rgba(168, 85, 247, 0.15); }
+    .text-purple-500 { color: #a855f7; }
+    .border-purple-glow { border-color: rgba(168, 85, 247, 0.2); }
+</style>

@@ -1,0 +1,19 @@
+<h3 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-4 flex items-center justify-between">
+    Optimization Heuristics
+    <span class="text-emerald-400 animate-pulse">{{ optimization_boost }} Boost</span>
+</h3>
+<div class="space-y-4">
+    {% for skill in new_skills_found %}
+    <div class="flex items-center justify-between p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl group animate-in slide-in-from-right-4 duration-500">
+        <span class="text-xs font-bold text-emerald-400">{{ skill }}</span>
+        <span class="text-[8px] font-black text-emerald-400 uppercase tracking-widest">Signal Verified</span>
+    </div>
+    {% endfor %}
+</div>
+<button hx-post="{% url 'student_run_skill_audit' %}"
+        hx-target="#skill-audit-container"
+        hx-swap="innerHTML"
+        class="w-full mt-6 py-3 bg-emerald-500 text-white text-[9px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 group">
+    <i class="fa-solid fa-rotate group-hover:rotate-180 transition-transform"></i>
+    <span>Re-Audit Identity</span>
+</button>
